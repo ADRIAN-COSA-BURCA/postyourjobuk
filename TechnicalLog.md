@@ -100,3 +100,16 @@ Presentation: (views/home/index.php) – The UI is separated from the logic
 
 
 
+Architectural Summary
+To finalize your dissertation documentation for this stage, consider the flow we have established:
+
+Request Flow: public/index.php (Router) → HomeController (Orchestrator).
+
+Model Interaction: HomeController queries the Job model, which uses the BaseModel (Inheritance) to communicate with the Database (Singleton).
+
+Data Presentation: The data is passed back to views/home/index.php, which remains purely focused on HTML/CSS.
+
+
+We have successfully built the Security Foundation (BaseController), the Authentication Layer (AuthController & Model), and the Router (public/index.php).
+
+
