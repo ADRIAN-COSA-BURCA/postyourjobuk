@@ -6,14 +6,17 @@ use App\Models\Job;
 use App\Models\Tenant;
 
 class DashboardController extends BaseController {
-    public function index() {
-    $jobModel = new Job();
-    $tenantModel = new Tenant();
     
-    // The data fetching remains clean and focused
-    $this->render('portal/dashboard', [
-        'stats' => $tenantModel->getStats($_SESSION['tenant_id']),
-        'jobs'  => $jobModel->getTenantJobs($_SESSION['tenant_id'])
-    ]);
-}
+    public function index() {
+        $jobModel = new Job();
+        $tenantModel = new Tenant();
+        $tenantId = $_SESSION['tenant_id'];
+        
+        // Passing data to the view, now pointing to the standardized view path
+        $this->render('dashboard/index', [
+            'pageTitle' => 'Tenant Dashboard',
+            'stats'     => $tenantModel->getStats($tenantId),
+            'jobs'      => $jobModel->getTenantJobs($tenantId)
+        ]);
+    }
 }

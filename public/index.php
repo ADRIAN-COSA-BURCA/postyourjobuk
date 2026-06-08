@@ -4,11 +4,12 @@ require_once __DIR__ . '/../bootstrap.php';
 
 $path = parse_url($_SERVER['REQUEST_URI'], PHP_URL_PATH);
 
-// Public Routes
+// --- Public Routes ---
 if ($path === '/' || $path === '/index.php') {
     (new \App\Controllers\HomeController())->index();
 } 
-// Authentication Routes
+
+// --- Authentication Routes ---
 elseif ($path === '/login') {
     (new \App\Controllers\AuthController())->login();
 } 
@@ -19,8 +20,7 @@ elseif ($path === '/logout') {
     (new \App\Controllers\AuthController())->logout();
 } 
 
-
-// Protected Routes
+// --- Protected Routes ---
 elseif ($path === '/dashboard') {
     (new \App\Controllers\DashboardController())->index();
 }
@@ -28,6 +28,22 @@ elseif ($path === '/dashboard') {
 elseif ($path === '/job') {
     $id = $_GET['id'] ?? null;
     (new \App\Controllers\JobController())->show($id);
+}
+
+// NEW: Job Creation Routes
+elseif ($path === '/jobs/create') {
+    // Renders the form
+    (new \App\Controllers\JobController())->create(); 
+}
+elseif ($path === '/jobs/store') {
+    // Processes the form submission
+    (new \App\Controllers\JobController())->store();
+}
+
+// NEW: Applicant Management Routes
+elseif ($path === '/applicants') {
+    $jobId = $_GET['job_id'] ?? null;
+    (new \App\Controllers\ApplicantController())->index($jobId);
 }
 
 // Fallback

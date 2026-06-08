@@ -131,6 +131,14 @@ class Job extends BaseModel {
         
         return $this->db->fetchOne($sql, [(int)$tenantId, (int)$tenantId]);
     }
+	
+	public function getPostCountLastHour(int $tenantId): int {
+        $sql = "SELECT COUNT(*) FROM {$this->table} 
+                WHERE tenant_id = ? 
+                AND created_at > DATE_SUB(NOW(), INTERVAL 1 HOUR)";
+        
+        return (int)$this->db->fetchColumn($sql, [$tenantId]);
+    }
     
     // ============================================
     // EXTENSION POINTS (Business Phase Hooks)

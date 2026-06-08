@@ -113,3 +113,28 @@ Data Presentation: The data is passed back to views/home/index.php, which remain
 We have successfully built the Security Foundation (BaseController), the Authentication Layer (AuthController & Model), and the Router (public/index.php).
 
 
+
+Documentation Update: Architectural Migration
+Summary of Changes:
+Migrated the application from a procedural structure to a modern Model-View-Controller (MVC) design pattern. This shift was motivated by the need to centralize security controls and decouple business logic from presentation layers.
+
+Key Technical Enhancements:
+
+Centralized Security Middleware: Implemented a BaseController that enforces authentication globally. This eliminates the risk of "forgotten" authentication checks on new pages—a known vulnerability in the previous version.
+
+Zero-Trust Data Access: Transitioned database operations to dedicated Model classes. This ensures that every data request is validated against the tenant's context, preventing cross-tenant data leakage.
+
+Separation of Concerns: Decoupled business logic (Controllers) from UI presentation (Views). This improves code maintainability and facilitates future scalability.
+
+Proactive Security Layering: Integrated CSRF validation and rate-limiting (velocity monitoring) directly into the Controller layer. This creates a proactive "gatekeeper" that blocks malicious requests before they interact with the database.
+
+
+
+
+We have successfully transitioned your application from a scattered procedural monolith to a hardened MVC framework.
+
+MVC Architecture: We implemented a clear separation of concerns using BaseController (infrastructure), JobController/DashboardController (business logic), and Job model (data access).
+
+Zero-Trust Security: We moved from "per-file" security checks to an "architectural gatekeeper" in BaseController. Every request is now validated for session integrity and tenant state before logic is even executed.
+
+Proactive Monitoring: We integrated the SecurityLogger directly into the authentication and request flow, ensuring that anomalies like session hijacking or unauthorized workspace access are logged for SIEM (Security Information and Event Management) analysis.

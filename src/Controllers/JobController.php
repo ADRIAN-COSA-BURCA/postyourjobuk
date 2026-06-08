@@ -4,67 +4,65 @@ namespace App\Controllers;
 use App\Core\BaseController;
 use App\Core\Helpers;
 use App\Models\Job;
-use App\Core\SecurityLogger; // Assuming you have this helper or want to implement it
+use App\Core\SecurityLogger;
 
 class JobController extends BaseController {
-    
-    public function show($id) {
-        $jobModel = new Job();
-        $job = $jobModel->find((int)$id);
 
-        if (!$job) {
-            http_response_code(404);
-            $this->render('errors/404');
-            return;
-        }
-
-        $this->render('job/details', ['job' => $job]);
+    public function create() {
+        $this->render('jobs/create', [
+            'pageTitle' => 'Create New Job'
+        ]);
     }
 
     public function store() {
-        // Ensure user is authenticated
-        if (!$this->isLoggedIn()) {
-            Helpers::redirect('/login');
-        }
-
-        $tenantId = $_SESSION['tenant_id'];
-
-        // 1. CSRF Verification
+        // CSRF Verification
         if (!isset($_POST['csrf_token']) || !Helpers::csrf_verify($_POST['csrf_token'])) {
-            SecurityLogger::logAlert("CSRF_VIOLATION", $tenantId, "Unauthorized form submission.");
+            SecurityLogger::logAlert("CSRF_CREATION_VIOLATION", $_SESSION['tenant_id'], "Unauthorized job creation attempt.");
             die("Security Token Mismatch.");
         }
 
-        // 2. Proactive Velocity Monitoring (Rate Limiting)
         $jobModel = new Job();
-        if ($this->hasExceededPostingLimit($tenantId)) {
-            $_SESSION['error'] = 'Velocity threshold exceeded. Please try again later.';
-            Helpers::redirect('/portal/dashboard');
+        $tenantId = $_SESSION['tenant_id'];
+
+        // Proactive Velocity Monitoring (Using Model method)
+        if ($jobModel->getPostCountLastHour($tenantId) >= 15) {
+            SecurityLogger::logAlert("RESOURCE_FLOODING_ATTEMPT", $tenantId, "Rate-limit threshold reached.");
+            $_SESSION['error_message'] = 'System velocity threshold exceeded.';
+            Helpers::redirect('/jobs/create');
+            return;
         }
 
-        // 3. Data Validation & Sanitization
-        $title = trim($_POST['title'] ?? '');
-        if (strlen($title) < 5) {
-            $_SESSION['error'] = 'Job title is too short.';
-            Helpers::redirect('/portal/create-job');
+        // Data Mapping
+        $data = [
+            'tenant_id'       => $tenantId,
+            'title'           => trim($_POST['title'] ?? ''),
+            'description'     => trim($_POST['description'] ?? ''),
+            'requirements'    => trim($_POST['requirements'] ?? ''),
+            'location'        => trim($_POST['location'] ?? null),
+            'salary'          => trim($_POST['salary'] ?? null),
+            'employment_type' => $_POST['employment_type'] ?? 'full-time',
+            'status'          => $_POST['status'] ?? 'active'
+        ];
+
+        // Validation
+        if (strlen($data['title']) < 5 || strlen($data['description']) < 50 || empty($data['requirements'])) {
+            $_SESSION['error_message'] = 'Validation failed: Please ensure all fields meet the criteria.';
+            Helpers::redirect('/jobs/create');
+            return;
         }
 
-        // 4. Persistence
-        $jobModel->createJob([
-            'tenant_id' => $tenantId,
-            'title'     => $title,
-            'description' => $_POST['description'] ?? '',
-            // ... add remaining fields
-        ]);
-
-        $_SESSION['success'] = 'Job posted successfully!';
-        Helpers::redirect('/portal/dashboard');
-    }
-
-    private function hasExceededPostingLimit($tenantId) {
-        // Migration of your "Level 6 Security" logic
-        $sql = "SELECT COUNT(*) FROM jobs WHERE tenant_id = ? AND created_at > DATE_SUB(NOW(), INTERVAL 1 HOUR)";
-        $count = $this->db->fetchColumn($sql, [$tenantId]);
-        return ($count >= 15);
+        // Persistence
+        try {
+            $jobId = $jobModel->createJob($data);
+            
+            SecurityLogger::logAlert("JOB_RECORD_CREATED", $tenantId, "New job created (ID: $jobId).");
+            
+            $_SESSION['success_message'] = 'Job posted successfully!';
+            Helpers::redirect('/dashboard');
+        } catch (\Exception $e) {
+            error_log('Job creation error: ' . $e->getMessage());
+            $_SESSION['error_message'] = 'Internal architecture error during record creation.';
+            Helpers::redirect('/jobs/create');
+        }
     }
 }
