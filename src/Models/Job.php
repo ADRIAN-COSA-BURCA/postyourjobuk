@@ -2,6 +2,7 @@
 namespace App\Models;
 
 use App\Core\BaseModel;
+use PDO;
 
 class Job extends BaseModel {
     
@@ -28,7 +29,9 @@ class Job extends BaseModel {
             $sql .= " LIMIT " . (int)$limit;
         }
         
-        return $this->db->fetchAll($sql);
+        $stmt = $this->db->prepare($sql);
+        $stmt->execute();
+        return $stmt->fetchAll();
     }
     
     /**
@@ -52,7 +55,9 @@ class Job extends BaseModel {
         
         $sql .= " ORDER BY j.created_at DESC";
         
-        return $this->db->fetchAll($sql, $params);
+        $stmt = $this->db->prepare($sql);
+        $stmt->execute($params);
+        return $stmt->fetchAll();
     }
 
     /**
@@ -60,7 +65,6 @@ class Job extends BaseModel {
      * Refactored to assume data is already validated by the Controller.
      */
     public function createJob(array $data): ?int {
-        // Business rule defaults
         $data['status'] = $data['status'] ?? 'active';
         $data['employment_type'] = $data['employment_type'] ?? 'full-time';
         
@@ -107,12 +111,9 @@ class Job extends BaseModel {
         ";
         
         $searchTerm = '%' . $keyword . '%';
-        return $this->db->fetchAll($sql, [
-            $searchTerm, 
-            $searchTerm, 
-            $searchTerm, 
-            $searchTerm
-        ]);
+        $stmt = $this->db->prepare($sql);
+        $stmt->execute([$searchTerm, $searchTerm, $searchTerm, $searchTerm]);
+        return $stmt->fetchAll();
     }
     
     /**
@@ -129,31 +130,23 @@ class Job extends BaseModel {
             WHERE tenant_id = ?
         ";
         
-        return $this->db->fetchOne($sql, [(int)$tenantId, (int)$tenantId]);
+        $stmt = $this->db->prepare($sql);
+        $stmt->execute([(int)$tenantId, (int)$tenantId]);
+        $row = $stmt->fetch();
+        return $row ? $row : ['total_jobs' => 0, 'active_jobs' => 0, 'inactive_jobs' => 0, 'total_applicants' => 0];
     }
 	
-	public function getPostCountLastHour(int $tenantId): int {
+    public function getPostCountLastHour(int $tenantId): int {
         $sql = "SELECT COUNT(*) FROM {$this->table} 
                 WHERE tenant_id = ? 
                 AND created_at > DATE_SUB(NOW(), INTERVAL 1 HOUR)";
         
-        return (int)$this->db->fetchColumn($sql, [$tenantId]);
+        $stmt = $this->db->prepare($sql);
+        $stmt->execute([$tenantId]);
+        return (int)$stmt->fetchColumn();
     }
     
-    // ============================================
-    // EXTENSION POINTS (Business Phase Hooks)
-    // ============================================
-    
-    protected function beforeCreate(&$data) {
-        // Enforced in business phase to assert billing limits
-    }
-    
-    protected function afterCreate($id) {
-        // Dispatches global application logs
-    }
-    
-    protected function beforeDelete($id) {
-        // Cascade hooks go here
-    }
+    protected function beforeCreate(&$data) {}
+    protected function afterCreate($id) {}
+    protected function beforeDelete($id) {}
 }
-?>
