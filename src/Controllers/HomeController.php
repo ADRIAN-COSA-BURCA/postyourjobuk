@@ -1,10 +1,10 @@
 <?php
 namespace App\Controllers;
 
-use App\Core\Controller;
+use App\Core\BaseController;
 use App\Models\Job;
 
-class HomeController extends Controller {
+class HomeController extends BaseController {
     public function index() {
         $jobModel = new Job();
         

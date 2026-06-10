@@ -1,0 +1,14 @@
+<IfModule mod_rewrite.c>
+    RewriteEngine On
+    RewriteBase /
+
+    # Hard stop: If it's already index.php, do not rewrite again
+    RewriteRule ^index\.php$ - [L]
+
+    # If it's a real file or directory (like your CSS or JS files), load it directly
+    RewriteCond %{REQUEST_FILENAME} !-f
+    RewriteCond %{REQUEST_FILENAME} !-d
+
+    # Forward everything else to index.php cleanly
+    RewriteRule ^(.*)$ index.php [L,QSA]
+</IfModule>

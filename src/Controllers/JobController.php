@@ -13,6 +13,18 @@ class JobController extends BaseController {
             'pageTitle' => 'Create New Job'
         ]);
     }
+	
+	
+public function show($id) {
+    // Logic to fetch and display a single job based on $id
+    $jobModel = new Job();
+    $job = $jobModel->find($id);
+    
+    $this->render('jobs/show', [
+        'pageTitle' => 'View Job',
+        'job' => $job
+    ]);
+}
 
     public function store() {
         // CSRF Verification

@@ -1,5 +1,5 @@
 <?php
-namespace App\Config;
+namespace App\Core;
 
 use PDO;
 use PDOException;
@@ -17,10 +17,13 @@ class Database {
             PDO::ATTR_ERRMODE            => PDO::ERRMODE_EXCEPTION,
             PDO::ATTR_DEFAULT_FETCH_MODE => PDO::FETCH_ASSOC,
             PDO::ATTR_EMULATE_PREPARES   => false,
-            // SSL Configuration maintained from your previous version
-            PDO::MYSQL_ATTR_SSL_CA       => ROOT_PATH . DIRECTORY_SEPARATOR . 'DigiCertGlobalRootG2.crt.pem',
-            PDO::MYSQL_ATTR_SSL_VERIFY_SERVER_CERT => true,
         ];
+
+        // ONLY enforce SSL if we are NOT on local Docker development
+        if (defined('DB_HOST') && DB_HOST !== 'db' && ($_ENV['APP_ENV'] ?? '') !== 'development') {
+            $options[PDO::MYSQL_ATTR_SSL_CA] = ROOT_PATH . DIRECTORY_SEPARATOR . 'DigiCertGlobalRootG2.crt.pem';
+            $options[PDO::MYSQL_ATTR_SSL_VERIFY_SERVER_CERT] = true;
+        }
 
         try {
             $this->connection = new PDO($dsn, DB_USER, DB_PASS, $options);

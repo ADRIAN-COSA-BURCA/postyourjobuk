@@ -4,6 +4,88 @@ This log serves as a detailed record of the architectural, design, and implement
 
 ---
 
+
+adrian final year project disertation; 
+final project for level 6 computing; 
+analyse my project ; 
+analyse below the work has been done for this project; 
+
+
+Level 6 final project
+Title that was chosen for this project: 50-70 words:
+Next-Generation Recruitment Analytics: A Scalable, Multi-Tenant SaaS Platform Leveraging Azure Serverless Architecture and Event-Driven AI. Developing an enterprise-grade recruitment ecosystem that utilizes Azure App Service for scalable frontend delivery alongside Azure Functions to facilitate asynchronous, event-driven CV processing, while simultaneously leveraging Azure AI to interpret, rank, and select top-tier candidates to deliver real-time, data-driven insights.
+
+Project Overview
+•	What it does: Automates the processing and scoring of CVs against job descriptions, providing recruiters with instant, data-driven candidate rankings.
+•	Structure: A hybrid-modular architecture consisting of a PHP-based web frontend and an event-driven "serverless" analytical backend.
+•	Core Services & Connections:
+o	Frontend (PHP on Azure App Service): Manages user interactions, job postings, and applicant tracking.
+o	Analytical Engine (Azure Functions with Python): Acts as the "intelligence" layer, triggered automatically when a file is uploaded to perform deep-text analysis.
+o	Data Storage (Azure Database for MySQL flexible servers): Central repository for job data, tenant information, and candidate rankings.
+o	File Storage (Azure Blob Storage): A secure, cloud-based vault for storing CVs and resumes, replacing local server storage.
+
+Azure’s Role
+Azure acts as the "backbone" of your platform, providing:
+1.	High Availability: Database and storage systems that are accessible 24/7.
+2.	Serverless Processing: Azure Functions execute your Python AI code on-demand, ensuring costs are low and performance is high.
+3.	Security & Scalability: Built-in enterprise-grade firewall protection and the ability to scale seamlessly as your user base grows toward 2027.
+
+
+
+Summary of Workflow
+1.	User Input: A candidate applies via your PHP portal.
+2.	Data Persistence: PHP stores metadata in Azure Database for MySQL flexible servers
+and the file in Azure Blob Storage.
+3.	Automated Trigger: An event triggers an Azure Function.
+4.	Intelligence: The Python service analyzes the document and computes a ranking.
+5.	Output: The ranking is saved back to Azure Database for MySQL flexible servers
+and displayed instantly on the recruiter's dashboard.
+
+
+
+
+
+
+
+
+
+
+To ensure your project remains modular, scalable, and easy to transition from local development to your existing Azure infrastructure, you should treat your code as Environment Agnostic.
+Here is the analysis and the strategy for your requirements, followed by the recommended development workflow.
+1. Technical Requirements & Implementation Strategy
+Requirement	Implementation Strategy
+Modularity & OOP	Use a Repository Pattern or Service Layer. Your controllers should never contain raw SQL. Create a Database interface; locally, the implementation connects to XAMPP, while in Azure, it uses your MySQL Flexible Server credentials.
+Scalability (UI)	Use CSS Flexbox and Grid. Define a standard gutter and unit system (e.g., --spacing-unit: 8px). Use media queries only to switch column counts, not to rewrite entire page logic.
+Uniformity	Use a Template Engine (like Twig or simple PHP require blocks for header.php, footer.php, nav.php). Place all global styles in global.css and page-specific logic in page-name.css.
+Azure Readiness	Use Environment Variables (.env). Never hardcode database connection strings. Your app should read these from the system environment. Locally, this is a .env file; in Azure, it is the "Configuration" blade in the App Service.
+Code Simplicity	Adhere to the "Fat Models, Skinny Controllers" approach. Keep your PHP files clean by offloading logic to classes. If a file exceeds 120 lines, it is a signal to split it into a separate class or partial view.
+
+
+
+Local vs. Direct Deployment Strategy
+The Recommendation: Local-First Development.
+Building directly in Azure will slow down your development cycle because of build times, deployment latency, and debugging challenges. A local-first approach using XAMPP is standard, provided you structure the code for easy migration.
+Strategies to make switching to Azure "Super Easy":
+1.	Abstraction of Services: Create a Config class that checks if it is running in Azure or Local.
+o	Example: If $_SERVER['AZURE_ENVIRONMENT'] is set, use managed identity credentials; otherwise, use local MySQL user/pass.
+2.	Relative Pathing: Never use absolute paths (e.g., C:\xampp\htdocs\...). Use relative paths (__DIR__ . '/../storage/cvs') to ensure your file system logic works on both Windows (local) and Linux (Azure App Service).
+3.	Dockerize Early: Since you mentioned Docker, use it locally to replicate the Azure environment. By running your local MySQL and PHP inside containers (matching your Azure setup), you eliminate the "it works on XAMPP but not on Azure" problem.
+4.	Blob Storage Wrapper: Create a simple PHP class StorageInterface. It should have methods like uploadFile() and getFile(). Initially, these methods write to a local folder. When you move to the cloud, you only update the class to use the Azure SDK for PHP to talk to Blob Storage. The rest of your application remains untouched.
+
+
+Implementation Roadmap
+•	Phase 1 (Design & Skeleton): Define your global CSS grid, color palette, and PHP base classes. Set up the local Docker environment to mimic your final cloud production environment.
+•	Phase 2 (Core Logic): Develop the UI components (forms, dashboard, tables) using OOP. Implement the local storage/database interaction using your abstraction wrappers.
+•	Phase 3 (Azure Integration): Swap the local storage/database drivers for the Azure SDK drivers. Since your code uses interfaces (e.g., StorageInterface), this is a seamless "plug-and-play" transition.
+•	Phase 4 (Validation & Polish): Test responsiveness across breakpoints (320px for mobile, 768px for tablet, 1200px+ for desktop).
+
+
+
+
+
+
+
+
 ## 1. Chapter 1: Introduction & Rationale
 * **Problem Statement:** Addressing the inefficiency and potential human bias in manual CV screening.
 * **Justification:** Utilizing Azure-based AI/ML services to provide objective, standardized candidate ranking.
@@ -138,3 +220,643 @@ MVC Architecture: We implemented a clear separation of concerns using BaseContro
 Zero-Trust Security: We moved from "per-file" security checks to an "architectural gatekeeper" in BaseController. Every request is now validated for session integrity and tenant state before logic is even executed.
 
 Proactive Monitoring: We integrated the SecurityLogger directly into the authentication and request flow, ensuring that anomalies like session hijacking or unauthorized workspace access are logged for SIEM (Security Information and Event Management) analysis.
+
+
+Project Status: MVC Architectural Migration
+Accomplishments:
+
+Hardened Infrastructure: Implemented a BaseController with Zero-Trust session pinning and dynamic tenant state validation.
+
+Security Gates: Integrated proactive monitoring for velocity (rate-limiting) and CSRF protection on all data-mutation routes.
+
+Architectural Refactor: Shifted from procedural file-based routing to a centralized MVC routing system using public/index.php.
+
+UI/UX Consistency: Migrated legacy styling to a unified Layout system (header/footer) with modular CSS utility classes, ensuring visual and functional consistency.
+
+Data Isolation: Enforced tenant-scoped queries across all model-level operations to prevent cross-tenant data leakage.
+
+
+Dashboard Refactor
+
+Fix: Resolved "Undefined array key" error in the recruitment dashboard by synchronizing controller data fetching with model logic.
+
+Refactor: Migrated statistic retrieval from Recruiter model to Job model to ensure correct data mapping (total_jobs, active_jobs, total_applicants).
+
+Security: Validated tenant_id session integrity checks for dashboard access.
+
+
+
+Work Done
+You have built a secure, high-quality multi-tenant MVC framework core.
+
+Backend Engine: Your centralized routing loop (Router.php), database singletons, and query abstraction tools (BaseModel.php) are complete and functioning correctly.
+
+Zero-Trust Security: Your authentication handling is industry-grade. You have proactive session footprint tracking (user_agent and client_ip_hash validations) implemented natively into your BaseController lifecycle to block session-hijacking.
+
+Unified Layout Wrapper: Your rendering logic cleanly splits presentation fragments from layout structures. The browser now receives structural components uniformly via main.php.
+
+
+
+
+
+docker compose down
+
+docker compose up --build -d
+
+docker compose up -d
+
+
+
+C:\xampp\php_x86\php.exe -S localhost:8000 -t public
+
+docker exec -it postyourjobuk-db-1 mysql -u root -p -e
+
+
+
+Email: recruiter@test.com
+Password: password
+
+
+
+ADMIN_EMAIL=admin@postyourjobhere.com
+ADMIN_PASSWORD_HASH= password
+
+
+
+
+
+
+
+file structure at this point:
+
+C:.
+|   .env
+|   .gitignore
+|   azure_database.sql
+|   bootstrap.php
+|   composer.json
+|   composer.lock
+|   DigiCertGlobalRootG2.crt.pem
+|   docker-compose.yml
+|   Dockerfile
+|   TechnicalLog.md
+|
++---public
+|   |   .htaccess
+|   |   index.php
+|   |
+|   \---assets
+|       \---css
+|               main.css
+|
++---src
+|   +---Controllers
+|   |       AdminController.php
+|   |       ApplicantController.php
+|   |       AuthController.php
+|   |       Controller.php
+|   |       DashboardController.php
+|   |       HomeController.php
+|   |       JobController.php
+|   |
+|   +---Core
+|   |       Auth.php
+|   |       BaseController.php
+|   |       BaseModel.php
+|   |       Database.php
+|   |       Helpers.php
+|   |       Router.php
+|   |       SecurityLogger.php
+|   |
+|   +---Middleware
+|   |       AdminAuth.php
+|   |
+|   +---Models
+|   |       Admin.php
+|   |       Applicant.php
+|   |       Job.php
+|   |       Recruiter.php
+|   |
+|   +---Services
+|   |       StorageService.php
+|   |
+|   \---views
+|       +---admin
+|       |       dashboard.php
+|       |       login.php
+|       |       view_tenant.php
+|       |
+|       +---auth
+|       |       login.php
+|       |
+|       +---dashboard
+|       |       index.php
+|       |
+|       +---jobs
+|       |       create.php
+|       |       details.php
+|       |
+|       +---layouts
+|       |       footer.php
+|       |       header.php
+|       |
+|       \---portal
+|               dashboard.php
+|
++---vendor
+|   |   autoload.php
+|   |
+|   +---composer
+|   |       autoload_classmap.php
+|   |       autoload_files.php
+|   |       autoload_namespaces.php
+|   |       autoload_psr4.php
+|   |       autoload_real.php
+|   |       autoload_static.php
+|   |       ClassLoader.php
+|   |       installed.json
+|   |       installed.php
+|   |       InstalledVersions.php
+|   |       LICENSE
+|   |       platform_check.php
+|   |
+|   +---graham-campbell
+|   |   \---result-type
+|   |       |   composer.json
+|   |       |   LICENSE
+|   |       |
+|   |       \---src
+|   |               Error.php
+|   |               Result.php
+|   |               Success.php
+|   |
+|   +---guzzlehttp
+|   |   +---guzzle
+|   |   |   |   CHANGELOG.md
+|   |   |   |   composer.json
+|   |   |   |   LICENSE
+|   |   |   |   package-lock.json
+|   |   |   |   README.md
+|   |   |   |   UPGRADING.md
+|   |   |   |
+|   |   |   \---src
+|   |   |       |   BodySummarizer.php
+|   |   |       |   BodySummarizerInterface.php
+|   |   |       |   Client.php
+|   |   |       |   ClientInterface.php
+|   |   |       |   ClientTrait.php
+|   |   |       |   functions.php
+|   |   |       |   functions_include.php
+|   |   |       |   HandlerStack.php
+|   |   |       |   MessageFormatter.php
+|   |   |       |   MessageFormatterInterface.php
+|   |   |       |   Middleware.php
+|   |   |       |   Pool.php
+|   |   |       |   PrepareBodyMiddleware.php
+|   |   |       |   RedirectMiddleware.php
+|   |   |       |   RequestOptions.php
+|   |   |       |   RetryMiddleware.php
+|   |   |       |   TransferStats.php
+|   |   |       |   TransportSharing.php
+|   |   |       |   Utils.php
+|   |   |       |
+|   |   |       +---Cookie
+|   |   |       |       CookieJar.php
+|   |   |       |       CookieJarInterface.php
+|   |   |       |       FileCookieJar.php
+|   |   |       |       SessionCookieJar.php
+|   |   |       |       SetCookie.php
+|   |   |       |
+|   |   |       +---Exception
+|   |   |       |       BadResponseException.php
+|   |   |       |       ClientException.php
+|   |   |       |       ConnectException.php
+|   |   |       |       GuzzleException.php
+|   |   |       |       InvalidArgumentException.php
+|   |   |       |       RequestException.php
+|   |   |       |       ServerException.php
+|   |   |       |       TooManyRedirectsException.php
+|   |   |       |       TransferException.php
+|   |   |       |
+|   |   |       \---Handler
+|   |   |               CurlFactory.php
+|   |   |               CurlFactoryInterface.php
+|   |   |               CurlHandler.php
+|   |   |               CurlMultiHandler.php
+|   |   |               CurlShareHandleState.php
+|   |   |               EasyHandle.php
+|   |   |               HeaderProcessor.php
+|   |   |               MockHandler.php
+|   |   |               Proxy.php
+|   |   |               StreamHandler.php
+|   |   |
+|   |   +---promises
+|   |   |   |   CHANGELOG.md
+|   |   |   |   composer.json
+|   |   |   |   LICENSE
+|   |   |   |   README.md
+|   |   |   |   UPGRADING.md
+|   |   |   |
+|   |   |   \---src
+|   |   |           AggregateException.php
+|   |   |           CancellationException.php
+|   |   |           Coroutine.php
+|   |   |           Create.php
+|   |   |           Each.php
+|   |   |           EachPromise.php
+|   |   |           FulfilledPromise.php
+|   |   |           Is.php
+|   |   |           Promise.php
+|   |   |           PromiseInterface.php
+|   |   |           PromisorInterface.php
+|   |   |           RejectedPromise.php
+|   |   |           RejectionException.php
+|   |   |           TaskQueue.php
+|   |   |           TaskQueueInterface.php
+|   |   |           Utils.php
+|   |   |
+|   |   \---psr7
+|   |       |   CHANGELOG.md
+|   |       |   composer.json
+|   |       |   LICENSE
+|   |       |   README.md
+|   |       |   UPGRADING.md
+|   |       |
+|   |       \---src
+|   |           |   AppendStream.php
+|   |           |   BufferStream.php
+|   |           |   CachingStream.php
+|   |           |   DroppingStream.php
+|   |           |   FnStream.php
+|   |           |   Header.php
+|   |           |   HttpFactory.php
+|   |           |   InflateStream.php
+|   |           |   LazyOpenStream.php
+|   |           |   LimitStream.php
+|   |           |   Message.php
+|   |           |   MessageTrait.php
+|   |           |   MimeType.php
+|   |           |   MultipartStream.php
+|   |           |   NoSeekStream.php
+|   |           |   PumpStream.php
+|   |           |   Query.php
+|   |           |   Request.php
+|   |           |   Response.php
+|   |           |   Rfc3986.php
+|   |           |   Rfc7230.php
+|   |           |   ServerRequest.php
+|   |           |   Stream.php
+|   |           |   StreamDecoratorTrait.php
+|   |           |   StreamWrapper.php
+|   |           |   UploadedFile.php
+|   |           |   Uri.php
+|   |           |   UriComparator.php
+|   |           |   UriNormalizer.php
+|   |           |   UriResolver.php
+|   |           |   Utils.php
+|   |           |
+|   |           \---Exception
+|   |                   MalformedUriException.php
+|   |
+|   +---microsoft
+|   |   +---azure-storage-blob
+|   |   |   |   BreakingChanges.md
+|   |   |   |   ChangeLog.md
+|   |   |   |   composer.json
+|   |   |   |   CONTRIBUTING.md
+|   |   |   |   LICENSE
+|   |   |   |   README.md
+|   |   |   |
+|   |   |   \---src
+|   |   |       \---Blob
+|   |   |           |   BlobRestProxy.php
+|   |   |           |   BlobSharedAccessSignatureHelper.php
+|   |   |           |
+|   |   |           +---Internal
+|   |   |           |       BlobResources.php
+|   |   |           |       IBlob.php
+|   |   |           |
+|   |   |           \---Models
+|   |   |                   AccessCondition.php
+|   |   |                   AccessTierTrait.php
+|   |   |                   AppendBlockOptions.php
+|   |   |                   AppendBlockResult.php
+|   |   |                   Blob.php
+|   |   |                   BlobAccessPolicy.php
+|   |   |                   BlobBlockType.php
+|   |   |                   BlobPrefix.php
+|   |   |                   BlobProperties.php
+|   |   |                   BlobServiceOptions.php
+|   |   |                   BlobType.php
+|   |   |                   Block.php
+|   |   |                   BlockList.php
+|   |   |                   BreakLeaseResult.php
+|   |   |                   CommitBlobBlocksOptions.php
+|   |   |                   Container.php
+|   |   |                   ContainerAccessPolicy.php
+|   |   |                   ContainerACL.php
+|   |   |                   ContainerProperties.php
+|   |   |                   CopyBlobFromURLOptions.php
+|   |   |                   CopyBlobOptions.php
+|   |   |                   CopyBlobResult.php
+|   |   |                   CopyState.php
+|   |   |                   CreateBlobBlockOptions.php
+|   |   |                   CreateBlobOptions.php
+|   |   |                   CreateBlobPagesOptions.php
+|   |   |                   CreateBlobPagesResult.php
+|   |   |                   CreateBlobSnapshotOptions.php
+|   |   |                   CreateBlobSnapshotResult.php
+|   |   |                   CreateBlockBlobOptions.php
+|   |   |                   CreateContainerOptions.php
+|   |   |                   CreatePageBlobFromContentOptions.php
+|   |   |                   CreatePageBlobOptions.php
+|   |   |                   DeleteBlobOptions.php
+|   |   |                   GetBlobMetadataOptions.php
+|   |   |                   GetBlobMetadataResult.php
+|   |   |                   GetBlobOptions.php
+|   |   |                   GetBlobPropertiesOptions.php
+|   |   |                   GetBlobPropertiesResult.php
+|   |   |                   GetBlobResult.php
+|   |   |                   GetContainerACLResult.php
+|   |   |                   GetContainerPropertiesResult.php
+|   |   |                   LeaseMode.php
+|   |   |                   LeaseResult.php
+|   |   |                   ListBlobBlocksOptions.php
+|   |   |                   ListBlobBlocksResult.php
+|   |   |                   ListBlobsOptions.php
+|   |   |                   ListBlobsResult.php
+|   |   |                   ListContainersOptions.php
+|   |   |                   ListContainersResult.php
+|   |   |                   ListPageBlobRangesDiffResult.php
+|   |   |                   ListPageBlobRangesOptions.php
+|   |   |                   ListPageBlobRangesResult.php
+|   |   |                   PageWriteOption.php
+|   |   |                   PublicAccessType.php
+|   |   |                   PutBlobResult.php
+|   |   |                   PutBlockResult.php
+|   |   |                   SetBlobMetadataResult.php
+|   |   |                   SetBlobPropertiesOptions.php
+|   |   |                   SetBlobPropertiesResult.php
+|   |   |                   SetBlobTierOptions.php
+|   |   |                   UndeleteBlobOptions.php
+|   |   |
+|   |   \---azure-storage-common
+|   |       |   BreakingChanges.md
+|   |       |   ChangeLog.md
+|   |       |   composer.json
+|   |       |   CONTRIBUTING.md
+|   |       |   LICENSE
+|   |       |   README.md
+|   |       |
+|   |       \---src
+|   |           \---Common
+|   |               |   CloudConfigurationManager.php
+|   |               |   LocationMode.php
+|   |               |   Logger.php
+|   |               |   MarkerContinuationTokenTrait.php
+|   |               |   SharedAccessSignatureHelper.php
+|   |               |
+|   |               +---Exceptions
+|   |               |       InvalidArgumentTypeException.php
+|   |               |       ServiceException.php
+|   |               |
+|   |               +---Internal
+|   |               |   |   ACLBase.php
+|   |               |   |   ConnectionStringParser.php
+|   |               |   |   ConnectionStringSource.php
+|   |               |   |   MetadataTrait.php
+|   |               |   |   Resources.php
+|   |               |   |   RestProxy.php
+|   |               |   |   ServiceRestProxy.php
+|   |               |   |   ServiceRestTrait.php
+|   |               |   |   ServiceSettings.php
+|   |               |   |   StorageServiceSettings.php
+|   |               |   |   Utilities.php
+|   |               |   |   Validate.php
+|   |               |   |
+|   |               |   +---Authentication
+|   |               |   |       IAuthScheme.php
+|   |               |   |       SharedAccessSignatureAuthScheme.php
+|   |               |   |       SharedKeyAuthScheme.php
+|   |               |   |       TokenAuthScheme.php
+|   |               |   |
+|   |               |   +---Http
+|   |               |   |       HttpCallContext.php
+|   |               |   |       HttpFormatter.php
+|   |               |   |
+|   |               |   +---Middlewares
+|   |               |   |       CommonRequestMiddleware.php
+|   |               |   |
+|   |               |   \---Serialization
+|   |               |           ISerializer.php
+|   |               |           JsonSerializer.php
+|   |               |           MessageSerializer.php
+|   |               |           XmlSerializer.php
+|   |               |
+|   |               +---Middlewares
+|   |               |       HistoryMiddleware.php
+|   |               |       IMiddleware.php
+|   |               |       MiddlewareBase.php
+|   |               |       MiddlewareStack.php
+|   |               |       RetryMiddleware.php
+|   |               |       RetryMiddlewareFactory.php
+|   |               |
+|   |               \---Models
+|   |                       AccessPolicy.php
+|   |                       ContinuationToken.php
+|   |                       CORS.php
+|   |                       GetServicePropertiesResult.php
+|   |                       GetServiceStatsResult.php
+|   |                       Logging.php
+|   |                       MarkerContinuationToken.php
+|   |                       Metrics.php
+|   |                       Range.php
+|   |                       RangeDiff.php
+|   |                       RetentionPolicy.php
+|   |                       ServiceOptions.php
+|   |                       ServiceProperties.php
+|   |                       SignedIdentifier.php
+|   |                       TransactionalMD5Trait.php
+|   |
+|   +---phpoption
+|   |   \---phpoption
+|   |       |   composer.json
+|   |       |   LICENSE
+|   |       |
+|   |       \---src
+|   |           \---PhpOption
+|   |                   LazyOption.php
+|   |                   None.php
+|   |                   Option.php
+|   |                   Some.php
+|   |
+|   +---psr
+|   |   +---http-client
+|   |   |   |   CHANGELOG.md
+|   |   |   |   composer.json
+|   |   |   |   LICENSE
+|   |   |   |   README.md
+|   |   |   |
+|   |   |   \---src
+|   |   |           ClientExceptionInterface.php
+|   |   |           ClientInterface.php
+|   |   |           NetworkExceptionInterface.php
+|   |   |           RequestExceptionInterface.php
+|   |   |
+|   |   +---http-factory
+|   |   |   |   composer.json
+|   |   |   |   LICENSE
+|   |   |   |   README.md
+|   |   |   |
+|   |   |   \---src
+|   |   |           RequestFactoryInterface.php
+|   |   |           ResponseFactoryInterface.php
+|   |   |           ServerRequestFactoryInterface.php
+|   |   |           StreamFactoryInterface.php
+|   |   |           UploadedFileFactoryInterface.php
+|   |   |           UriFactoryInterface.php
+|   |   |
+|   |   \---http-message
+|   |       |   CHANGELOG.md
+|   |       |   composer.json
+|   |       |   LICENSE
+|   |       |   README.md
+|   |       |
+|   |       +---docs
+|   |       |       PSR7-Interfaces.md
+|   |       |       PSR7-Usage.md
+|   |       |
+|   |       \---src
+|   |               MessageInterface.php
+|   |               RequestInterface.php
+|   |               ResponseInterface.php
+|   |               ServerRequestInterface.php
+|   |               StreamInterface.php
+|   |               UploadedFileInterface.php
+|   |               UriInterface.php
+|   |
+|   +---ralouphie
+|   |   \---getallheaders
+|   |       |   composer.json
+|   |       |   LICENSE
+|   |       |   README.md
+|   |       |
+|   |       \---src
+|   |               getallheaders.php
+|   |
+|   +---symfony
+|   |   +---deprecation-contracts
+|   |   |       CHANGELOG.md
+|   |   |       composer.json
+|   |   |       function.php
+|   |   |       LICENSE
+|   |   |       README.md
+|   |   |
+|   |   +---polyfill-ctype
+|   |   |       bootstrap.php
+|   |   |       bootstrap80.php
+|   |   |       composer.json
+|   |   |       Ctype.php
+|   |   |       LICENSE
+|   |   |       README.md
+|   |   |
+|   |   +---polyfill-mbstring
+|   |   |   |   bootstrap.php
+|   |   |   |   bootstrap72.php
+|   |   |   |   bootstrap80.php
+|   |   |   |   composer.json
+|   |   |   |   LICENSE
+|   |   |   |   Mbstring.php
+|   |   |   |   README.md
+|   |   |   |
+|   |   |   \---Resources
+|   |   |       \---unidata
+|   |   |               caseFolding.php
+|   |   |               lowerCase.php
+|   |   |               titleCaseRegexp.php
+|   |   |               upperCase.php
+|   |   |
+|   |   \---polyfill-php80
+|   |       |   bootstrap.php
+|   |       |   composer.json
+|   |       |   LICENSE
+|   |       |   Php80.php
+|   |       |   PhpToken.php
+|   |       |   README.md
+|   |       |
+|   |       \---Resources
+|   |           \---stubs
+|   |                   Attribute.php
+|   |                   PhpToken.php
+|   |                   Stringable.php
+|   |                   UnhandledMatchError.php
+|   |                   ValueError.php
+|   |
+|   \---vlucas
+|       \---phpdotenv
+|           |   composer.json
+|           |   LICENSE
+|           |
+|           \---src
+|               |   Dotenv.php
+|               |   Validator.php
+|               |
+|               +---Exception
+|               |       ExceptionInterface.php
+|               |       InvalidEncodingException.php
+|               |       InvalidFileException.php
+|               |       InvalidPathException.php
+|               |       ValidationException.php
+|               |
+|               +---Loader
+|               |       Loader.php
+|               |       LoaderInterface.php
+|               |       Resolver.php
+|               |
+|               +---Parser
+|               |       Entry.php
+|               |       EntryParser.php
+|               |       Lexer.php
+|               |       Lines.php
+|               |       Parser.php
+|               |       ParserInterface.php
+|               |       Value.php
+|               |
+|               +---Repository
+|               |   |   AdapterRepository.php
+|               |   |   RepositoryBuilder.php
+|               |   |   RepositoryInterface.php
+|               |   |
+|               |   \---Adapter
+|               |           AdapterInterface.php
+|               |           ApacheAdapter.php
+|               |           ArrayAdapter.php
+|               |           EnvConstAdapter.php
+|               |           GuardedWriter.php
+|               |           ImmutableWriter.php
+|               |           MultiReader.php
+|               |           MultiWriter.php
+|               |           PutenvAdapter.php
+|               |           ReaderInterface.php
+|               |           ReplacingWriter.php
+|               |           ServerConstAdapter.php
+|               |           WriterInterface.php
+|               |
+|               +---Store
+|               |   |   FileStore.php
+|               |   |   StoreBuilder.php
+|               |   |   StoreInterface.php
+|               |   |   StringStore.php
+|               |   |
+|               |   \---File
+|               |           Paths.php
+|               |           Reader.php
+|               |
+|               \---Util
+|                       Regex.php
+|                       Str.php
+|
+\---views
+    +---auth
+    \---home
+            index.php

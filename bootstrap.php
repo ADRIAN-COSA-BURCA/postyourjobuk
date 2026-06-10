@@ -36,9 +36,7 @@ define('DB_USER', $_ENV['DB_USER']);
 define('DB_PASS', $_ENV['DB_PASS']);
 define('DB_CHARSET', 'utf8mb4');
 
-// 5. Initialize Database
-// We use the full path to match your folder structure
-require_once __DIR__ . '/config/Database.php';
+
 
 // Optional: Error reporting
 error_reporting(E_ALL);

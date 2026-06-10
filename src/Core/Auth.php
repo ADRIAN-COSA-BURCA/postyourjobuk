@@ -1,6 +1,8 @@
 <?php
 namespace App\Core;
 
+use PDO;
+
 class Auth {
     // Moved session validation logic here
     public static function checkSessionFingerprint(): bool {
@@ -13,7 +15,11 @@ class Auth {
     public static function isTenantActive(): bool {
         $db = Database::getInstance();
         $sql = "SELECT status, deleted_at FROM tenants WHERE tenant_id = ? LIMIT 1";
-        $tenant = $db->fetchOne($sql, [$_SESSION['tenant_id'] ?? 0]);
+        
+        // FIX: Use native PDO methods instead of the non-existent fetchOne()
+        $stmt = $db->prepare($sql);
+        $stmt->execute([$_SESSION['tenant_id'] ?? 0]);
+        $tenant = $stmt->fetch(PDO::FETCH_ASSOC);
         
         return ($tenant && $tenant['status'] === 'active' && $tenant['deleted_at'] === null);
     }

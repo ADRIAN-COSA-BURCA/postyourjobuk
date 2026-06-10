@@ -1,0 +1,2 @@
+INSERT INTO tenants (email, password_hash, is_super_admin, status, company_name) 
+VALUES ('admin@postyourjobhere.com', '$2y$10$92IXUNpkjO0rOQ5byMi.Ye4oKoEa3Ro9llC/.og/at2.uheWG/igi', 1, 'active', 'System Root');

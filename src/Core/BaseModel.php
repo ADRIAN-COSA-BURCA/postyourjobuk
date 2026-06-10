@@ -1,11 +1,9 @@
 <?php
 namespace App\Core; 
 
-use App\Config\Database;
-
 abstract class BaseModel {
     
-    // Database instance
+    // Database instance wrapper matching App\Core\Database
     protected $db;
     
     // Table name (must be set by child class)
@@ -18,13 +16,13 @@ abstract class BaseModel {
      * Constructor
      */
     public function __construct() {
-        $this->db = Database::getInstance();
+        // Pointing cleanly to the application's unified Core Database instance
+        $this->db = \App\Core\Database::getInstance();
     }
     
     /**
      * Find record by primary key
-     * 
-     * @param int $id Primary key value
+     * * @param int $id Primary key value
      * @return array|false Record or false if not found
      */
     public function find($id) {
@@ -34,8 +32,7 @@ abstract class BaseModel {
     
     /**
      * Find all records with optional conditions
-     * 
-     * @param array $where WHERE conditions ['column' => 'value']
+     * * @param array $where WHERE conditions ['column' => 'value']
      * @param string $orderBy ORDER BY clause
      * @param int $limit LIMIT clause
      * @return array Array of records
@@ -61,7 +58,7 @@ abstract class BaseModel {
         
         // Add LIMIT
         if ($limit) {
-            $sql .= " LIMIT $limit";
+            $sql .= " LIMIT " . (int)$limit;
         }
         
         return $this->db->fetchAll($sql, $params);
@@ -69,12 +66,11 @@ abstract class BaseModel {
     
     /**
      * Create new record
-     * 
-     * @param array $data Associative array of column => value
+     * * @param array $data Associative array of column => value
      * @return int|false Inserted ID or false
      */
     public function create($data) {
-        // Extension point (can be overridden by child)
+        // Pass data by reference securely
         $this->beforeCreate($data);
         
         $columns = array_keys($data);
@@ -94,13 +90,12 @@ abstract class BaseModel {
     
     /**
      * Update record by primary key
-     * 
-     * @param int $id Primary key value
+     * * @param int $id Primary key value
      * @param array $data Associative array of column => value
      * @return bool Success
      */
     public function update($id, $data) {
-        // Extension point (can be overridden by child)
+        // FIX: $data must be passed by reference here to match the declaration signature below
         $this->beforeUpdate($id, $data);
         
         $columns = [];
@@ -127,8 +122,7 @@ abstract class BaseModel {
     
     /**
      * Delete record by primary key
-     * 
-     * @param int $id Primary key value
+     * * @param int $id Primary key value
      * @return bool Success
      */
     public function delete($id) {
@@ -146,8 +140,7 @@ abstract class BaseModel {
     
     /**
      * Count records with optional conditions
-     * 
-     * @param array $where WHERE conditions
+     * * @param array $where WHERE conditions
      * @return int Count
      */
     public function count($where = []) {
@@ -168,8 +161,7 @@ abstract class BaseModel {
     
     /**
      * Check if record exists
-     * 
-     * @param int $id Primary key value
+     * * @param int $id Primary key value
      * @return bool
      */
     public function exists($id) {
@@ -178,68 +170,56 @@ abstract class BaseModel {
     }
     
     // ============================================
-    // EXTENSION POINTS (Override in child classes)
+    // EXTENSION POINTS (Strict signature alignment)
     // ============================================
     
     /**
      * Called before create() - Override to add validation
-     * 
-     * @param array &$data Data to be inserted (by reference, can modify)
+     * * @param array &$data Data to be inserted (by reference, can modify)
      */
     protected function beforeCreate(&$data) {
-        // University: Empty (no restrictions)
-        // Business: Child overrides to check limits, validate subscription, etc.
+        // Empty by default
     }
     
     /**
      * Called after create() - Override to trigger events
-     * 
-     * @param int $id Newly inserted ID
+     * * @param int $id Newly inserted ID
      */
     protected function afterCreate($id) {
-        // University: Empty
-        // Business: Child overrides to send emails, log analytics, etc.
+        // Empty by default
     }
     
     /**
      * Called before update() - Override to add validation
-     * 
-     * @param int $id Record ID
+     * * @param int $id Record ID
      * @param array &$data Data to be updated (by reference, can modify)
      */
     protected function beforeUpdate($id, &$data) {
-        // University: Empty
-        // Business: Child overrides to audit changes, validate, etc.
+        // Empty by default
     }
     
     /**
      * Called after update() - Override to trigger events
-     * 
-     * @param int $id Updated record ID
+     * * @param int $id Updated record ID
      */
     protected function afterUpdate($id) {
-        // University: Empty
-        // Business: Child overrides to invalidate cache, notify, etc.
+        // Empty by default
     }
     
     /**
      * Called before delete() - Override to add checks
-     * 
-     * @param int $id Record ID to be deleted
+     * * @param int $id Record ID to be deleted
      */
     protected function beforeDelete($id) {
-        // University: Empty
-        // Business: Child overrides to check dependencies, confirm, etc.
+        // Empty by default
     }
     
     /**
      * Called after delete() - Override to clean up
-     * 
-     * @param int $id Deleted record ID
+     * * @param int $id Deleted record ID
      */
     protected function afterDelete($id) {
-        // University: Empty
-        // Business: Child overrides to delete files, clear cache, etc.
+        // Empty by default
     }
 }
 ?>

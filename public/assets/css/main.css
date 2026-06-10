@@ -184,6 +184,181 @@ h1, h2, h3 { color: #111827; }
 
 
 
+/* ==========================================================================
+   ADMINISTRATIVE CONTROL PANELS & MULTI-TENANT CONSOLE STYLES
+   ========================================================================== */
+
+.admin-wrapper-view {
+    max-width: 1200px;
+    margin: 0 auto;
+    padding: 40px 20px;
+    font-family: var(--primary-font, system-ui, sans-serif);
+    color: #1e293b;
+}
+
+.admin-brand-header {
+    margin-bottom: 40px;
+    border-bottom: 1px solid #f1f5f9;
+    padding-bottom: 20px;
+}
+
+.admin-brand-header h1 {
+    font-size: 2.25rem;
+    font-weight: 800;
+    color: #0f172a;
+    margin: 0 0 8px 0;
+    letter-spacing: -0.025em;
+}
+
+.admin-brand-header p {
+    color: #64748b;
+    margin: 0;
+    font-size: 1.1rem;
+}
+
+/* Operational Metrics Component Cards Grid */
+.admin-counters-grid {
+    display: grid;
+    grid-template-columns: repeat(auto-fit, minmax(240px, 1fr));
+    gap: 24px;
+    margin-bottom: 48px;
+}
+
+.admin-metric-card {
+    background: #ffffff;
+    border: 1px solid #e2e8f0;
+    padding: 24px;
+    border-radius: 12px;
+    box-shadow: 0 1px 3px 0 rgba(0, 0, 0, 0.05);
+    transition: transform 0.2s, box-shadow 0.2s;
+}
+
+.admin-metric-card:hover {
+    transform: translateY(-2px);
+    box-shadow: 0 4px 6px -1px rgba(0, 0, 0, 0.05);
+}
+
+.admin-metric-card h3 {
+    font-size: 0.875rem;
+    font-weight: 600;
+    text-transform: uppercase;
+    letter-spacing: 0.05em;
+    color: #64748b;
+    margin: 0 0 12px 0;
+}
+
+.admin-metric-card .count-total { color: #0f172a; font-size: 2.5rem; font-weight: 800; margin: 0; line-height: 1; }
+.admin-metric-card .count-active { color: #0ea5e9; font-size: 2.5rem; font-weight: 800; margin: 0; line-height: 1; }
+.admin-metric-card .count-listings { color: #10b981; font-size: 2.5rem; font-weight: 800; margin: 0; line-height: 1; }
+
+/* Control Console Core Tables */
+.admin-data-card {
+    background: #ffffff;
+    border: 1px solid #e2e8f0;
+    border-radius: 16px;
+    box-shadow: 0 4px 6px -1px rgba(0, 0, 0, 0.05);
+    overflow: hidden;
+}
+
+.admin-data-card .card-title-bar {
+    padding: 24px;
+    border-bottom: 1px solid #f1f5f9;
+    background: #f8fafc;
+}
+
+.admin-data-card .card-title-bar h2 {
+    font-size: 1.25rem;
+    font-weight: 700;
+    color: #0f172a;
+    margin: 0;
+}
+
+.admin-table-view {
+    width: 100%;
+    border-collapse: collapse;
+    text-align: left;
+    font-size: 0.95rem;
+}
+
+.admin-table-view th {
+    padding: 16px 24px;
+    background: #f8fafc;
+    font-weight: 600;
+    color: #475569;
+    text-transform: uppercase;
+    font-size: 0.75rem;
+    letter-spacing: 0.05em;
+    border-bottom: 1px solid #e2e8f0;
+}
+
+.admin-table-view td {
+    padding: 18px 24px;
+    border-bottom: 1px solid #f1f5f9;
+    color: #1e293b;
+    vertical-align: middle;
+}
+
+.admin-table-view tr:last-child td {
+    border-bottom: none;
+}
+
+.admin-table-view tbody tr {
+    transition: background 0.15s;
+}
+
+.admin-table-view tbody tr:hover {
+    background-color: #f8fafc;
+}
+
+/* Multi-Tenant Lifecycle Router Status Badges */
+.status-badge-flag {
+    display: inline-flex;
+    align-items: center;
+    padding: 4px 12px;
+    border-radius: 9999px;
+    font-size: 0.75rem;
+    font-weight: 700;
+    text-transform: uppercase;
+    letter-spacing: 0.025em;
+}
+
+.status-badge-flag.active {
+    background: #f0fdf4;
+    color: #15803d;
+    border: 1px solid #dcfce7;
+}
+
+.status-badge-flag.suspended {
+    background: #fef2f2;
+    color: #ef4444;
+    border: 1px solid #fee2e2;
+}
+
+/* Action Control Buttons */
+.admin-action-btn {
+    display: inline-flex;
+    align-items: center;
+    justify-content: center;
+    padding: 8px 16px;
+    border-radius: 8px;
+    font-size: 0.875rem;
+    font-weight: 600;
+    text-decoration: none;
+    background: #0f172a;
+    color: #ffffff;
+    border: 1px solid #0f172a;
+    transition: all 0.15s;
+    box-shadow: 0 1px 2px 0 rgba(0, 0, 0, 0.05);
+    cursor: pointer;
+}
+
+.admin-action-btn:hover {
+    background: #1e293b;
+    border-color: #1e293b;
+}
+
+
+
 
 
 /* --- NEW: Dashboard & Portal Layout Utilities --- */
@@ -218,8 +393,19 @@ h1, h2, h3 { color: #111827; }
 .alert-error { background: #fee2e2; color: #991b1b; border: 1px solid #fecaca; }
 .alert-success { background: #dcfce7; color: #166534; border: 1px solid #bbf7d0; }
 
-/* --- NEW: Tables --- */
-table { width: 100%; border-collapse: collapse; margin-top: 1rem; }
-th { text-align: left; padding: 1rem; border-bottom: 2px solid #e5e7eb; color: #6b7280; }
-td { padding: 1rem; border-bottom: 1px solid #e5e7eb; }
-.flex-between { display: flex; justify-content: space-between; align-items: center; }
+
+
+/* Ensure the wrapper is always centered and uniform */
+.page-container {
+    max-width: 600px;
+    margin: 40px auto; /* 40px top/bottom, auto left/right centers the block */
+    padding: 20px;
+}
+
+.page-wrapper {
+    display: flex;
+    justify-content: center;
+    align-items: center;
+    min-height: 70vh; /* Keeps content vertically centered */
+    width: 100%;
+}

@@ -5,69 +5,92 @@ abstract class BaseController {
     protected $db;
 
     public function __construct() {
-        if (session_status() === PHP_SESSION_NONE) session_start();
+        if (session_status() === PHP_SESSION_NONE) {
+            session_start();
+        }
         
-        // 1. Basic Session Presence
+        $currentPath = rtrim(parse_url($_SERVER['REQUEST_URI'], PHP_URL_PATH), '/');
+        if ($currentPath === '') $currentPath = '/';
+
+        // 1. Bypass Tenant Auth for Admin and Public routes
+        $publicRoutes = ['/login', '/login/authenticate', '/'];
+        $isAdminRoute = str_starts_with($currentPath, '/admin');
+
+        if (in_array($currentPath, $publicRoutes) || $isAdminRoute) {
+            // Even if bypassing, we still need the database for Admin operations
+            $this->db = \App\Core\Database::getInstance();
+            return;
+        }
+
+        // 2. Standard Tenant Auth Enforcement
+        $this->db = \App\Core\Database::getInstance();
+        
         if (!$this->isLoggedIn()) {
             Helpers::redirect('/login');
+            return;
         }
-
-        // 2. Zero-Trust Identity Pinning (Detect session hijacking)
-        if (!$this->isSessionValid()) {
-            SecurityLogger::logAlert("SESSION_HIJACK_ATTEMPT", $_SESSION['tenant_id'] ?? 0, "Fingerprint mismatch detected.");
-            $this->logout();
-            Helpers::redirect('/login');
+        if (!$this->isSessionValid()) { 
+            $this->logout(); 
+            Helpers::redirect('/login'); 
+            return;
         }
-
-        // 3. Dynamic State Verification (Terminate if tenant is suspended/deleted)
-        if (!$this->isTenantActive()) {
-            SecurityLogger::logAlert("ACTIVE_SESSION_TERMINATION", $_SESSION['tenant_id'] ?? 0, "Suspended workspace access attempt.");
-            $this->logout();
-            Helpers::redirect('/login');
+        if (!$this->isTenantActive()) { 
+            $this->logout(); 
+            Helpers::redirect('/login'); 
+            return;
         }
-        
-        $this->db = \App\Core\Database::getInstance();
     }
 
     protected function render(string $view, array $data = []) {
-        extract($data);
-        
-        $header = __DIR__ . "/../views/layouts/header.php";
-        $footer = __DIR__ . "/../views/layouts/footer.php";
-        $content = __DIR__ . "/../views/{$view}.php";
+    // 1. Prepare variables for the view
+    extract($data);
+    
+    $viewsPath = dirname(__DIR__) . '/views';
+    $contentFile = $viewsPath . '/' . $view . '.php';
 
-        // Defensive check: Ensure view exists
-        if (!file_exists($content)) {
-            throw new \Exception("View file not found: {$view}");
-        }
-        
-        require_once $header;
-        require_once $content;
-        require_once $footer;
+    // 2. Security/Existence check for the view file
+    if (!file_exists($contentFile)) {
+        http_response_code(404);
+        die("View file not found: {$view}");
     }
 
+    // 3. Capture the specific view content into an output buffer
+    ob_start();
+    require $contentFile;
+    $view_content = ob_get_clean();
+
+    // 4. Load the Master Layout wrapper
+    // This wrapper acts as the central point for <head>, CSS, and <footer>
+    $layoutPath = $viewsPath . '/layouts/main.php';
+    
+    if (file_exists($layoutPath)) {
+        require $layoutPath;
+    } else {
+        // Fallback: if main.php is missing, just render the raw view content
+        echo $view_content;
+    }
+}
+
+    // ... [Keep existing isLoggedIn, isSessionValid, isTenantActive, and logout methods] ...
+    
     protected function isLoggedIn(): bool {
         return isset($_SESSION['tenant_id']);
     }
 
     private function isSessionValid(): bool {
-        // Handle case where session might be active but fingerprints not set
-        if (!isset($_SESSION['user_agent'], $_SESSION['client_ip_hash'])) return false;
-
+        if (!isset($_SESSION['user_agent'], $_SESSION['client_ip_hash'])) {
+            return false;
+        }
         $currentIpHash = hash('sha256', $_SERVER['REMOTE_ADDR'] ?? '127.0.0.1');
         return ($_SERVER['HTTP_USER_AGENT'] === $_SESSION['user_agent'] && 
                 $currentIpHash === $_SESSION['client_ip_hash']);
     }
 
     private function isTenantActive(): bool {
-        $db = \App\Core\Database::getInstance();
-        $sql = "SELECT status, deleted_at FROM tenants WHERE tenant_id = ? LIMIT 1";
-        $tenant = $db->fetchOne($sql, [$_SESSION['tenant_id']]);
-        
-        return ($tenant && $tenant['status'] === 'active' && $tenant['deleted_at'] === null);
+        return \App\Core\Auth::isTenantActive();
     }
 
-    private function logout() {
+    protected function logout() {
         $_SESSION = [];
         session_destroy();
     }
