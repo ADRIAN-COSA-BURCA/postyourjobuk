@@ -1,27 +1,29 @@
 FROM php:8.2-apache
 
-# 1. Install system dependencies and PHP extensions
+# 1. Install system dependencies
 RUN apt-get update && apt-get install -y \
     libzip-dev \
     zip \
     unzip \
-    && docker-php-ext-install mysqli pdo pdo_mysql zip
+    && rm -rf /var/lib/apt/lists/*
 
-# 2. Install Composer from the official image
+# 2. Install required PHP extensions (MySQL and Zip)
+RUN docker-php-ext-install mysqli pdo pdo_mysql zip
+
+# 3. Install Composer globally
 COPY --from=composer:latest /usr/bin/composer /usr/bin/composer
 
-# 3. Enable Apache rewrite module
+# 4. Enable Apache rewrite module (Crucial for your custom Router.php to work)
 RUN a2enmod rewrite
 
-# 4. Overwrite the default virtual host file with a clean, hardcoded DocumentRoot
-RUN echo '<VirtualHost *:80>\n\
-    DocumentRoot /var/www/html/public\n\
-    <Directory /var/www/html/public>\n\
-        Options Indexes FollowSymLinks\n\
-        AllowOverride All\n\
-        Require all granted\n\
-    </Directory>\n\
-</VirtualHost>' > /etc/apache2/sites-available/000-default.conf
+# 5. Dynamically configure Apache DocumentRoot to point to your 'public' folder
+ENV APACHE_DOCUMENT_ROOT /var/www/html/public
 
-# 5. Ensure the global directory permissions allow overrides
+RUN sed -ri -e 's!/var/www/html!${APACHE_DOCUMENT_ROOT}!g' /etc/apache2/sites-available/*.conf
+RUN sed -ri -e 's!/var/www/!${APACHE_DOCUMENT_ROOT}!g' /etc/apache2/apache2.conf /etc/apache2/conf-available/*.conf
+
+# 6. Explicitly allow .htaccess overrides globally so Apache doesn't ignore them
 RUN sed -i '/<Directory \/var\/www\/>/,/<\/Directory>/ s/AllowOverride None/AllowOverride All/' /etc/apache2/apache2.conf
+
+# 7. Set working directory to your project root
+WORKDIR /var/www/html

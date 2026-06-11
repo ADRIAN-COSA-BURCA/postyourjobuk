@@ -18,7 +18,9 @@ class AdminController extends BaseController {
             Helpers::redirect('/admin');
             return;
         }
-        $this->render('admin/login', ['pageTitle' => 'Administrator Portal Secure Login']);
+        $this->render('admin/login', [
+    'pageTitle' => 'Admin Login'
+], 'layouts/login_layout');
     }
 
     public function authenticateAdmin() {

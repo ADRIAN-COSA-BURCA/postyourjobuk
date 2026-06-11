@@ -42,34 +42,31 @@ abstract class BaseController {
     }
 
     protected function render(string $view, array $data = []) {
-    // 1. Prepare variables for the view
-    extract($data);
-    
-    $viewsPath = dirname(__DIR__) . '/views';
-    $contentFile = $viewsPath . '/' . $view . '.php';
+        extract($data);
+        
+        // DOCKER FIX: Explicitly define the container root
+        $containerRoot = '/var/www/html'; 
+        $contentFile = $containerRoot . '/src/views/' . $view . '.php';
 
-    // 2. Security/Existence check for the view file
-    if (!file_exists($contentFile)) {
-        http_response_code(404);
-        die("View file not found: {$view}");
+        // THE TRUTH CHECK: If this triggers, we know exactly where it's failing
+        if (!file_exists($contentFile)) {
+            die("DOCKER PATH ERROR: The system cannot find the view file. <br>" .
+                "Attempted path: " . $contentFile . "<br>" .
+                "Current working directory: " . getcwd());
+        }
+
+        ob_start();
+        require $contentFile;
+        $view_content = ob_get_clean();
+
+        $layoutPath = $containerRoot . '/src/views/layouts/main.php';
+        
+        if (file_exists($layoutPath)) {
+            require $layoutPath;
+        } else {
+            echo $view_content;
+        }
     }
-
-    // 3. Capture the specific view content into an output buffer
-    ob_start();
-    require $contentFile;
-    $view_content = ob_get_clean();
-
-    // 4. Load the Master Layout wrapper
-    // This wrapper acts as the central point for <head>, CSS, and <footer>
-    $layoutPath = $viewsPath . '/layouts/main.php';
-    
-    if (file_exists($layoutPath)) {
-        require $layoutPath;
-    } else {
-        // Fallback: if main.php is missing, just render the raw view content
-        echo $view_content;
-    }
-}
 
     // ... [Keep existing isLoggedIn, isSessionValid, isTenantActive, and logout methods] ...
     

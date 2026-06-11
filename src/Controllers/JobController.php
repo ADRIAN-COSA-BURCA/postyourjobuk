@@ -47,11 +47,11 @@ public function show($id) {
         // Data Mapping
         $data = [
             'tenant_id'       => $tenantId,
-            'title'           => trim($_POST['title'] ?? ''),
-            'description'     => trim($_POST['description'] ?? ''),
-            'requirements'    => trim($_POST['requirements'] ?? ''),
-            'location'        => trim($_POST['location'] ?? null),
-            'salary'          => trim($_POST['salary'] ?? null),
+            'title'           => trim((string)($_POST['title'] ?? '')),
+            'description'     => trim((string)($_POST['description'] ?? '')),
+            'requirements'    => trim((string)($_POST['requirements'] ?? '')),
+            'location'        => trim((string)($_POST['location'] ?? '')),
+            'salary'          => trim((string)($_POST['salary'] ?? '')),
             'employment_type' => $_POST['employment_type'] ?? 'full-time',
             'status'          => $_POST['status'] ?? 'active'
         ];

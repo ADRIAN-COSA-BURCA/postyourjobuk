@@ -195,8 +195,8 @@ Data Presentation: The data is passed back to views/home/index.php, which remain
 We have successfully built the Security Foundation (BaseController), the Authentication Layer (AuthController & Model), and the Router (public/index.php).
 
 
-
-Documentation Update: Architectural Migration
+update:
+Architectural Migration
 Summary of Changes:
 Migrated the application from a procedural structure to a modern Model-View-Controller (MVC) design pattern. This shift was motivated by the need to centralize security controls and decouple business logic from presentation layers.
 
@@ -212,7 +212,7 @@ Proactive Security Layering: Integrated CSRF validation and rate-limiting (veloc
 
 
 
-
+update:
 We have successfully transitioned your application from a scattered procedural monolith to a hardened MVC framework.
 
 MVC Architecture: We implemented a clear separation of concerns using BaseController (infrastructure), JobController/DashboardController (business logic), and Job model (data access).
@@ -222,6 +222,7 @@ Zero-Trust Security: We moved from "per-file" security checks to an "architectur
 Proactive Monitoring: We integrated the SecurityLogger directly into the authentication and request flow, ensuring that anomalies like session hijacking or unauthorized workspace access are logged for SIEM (Security Information and Event Management) analysis.
 
 
+update:
 Project Status: MVC Architectural Migration
 Accomplishments:
 
@@ -236,7 +237,7 @@ UI/UX Consistency: Migrated legacy styling to a unified Layout system (header/fo
 Data Isolation: Enforced tenant-scoped queries across all model-level operations to prevent cross-tenant data leakage.
 
 
-Dashboard Refactor
+update:
 
 Fix: Resolved "Undefined array key" error in the recruitment dashboard by synchronizing controller data fetching with model logic.
 
@@ -246,7 +247,7 @@ Security: Validated tenant_id session integrity checks for dashboard access.
 
 
 
-Work Done
+update:
 You have built a secure, high-quality multi-tenant MVC framework core.
 
 Backend Engine: Your centralized routing loop (Router.php), database singletons, and query abstraction tools (BaseModel.php) are complete and functioning correctly.
@@ -256,13 +257,80 @@ Zero-Trust Security: Your authentication handling is industry-grade. You have pr
 Unified Layout Wrapper: Your rendering logic cleanly splits presentation fragments from layout structures. The browser now receives structural components uniformly via main.php.
 
 
+update:
+
+You have successfully built the "Engine Room" of your MVC framework. You have successfully navigated:
+
+Routing & Request Dispatching: The system correctly maps URLs to Controller actions.
+
+Controller Logic: You have built secure, rate-limited, and authenticated pathways.
+
+Model Persistence: You have robust BaseModel and Job models that handle SQL prepared statements correctly.
+
+Security Foundations: CSRF protection, data boundary gatekeeping, and error handling are now active.
+
+Analysis of Current Status
+DONE: Recruiter Dashboard, Job Posting, CSRF protection, Database abstraction (BaseModel), and security logging.
+
+BROKEN/INCOMPLETE:
+
+Database Helper Methods: You currently have Fatal errors because Database.php lacks the fetchOne, fetchAll, etc., wrapper methods needed by BaseModel.
+
+Public Job Board: There is no "Front Door" for candidates to view jobs.
+
+Application Flow: You cannot yet test the "Applicants" list because no users have applied yet.
+
+
+
+update:
+Analysis of Current Status
+Design System: Unified across Admin and Recruiter interfaces.
+
+Authentication: Both login portals are functionally stable, secure, and styled consistently.
+
+Data Input: The jobs/create interface is now ready to capture structured data (Location, Salary, Type).
+
+Missing Core: We lack the Public-Facing Job Board (the landing page index) and the Application Flow (CV upload, candidate data).
+
+
+
+
+
+update:
+Design & Theming
+Unified Design System: Replaced fragmented inline styles with a centralized :root CSS variable system in main.css.
+
+Modern Aesthetics: Integrated Google Fonts (Outfit & Inter) and implemented a dark-themed radial-gradient background with backdrop-filter effects.
+
+Contrast Optimization: Resolved visual interference by standardizing surface colors, borders, and text contrasts, ensuring that data-heavy components (like tables) remain readable.
+
+Authentication Layouts
+Structural Uniformity: Standardized Admin and Recruiter login templates.
+
+Layout Standardization: Utilized flexbox-based centering (min-height: 80vh) to ensure consistent "top-space" and centering across all screen sizes.
+
+Functional Parity: Refactored form components (.form-control, .btn) to maintain exact visual dimensions across both login portals while preserving necessary security logic (CSRF tokens, form actions).
+
+Recruitment Workflow (Job Posting)
+Form Evolution: Transformed the basic job creation form into a structured, professional interface with grouped sections (Basic Info, Compensation, Location, Content).
+
+Data Consistency: Standardized input types (Dropdowns, Range-ready inputs) to ensure high-quality data collection.
+
+High-End Display: Updated the Job View interface to use a professional metadata bar with badge-styled indicators for Location, Salary, and Employment Type
+
+
+
+
+
+git status
+git add .
+git commit -m "......."
+git push origin main
 
 
 
 docker compose down
-
 docker compose up --build -d
-
 docker compose up -d
 
 
@@ -272,12 +340,12 @@ C:\xampp\php_x86\php.exe -S localhost:8000 -t public
 docker exec -it postyourjobuk-db-1 mysql -u root -p -e
 
 
-
+http://localhost:8000/login
 Email: recruiter@test.com
 Password: password
 
 
-
+http://localhost:8000/admin/login
 ADMIN_EMAIL=admin@postyourjobhere.com
 ADMIN_PASSWORD_HASH= password
 

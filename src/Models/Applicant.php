@@ -2,42 +2,31 @@
 namespace App\Models;
 
 use App\Core\BaseModel;
-use Exception;
-use Throwable;
 
 class Applicant extends BaseModel {
     protected $table = 'applicants';
+    protected $primaryKey = 'applicant_id';
 
-    // Refactored store path logic: Uses dependency injection of the storage service
-    public function createApplication(array $data, array $cvFile) {
-        $this->validateFile($cvFile);
-        
-        // This keeps logic clean: The model focuses on the database, 
-        // while the Storage service handles the Azure/Local distinction.
-        $storagePath = $this->container->get('storage')->store($cvFile, $data['tenant_id'], $data['job_id']);
-        
-        $data['cv_storage_path'] = $storagePath;
+    public function createApplication(array $data) {
         return $this->create($data);
     }
 
-    public function deleteWithCVIsolated(int $tenantId, int $applicantId): bool {
-        $applicant = $this->getApplicantSecure($tenantId, $applicantId);
-        if (!$applicant) return false;
+    public function getJobApplicants(int $tenantId, int $jobId, string $sortBy = 'ai_score', string $order = 'DESC'): array {
+        $sql = "SELECT * FROM {$this->table} WHERE tenant_id = ? AND job_id = ? ORDER BY {$sortBy} {$order}";
+        return $this->db->fetchAll($sql, [$tenantId, $jobId]);
+    }
 
-        $this->db->beginTransaction();
-        try {
-            // Delete child records...
-            $this->db->executeQuery("DELETE FROM applicant_ai_analysis WHERE applicant_id = ?", [$applicantId]);
-            $this->db->executeQuery("DELETE FROM {$this->table} WHERE applicant_id = ? AND tenant_id = ?", [$applicantId, $tenantId]);
-            
-            $this->db->commit();
-            
-            // Trigger storage cleanup
-            $this->container->get('storage')->delete($applicant['cv_storage_path']);
-            return true;
-        } catch (Throwable $e) {
-            $this->db->rollback();
-            throw $e;
-        }
+    // ADD THIS METHOD TO FIX THE ERROR
+    public function getJobStats(int $tenantId, int $jobId): array {
+        $sql = "SELECT 
+                    COUNT(*) as total_applicants,
+                    IFNULL(AVG(ai_score), 0) as average_score,
+                    SUM(CASE WHEN ai_score >= 80 THEN 1 ELSE 0 END) as strong_matches,
+                    SUM(CASE WHEN ai_score >= 50 AND ai_score < 80 THEN 1 ELSE 0 END) as moderate_matches
+                FROM {$this->table} 
+                WHERE tenant_id = ? AND job_id = ?";
+        
+        $result = $this->db->fetchOne($sql, [$tenantId, $jobId]);
+        return $result ?: ['total_applicants' => 0, 'average_score' => 0, 'strong_matches' => 0, 'moderate_matches' => 0];
     }
 }

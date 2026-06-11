@@ -66,6 +66,9 @@ $router->add('GET',  '/job',                    [\App\Controllers\JobController:
 // --- Job Creation Lifecycle Management Routes ---
 $router->add('GET',  '/jobs/create',            [\App\Controllers\JobController::class, 'create']);
 $router->add('POST', '/jobs/store',             [\App\Controllers\JobController::class, 'store']);
+$router->add('GET',  '/jobs/edit',              [\App\Controllers\JobController::class, 'edit']);
+$router->add('POST', '/jobs/update',            [\App\Controllers\JobController::class, 'update']);
+$router->add('GET',  '/jobs/delete',            [\App\Controllers\JobController::class, 'delete']);
 
 // --- Applicant Tracking System (ATS) Routes ---
 $router->add('GET',  '/applicants',             [\App\Controllers\ApplicantController::class, 'index']);

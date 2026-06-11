@@ -11,7 +11,6 @@ class Job extends BaseModel {
 
     /**
      * Get all active jobs for public job board.
-     * Note: Tenant status is validated via JOINs for security.
      */
     public function getActiveJobs(?int $limit = null): array {
         $sql = "
@@ -60,10 +59,6 @@ class Job extends BaseModel {
         return $stmt->fetchAll();
     }
 
-    /**
-     * Create new job.
-     * Refactored to assume data is already validated by the Controller.
-     */
     public function createJob(array $data): ?int {
         $data['status'] = $data['status'] ?? 'active';
         $data['employment_type'] = $data['employment_type'] ?? 'full-time';
@@ -71,9 +66,6 @@ class Job extends BaseModel {
         return $this->create($data);
     }
     
-    /**
-     * Toggle status securely by verifying ownership (Zero-Trust Pattern).
-     */
     public function toggleStatusSecure(int $tenantId, int $jobId): bool {
         $job = $this->find($jobId);
         if (!$job || (int)$job['tenant_id'] !== $tenantId) {
@@ -84,9 +76,6 @@ class Job extends BaseModel {
         return $this->update($jobId, ['status' => $newStatus]);
     }
     
-    /**
-     * Search active jobs by keyword — Hardened with Cascade Protection rules
-     */
     public function search($keyword, $limit = 20) {
         $cleanLimit = (int)$limit;
         
@@ -116,9 +105,6 @@ class Job extends BaseModel {
         return $stmt->fetchAll();
     }
     
-    /**
-     * Get job statistics for tenant
-     */
     public function getStats($tenantId) {
         $sql = "
             SELECT 
@@ -144,6 +130,16 @@ class Job extends BaseModel {
         $stmt = $this->db->prepare($sql);
         $stmt->execute([$tenantId]);
         return (int)$stmt->fetchColumn();
+    }
+
+    /**
+     * Security check: Verify if a job belongs to a specific tenant.
+     */
+    public function belongsToTenant(int $jobId, int $tenantId): bool {
+        $sql = "SELECT COUNT(*) FROM {$this->table} WHERE job_id = ? AND tenant_id = ?";
+        $stmt = $this->db->prepare($sql);
+        $stmt->execute([$jobId, $tenantId]);
+        return (int)$stmt->fetchColumn() > 0;
     }
     
     protected function beforeCreate(&$data) {}
