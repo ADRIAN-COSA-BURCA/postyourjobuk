@@ -12,7 +12,6 @@ class HomeController extends BaseController {
         $search = trim($_GET['search'] ?? '');
 
         // 2. Fetch jobs: If searching, use model search; otherwise get latest
-        // Ensure your Job model has a public search() method
         $jobs = $search ? $jobModel->search($search) : $jobModel->getActiveJobs(50);
         
         // 3. Prepare session messages for the view
@@ -22,10 +21,10 @@ class HomeController extends BaseController {
         // 4. Clear messages after reading (to prevent them from appearing on refresh)
         unset($_SESSION['success_message'], $_SESSION['error_message']);
         
-        // 5. Pass data to the view
+        // 5. UPDATE: Point to 'home/index' to match your actual file structure
         $this->render('home/index', [
             'jobs'           => $jobs,
-            'searchQuery'    => $search,
+            'searchQuery'    => htmlspecialchars($search, ENT_QUOTES, 'UTF-8'),
             'successMessage' => $successMessage,
             'errorMessage'   => $errorMessage
         ]);

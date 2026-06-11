@@ -102,7 +102,7 @@ class Job extends BaseModel {
         $searchTerm = '%' . $keyword . '%';
         $stmt = $this->db->prepare($sql);
         $stmt->execute([$searchTerm, $searchTerm, $searchTerm, $searchTerm]);
-        return $stmt->fetchAll();
+        return $searchTerm ? $stmt->fetchAll() : [];
     }
     
     public function getStats($tenantId) {
@@ -120,6 +120,24 @@ class Job extends BaseModel {
         $stmt->execute([(int)$tenantId, (int)$tenantId]);
         $row = $stmt->fetch();
         return $row ? $row : ['total_jobs' => 0, 'active_jobs' => 0, 'inactive_jobs' => 0, 'total_applicants' => 0];
+    }
+    
+    /**
+     * Get a single job by ID with its associated tenant details.
+     */
+    public function getJobWithTenant(int $jobId): ?array {
+        $sql = "
+            SELECT j.*, t.company_name, t.logo_url
+            FROM {$this->table} j
+            INNER JOIN tenants t ON j.tenant_id = t.tenant_id
+            WHERE j.job_id = ?
+        ";
+        
+        $stmt = $this->db->prepare($sql);
+        $stmt->execute([$jobId]);
+        $result = $stmt->fetch();
+        
+        return $result ?: null;
     }
 	
     public function getPostCountLastHour(int $tenantId): int {

@@ -12,12 +12,11 @@ abstract class BaseController {
         $currentPath = rtrim(parse_url($_SERVER['REQUEST_URI'], PHP_URL_PATH), '/');
         if ($currentPath === '') $currentPath = '/';
 
-        // 1. Bypass Tenant Auth for Admin and Public routes
-        $publicRoutes = ['/login', '/login/authenticate', '/'];
+        // 1. FIXED: Added '/job' to public routes so candidates can view postings
+        $publicRoutes = ['/login', '/login/authenticate', '/', '/index.php', '/job'];
         $isAdminRoute = str_starts_with($currentPath, '/admin');
 
         if (in_array($currentPath, $publicRoutes) || $isAdminRoute) {
-            // Even if bypassing, we still need the database for Admin operations
             $this->db = \App\Core\Database::getInstance();
             return;
         }
@@ -44,31 +43,30 @@ abstract class BaseController {
     protected function render(string $view, array $data = []) {
         extract($data);
         
-        // DOCKER FIX: Explicitly define the container root
         $containerRoot = '/var/www/html'; 
+        $view = ltrim($view, '/');
         $contentFile = $containerRoot . '/src/views/' . $view . '.php';
 
-        // THE TRUTH CHECK: If this triggers, we know exactly where it's failing
         if (!file_exists($contentFile)) {
             die("DOCKER PATH ERROR: The system cannot find the view file. <br>" .
-                "Attempted path: " . $contentFile . "<br>" .
-                "Current working directory: " . getcwd());
+                "Attempted path: " . htmlspecialchars($contentFile) . "<br>" .
+                "Current working directory: " . htmlspecialchars(getcwd()));
         }
 
         ob_start();
         require $contentFile;
-        $view_content = ob_get_clean();
+        $content = ob_get_clean();
 
         $layoutPath = $containerRoot . '/src/views/layouts/main.php';
         
         if (file_exists($layoutPath)) {
+            // FIXED: Set both variable names to maximize support across your layout pages
+            $view_content = $content; 
             require $layoutPath;
         } else {
-            echo $view_content;
+            echo $content;
         }
     }
-
-    // ... [Keep existing isLoggedIn, isSessionValid, isTenantActive, and logout methods] ...
     
     protected function isLoggedIn(): bool {
         return isset($_SESSION['tenant_id']);

@@ -340,6 +340,10 @@ C:\xampp\php_x86\php.exe -S localhost:8000 -t public
 docker exec -it postyourjobuk-db-1 mysql -u root -p -e
 
 
+
+http://localhost:8000
+
+
 http://localhost:8000/login
 Email: recruiter@test.com
 Password: password

@@ -60,6 +60,15 @@ class Database {
     public function fetchColumn($sql, $params = []) {
         return $this->query($sql, $params)->fetchColumn();
     }
+	
+	
+
+
+// Update this method:
+public function lastInsertId() {
+    // We must use $this->connection because that is the name of your PDO property
+    return $this->connection->lastInsertId(); 
+}
 
 // Ensure you also add this to allow BaseModel to use execute/prepare directly
 public function prepare($sql) {

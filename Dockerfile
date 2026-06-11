@@ -10,8 +10,8 @@ RUN apt-get update && apt-get install -y \
 # 2. Install required PHP extensions (MySQL and Zip)
 RUN docker-php-ext-install mysqli pdo pdo_mysql zip
 
-# 3. Install Composer globally
-COPY --from=composer:latest /usr/bin/composer /usr/bin/composer
+# 3. Install Composer directly via curl
+RUN curl -sS https://getcomposer.org/installer | php -- --install-dir=/usr/bin --filename=composer
 
 # 4. Enable Apache rewrite module (Crucial for your custom Router.php to work)
 RUN a2enmod rewrite
