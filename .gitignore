@@ -2,3 +2,7 @@
 "vendor/" 
 "node_modules/" 
 "*.crt.pem" 
+
+# Ignore local CV uploads
+/uploads/*
+!/uploads/.gitkeep

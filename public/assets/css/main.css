@@ -732,6 +732,7 @@ select {
 }
 
 
+
 /* =========================================================================
    14. LOGIN / AUTH PAGES
    ========================================================================= */
@@ -857,6 +858,26 @@ select {
     padding: 0; margin: -1px;
     overflow: hidden; clip: rect(0,0,0,0);
     white-space: nowrap; border-width: 0;
+}
+
+.flow-layout-gap {
+    display: flex;
+    flex-direction: column;
+    gap: 1.5rem; /* This matches the exact 24px uniform spacing you love! */
+}
+
+.dashboard-flow {
+    display: flex !important;
+    flex-direction: column !important;
+    gap: 1.75rem !important; /* Forces a perfect uniform vertical gap between layout blocks */
+}
+
+/* Ensure the stats-grid component explicitly utilizes grid layout */
+.stats-grid {
+    display: grid !important;
+    grid-template-columns: repeat(auto-fit, minmax(240px, 1fr)) !important;
+    gap: 1.5rem !important; /* Spacing between individual metric cards */
+    margin-bottom: 0 !important; /* Prevents double-margin stacking */
 }
 
 

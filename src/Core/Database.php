@@ -33,7 +33,7 @@ class Database {
         }
     }
 
-    // 1. Update this method to return the Database instance
+    // 1. Singleton Instance
     public static function getInstance() {
         if (self::$instance === null) {
             self::$instance = new self();
@@ -41,14 +41,14 @@ class Database {
         return self::$instance; 
     }
 
-    // 2. Add a query helper to match your BaseModel's expectations
+    // 2. Query helper
     public function query($sql, $params = []) {
         $stmt = $this->connection->prepare($sql);
         $stmt->execute($params);
         return $stmt;
     }
 
-    // 3. Keep your fetch methods as you have them...
+    // 3. Data fetch methods
     public function fetchOne($sql, $params = []) {
         return $this->query($sql, $params)->fetch();
     }
@@ -60,23 +60,19 @@ class Database {
     public function fetchColumn($sql, $params = []) {
         return $this->query($sql, $params)->fetchColumn();
     }
-	
-	
 
+    // 4. Required for BaseModel integration
+    public function lastInsertId() {
+        return $this->connection->lastInsertId();
+    }
 
-// Update this method:
-public function lastInsertId() {
-    // We must use $this->connection because that is the name of your PDO property
-    return $this->connection->lastInsertId(); 
-}
-
-// Ensure you also add this to allow BaseModel to use execute/prepare directly
-public function prepare($sql) {
-    return $this->connection->prepare($sql);
-}
+    public function prepare($sql) {
+        return $this->connection->prepare($sql);
+    }
 
     // Prevent cloning and unserialization
     private function __clone() {}
+    
     public function __wakeup() {
         throw new Exception("Cannot unserialize singleton");
     }

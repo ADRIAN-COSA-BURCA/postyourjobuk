@@ -1,4 +1,4 @@
-<div class="dashboard-container">
+<div class="dashboard-container dashboard-flow">
     <h1>Welcome to your Dashboard</h1>
 
     <?php if (isset($_SESSION['success_message'])): ?>

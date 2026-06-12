@@ -32,6 +32,7 @@ function time_ago($datetime) {
 define('BASE_URL', $_ENV['BASE_URL'] ?? 'http://localhost');
 define('ROOT_PATH', __DIR__); // Essential for finding your SSL certificate
 
+
 // 4.1 Define Database Constants (These map to your .env file)
 define('DB_HOST', $_ENV['DB_HOST']);
 define('DB_NAME', $_ENV['DB_NAME']);
@@ -39,7 +40,11 @@ define('DB_USER', $_ENV['DB_USER']);
 define('DB_PASS', $_ENV['DB_PASS']);
 define('DB_CHARSET', 'utf8mb4');
 
-
+// 4.2 Define Azure Blob Storage Constants
+define('AZURE_STORAGE_ACCOUNT_NAME', $_ENV['AZURE_STORAGE_ACCOUNT_NAME'] ?? '');
+define('AZURE_STORAGE_ACCOUNT_KEY', $_ENV['AZURE_STORAGE_ACCOUNT_KEY'] ?? '');
+define('AZURE_STORAGE_CONTAINER', $_ENV['AZURE_STORAGE_CONTAINER'] ?? 'cv-storage');
+define('AZURE_STORAGE_API_VERSION', $_ENV['AZURE_STORAGE_API_VERSION'] ?? '2023-11-03');
 
 // Optional: Error reporting
 error_reporting(E_ALL);

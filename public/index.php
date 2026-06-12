@@ -9,10 +9,8 @@ error_reporting(E_ALL);
 // =========================================================================
 // 2. CORE BOOTSTRAP INITIALIZATION
 // =========================================================================
-// bootstrap.php already handles composer loading and session initialization
 require_once __DIR__ . '/../bootstrap.php';
 
-// Custom autoloader fallback if Composer mapping isn't fully updated yet
 spl_autoload_register(function ($class) {
     $prefix = 'App\\';
     $base_dir = __DIR__ . '/../src/';
@@ -30,7 +28,6 @@ spl_autoload_register(function ($class) {
     }
 });
 
-// Instantiate the centralized routing engine
 $router = new \App\Core\Router();
 
 // =========================================================================
@@ -42,7 +39,6 @@ $router->add('GET',  '/admin',               [\App\Controllers\AdminController::
 $router->add('GET',  '/admin/index.php',     [\App\Controllers\AdminController::class, 'index']);
 $router->add('GET',  '/admin/login',         [\App\Controllers\AdminController::class, 'login']);
 $router->add('POST', '/admin/login',         [\App\Controllers\AdminController::class, 'authenticateAdmin']);
-
 $router->add('GET',  '/admin/logout',        [\App\Controllers\AdminController::class, 'logout']);
 
 // --- Admin Tenant Management Operations ---
@@ -72,6 +68,14 @@ $router->add('GET',  '/jobs/delete',            [\App\Controllers\JobController:
 
 // --- Applicant Tracking System (ATS) Routes ---
 $router->add('GET',  '/applicants',             [\App\Controllers\ApplicantController::class, 'index']);
+$router->add('POST', '/apply',                  [\App\Controllers\ApplicantController::class, 'store']);
+
+// ADD THE NEW ROUTE LINES HERE:
+// Register the Profile details view matching your link patterns
+$router->add('GET', '/applicant/view', [\App\Controllers\ApplicantController::class, 'view']);
+
+// Register the CV secure proxy download handler matching your link patterns
+$router->add('GET', '/applicant/download', [\App\Controllers\ApplicantController::class, 'download']);
 
 // =========================================================================
 // 4. DISPATCH ENGINE RUNTIME EXECUTOR

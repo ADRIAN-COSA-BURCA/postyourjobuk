@@ -50,8 +50,8 @@
                     <td style="padding: 1rem; color: var(--secondary);"><?= htmlspecialchars($applicant['email']) ?></td>
                     <td style="padding: 1rem;"><?= date('M d, Y', strtotime($applicant['applied_at'])) ?></td>
                     <td style="padding: 1rem;">
-                        <a href="/applicant/view/<?= (int)$applicant['applicant_id'] ?>" class="btn btn-primary" style="padding: 0.4rem 0.8rem; font-size: 0.8rem;">👁️ Profile</a>
-                        <a href="/applicant/download/<?= (int)$applicant['applicant_id'] ?>" class="btn btn-secondary" style="padding: 0.4rem 0.8rem; font-size: 0.8rem;">📥 CV</a>
+                        <a href="/applicant/view?id=<?= (int)$applicant['applicant_id'] ?>" class="btn btn-sm">Profile</a>
+                        <a href="/applicant/download?id=<?= (int)$applicant['applicant_id'] ?>" class="btn btn-sm">CV</a>
                     </td>
                 </tr>
                 <?php endforeach; ?>

@@ -65,6 +65,26 @@ class Job extends BaseModel {
         
         return $this->create($data);
     }
+
+    /**
+     * Update a job securely, ensuring it belongs to the tenant.
+     */
+    public function updateJobSecure(int $tenantId, int $jobId, array $data): bool {
+        if (!$this->belongsToTenant($jobId, $tenantId)) {
+            return false;
+        }
+        return $this->update($jobId, $data);
+    }
+
+    /**
+     * Delete a job securely, ensuring it belongs to the tenant.
+     */
+    public function deleteJobSecure(int $tenantId, int $jobId): bool {
+        if (!$this->belongsToTenant($jobId, $tenantId)) {
+            return false;
+        }
+        return $this->delete($jobId);
+    }
     
     public function toggleStatusSecure(int $tenantId, int $jobId): bool {
         $job = $this->find($jobId);
@@ -77,6 +97,11 @@ class Job extends BaseModel {
     }
     
     public function search($keyword, $limit = 20) {
+        $trimmed = trim((string)$keyword);
+        if ($trimmed === '') {
+            return [];
+        }
+
         $cleanLimit = (int)$limit;
         
         $sql = "
@@ -99,10 +124,10 @@ class Job extends BaseModel {
             LIMIT {$cleanLimit}
         ";
         
-        $searchTerm = '%' . $keyword . '%';
+        $searchTerm = '%' . $trimmed . '%';
         $stmt = $this->db->prepare($sql);
         $stmt->execute([$searchTerm, $searchTerm, $searchTerm, $searchTerm]);
-        return $searchTerm ? $stmt->fetchAll() : [];
+        return $stmt->fetchAll();
     }
     
     public function getStats($tenantId) {
@@ -139,7 +164,7 @@ class Job extends BaseModel {
         
         return $result ?: null;
     }
-	
+    
     public function getPostCountLastHour(int $tenantId): int {
         $sql = "SELECT COUNT(*) FROM {$this->table} 
                 WHERE tenant_id = ? 

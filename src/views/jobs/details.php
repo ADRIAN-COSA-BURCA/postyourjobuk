@@ -1,3 +1,19 @@
+
+<?php if (isset($_SESSION['success_message'])): ?>
+    <div style="background-color: #d1fae5; border: 1px solid #10b981; color: #065f46; padding: 1rem; border-radius: var(--radius-sm); margin-bottom: 1.5rem; font-weight: 600;">
+        ✓ <?= e($_SESSION['success_message']) ?>
+        <?php unset($_SESSION['success_message']); // Clear message so it disappears on refresh ?>
+    </div>
+<?php endif; ?>
+
+<?php if (isset($_SESSION['error_message'])): ?>
+    <div style="background-color: #fee2e2; border: 1px solid #ef4444; color: #991b1b; padding: 1rem; border-radius: var(--radius-sm); margin-bottom: 1.5rem; font-weight: 600;">
+        ✕ <?= e($_SESSION['error_message']) ?>
+        <?php unset($_SESSION['error_message']); ?>
+    </div>
+<?php endif; ?>
+
+
 <div class="container" style="max-width: 900px; margin-top: 2rem; margin-bottom: 4rem;">
     
     <div style="margin-bottom: 1.5rem;">
@@ -74,7 +90,7 @@
 
             <div id="upload-option" class="form-group" style="margin-bottom: 2rem;">
                 <label class="form-label">Upload CV (PDF or DOCX format)</label>
-                <input type="file" id="cv" name="cv" class="form-control" accept=".pdf,.docx,.doc">
+                <input type="file" id="cv" name="cv_document" class="form-control" accept=".pdf,.docx,.doc">
             </div>
 
             <div id="text-option" class="form-group" style="display: none; margin-bottom: 2rem;">
@@ -112,7 +128,11 @@
                 });
             </script>
 
-            <button type="submit" class="btn btn-primary" style="width: 100%; padding: 1rem; font-weight: 600;">📤 Submit Application</button>
+            <button type="submit" class="btn btn-primary" 
+        style="width: 100%; padding: 1rem; font-weight: 600;" 
+        onclick="this.disabled=true; this.innerText='Processing...'; this.form.submit();">
+    📤 Submit Application
+</button>
         </form>
     </div>
 </div>

@@ -321,6 +321,70 @@ High-End Display: Updated the Job View interface to use a professional metadata 
 
 
 
+UPDATE:
+You have successfully resolved the routing, authentication, and database persistence layers. 
+Main dasboard index was implemented; job posted by recruiters will populate the main dashboard index where candidates can apply for jobs;
+
+
+
+update:
+hase 1: Core Architecture (COMPLETED)
+Docker Environment: Web server, database, and PHPMyAdmin are fully containerized and communicating.
+
+Routing Engine: The MVC router (index.php, Router.php, BaseController.php) cleanly separates public endpoints from protected recruiter workspaces.
+
+Database & Persistence: The PDO wrapper (Database.php) and BaseModel.php are successfully communicating and resolving IDs.
+
+Authentication & Isolation: Multi-tenant architecture is active. Recruiter sessions are protected, IP/User-Agent hijacking defenses are in place, and users can only see their own company's data.
+
+✅ Phase 2: Job Board & Dashboard (COMPLETED)
+Recruiter UI: The dashboard loads correctly, calculating live metrics (Total Jobs, Active Jobs) based on tenant ID.
+
+Job Creation: The JobController::store method successfully validates data, checks rate limits, sanitizes inputs, and saves jobs to the database.
+
+UI/UX: The dark-mode interface and form contrast issues have been stabilized.
+
+🚧 Phase 3: The Applicant Tracking System (NEXT)
+Build ApplicantController.php: To intercept the "Apply" form submission.
+
+Build StorageService.php: To securely connect to Azure Blob and upload the CV documents (PDF/DOCX).
+
+Build the Candidate Review UI: The /applicants route needs a view for recruiters to download those CVs from Azure and review the candidates.
+
+🚧 Phase 4: Job Management Completion (PENDING)
+Edit & Delete Jobs: We need to build the edit() and delete() methods in JobController.php so recruiters can manage their existing postings.
+
+🚧 Phase 5: Super Admin Portal (PENDING)
+Tenant Management: The /admin routes are mapped, but we need to ensure the admin can suspend or activate corporate tenants to control platform access.
+
+
+
+
+update:
+StorageService.php so it acts as the master switchboard, utilizing the AzureBlobStorage.php worker
+ero Downtime: If your Azure subscription expires or the API goes down, ApplicantController won't crash.
+ StorageService will automatically catch the Azure error, switch to local storage, 
+ save the CV to the Docker container, and the candidate's application will still go through!
+Storage Layer: Your StorageService.php is complete, featuring a primary cloud-first strategy with a reliable local filesystem fallback, now protected against file collisions.
+
+Application Layer: Your ApplicantController.php handles multi-tenant authorization, file validation, and secures the process against BOLA (Broken Object Level Authorization) attacks.
+
+View Layer: Your details.php handles form state and provides a secure user experience.
+
+
+Creating a local fallback in your StorageService.php is a standard enterprise pattern known as Defensive Engineering or Tiered Availability. Even if your production destination is Azure, the local fallback is not "extra" work—it is an insurance policy.
+
+Here is why this is the best architectural choice for your project:
+
+By having a local fallback, you can work on the bus, on a plane, or during an internet outage without breaking your flow. You can test the logic of the upload pipeline without needing cloud infrastructure credentials.
+
+Infrastructure Decoupling (The "Zero-Trust" Benefit):
+
+If you ever need to switch cloud providers (e.g., from Azure to AWS or Google Cloud) or if Azure has a regional outage, your application does not stop working. The code is abstracted via the StorageService, meaning you only have to update the service layer, not every controller in your app.
+
+
+
+
 
 git status
 git add .
@@ -340,6 +404,8 @@ C:\xampp\php_x86\php.exe -S localhost:8000 -t public
 docker exec -it postyourjobuk-db-1 mysql -u root -p -e
 
 
+
+http://localhost:8080/index.php?route=/&db=postyourjobhere
 
 http://localhost:8000
 

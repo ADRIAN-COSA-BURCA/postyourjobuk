@@ -12,8 +12,8 @@ abstract class BaseController {
         $currentPath = rtrim(parse_url($_SERVER['REQUEST_URI'], PHP_URL_PATH), '/');
         if ($currentPath === '') $currentPath = '/';
 
-        // 1. FIXED: Added '/job' to public routes so candidates can view postings
-        $publicRoutes = ['/login', '/login/authenticate', '/', '/index.php', '/job'];
+        // Add the exact route where your form submits (e.g., /applicants/store)
+        $publicRoutes = ['/login', '/login/authenticate', '/', '/index.php', '/job', '/applicants/store', '/apply'];
         $isAdminRoute = str_starts_with($currentPath, '/admin');
 
         if (in_array($currentPath, $publicRoutes) || $isAdminRoute) {
