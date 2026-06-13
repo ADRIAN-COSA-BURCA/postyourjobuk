@@ -12,8 +12,21 @@ abstract class BaseController {
         $currentPath = rtrim(parse_url($_SERVER['REQUEST_URI'], PHP_URL_PATH), '/');
         if ($currentPath === '') $currentPath = '/';
 
-        // Add the exact route where your form submits (e.g., /applicants/store)
-        $publicRoutes = ['/login', '/login/authenticate', '/', '/index.php', '/job', '/applicants/store', '/apply'];
+        // ADDED THE MISSING ROUTES HERE: /about, /contact, /vision, /terms
+        $publicRoutes = [
+            '/login', 
+            '/login/authenticate', 
+            '/', 
+            '/index.php', 
+            '/job', 
+            '/applicants/store', 
+            '/apply',
+            '/about',
+            '/contact',
+            '/vision',
+            '/terms'
+        ];
+        
         $isAdminRoute = str_starts_with($currentPath, '/admin');
 
         if (in_array($currentPath, $publicRoutes) || $isAdminRoute) {
@@ -60,7 +73,6 @@ abstract class BaseController {
         $layoutPath = $containerRoot . '/src/views/layouts/main.php';
         
         if (file_exists($layoutPath)) {
-            // FIXED: Set both variable names to maximize support across your layout pages
             $view_content = $content; 
             require $layoutPath;
         } else {

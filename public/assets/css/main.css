@@ -247,6 +247,13 @@ small { font-size: 0.8rem; color: var(--text-muted); }
     overflow: hidden;
 }
 
+
+
+ /* Card padding trim */
+    .card {
+        padding: 1.25rem;
+    }
+
 /* Subtle top-edge accent line */
 .card::before {
     content: '';
@@ -925,11 +932,7 @@ select {
         font-size: 0.82rem;
     }
 
-    /* Cards */
-    .card {
-        padding: 1.5rem;
-        border-radius: var(--radius-md);
-    }
+    
 
     .login-card-uniform {
         padding: 2rem 1.5rem;
@@ -1023,8 +1026,5 @@ select {
         justify-content: center;
     }
 
-    /* Card padding trim */
-    .card {
-        padding: 1.25rem;
-    }
+   
 }

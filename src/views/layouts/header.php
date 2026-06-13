@@ -22,7 +22,7 @@
             <?php elseif (isset($_SESSION['tenant_id'])): ?>
                 <a href="/dashboard" class="btn btn-secondary">Dashboard</a>
                 <a href="/jobs/create" class="btn btn-primary">Post a Job</a>
-                <a href="/admin/logout" class="btn" style="background:var(--danger); color:white;">Logout</a>
+                <a href="/logout" class="btn" style="background:var(--danger); color:white;">Logout</a>
                 
             <?php else: ?>
                 <a href="/login" class="btn btn-ghost btn-sm" style="color: var(--text-muted); text-decoration: none; font-weight: 500; font-size: 0.9rem;">
@@ -32,7 +32,6 @@
                 <a href="/admin/login" class="btn btn-primary btn-sm" style="font-size: 0.9rem; padding: 0.5rem 1rem;">
                     ⚡ Admin Entry
                 </a>
-                
             <?php endif; ?>
         </nav>
         

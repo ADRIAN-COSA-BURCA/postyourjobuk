@@ -50,6 +50,11 @@ $router->add('POST', '/admin/activate-tenant',  [\App\Controllers\AdminControlle
 $router->add('GET',  '/',                       [\App\Controllers\HomeController::class, 'index']);
 $router->add('GET',  '/index.php',              [\App\Controllers\HomeController::class, 'index']);
 
+$router->add('GET',  '/about',                  [\App\Controllers\HomeController::class, 'about']);
+$router->add('GET',  '/contact',                [\App\Controllers\HomeController::class, 'contact']);
+$router->add('GET',  '/vision',                 [\App\Controllers\HomeController::class, 'vision']);
+$router->add('GET',  '/terms',                  [\App\Controllers\HomeController::class, 'terms']);
+
 // --- Recruiter Authentication Identity Routes ---
 $router->add('GET',  '/login',                  [\App\Controllers\AuthController::class, 'login']);
 $router->add('POST', '/login/authenticate',     [\App\Controllers\AuthController::class, 'authenticate']);
@@ -70,14 +75,43 @@ $router->add('GET',  '/jobs/delete',            [\App\Controllers\JobController:
 $router->add('GET',  '/applicants',             [\App\Controllers\ApplicantController::class, 'index']);
 $router->add('POST', '/apply',                  [\App\Controllers\ApplicantController::class, 'store']);
 
-// ADD THE NEW ROUTE LINES HERE:
-// Register the Profile details view matching your link patterns
-$router->add('GET', '/applicant/view', [\App\Controllers\ApplicantController::class, 'view']);
+// --- Profile View & Secure Access Handlers ---
+$router->add('GET', '/applicant/view',          [\App\Controllers\ApplicantController::class, 'view']);
+$router->add('GET', '/applicant/download',      [\App\Controllers\ApplicantController::class, 'download']);
 
-// Register the CV secure proxy download handler matching your link patterns
-$router->add('GET', '/applicant/download', [\App\Controllers\ApplicantController::class, 'download']);
 
 // =========================================================================
-// 4. DISPATCH ENGINE RUNTIME EXECUTOR
+// 4. CONTEXT-AWARE AUTHENTICATION BYPASS MIDDLEWARE
+// =========================================================================
+// Extract the URI path dynamically to bypass validation rules for non-authenticated public spaces
+$requestUri = parse_url($_SERVER['REQUEST_URI'], PHP_URL_PATH);
+$cleanPath = ($requestUri === '/') ? '/' : rtrim($requestUri, '/');
+
+// Absolute non-guarded routes array whitelist
+$allowedPublicPaths = [
+    '/', 
+    '/index.php', 
+    '/about', 
+    '/contact', 
+    '/vision', 
+    '/terms', 
+    '/login', 
+    '/login/authenticate',
+    '/admin/login',
+    '/apply'
+];
+
+// If no administrative session or tenant identity context exists, guard all paths outside our whitelist
+if (!isset($_SESSION['tenant_id']) && !isset($_SESSION['admin_logged_in'])) {
+    if (!in_array($cleanPath, $allowedPublicPaths)) {
+        // Clear conflicting variables and bounce smoothly to workspace portal
+        header('Location: /login');
+        exit;
+    }
+}
+
+
+// =========================================================================
+// 5. DISPATCH ENGINE RUNTIME EXECUTOR
 // =========================================================================
 $router->dispatch($_SERVER['REQUEST_URI'], $_SERVER['REQUEST_METHOD']);

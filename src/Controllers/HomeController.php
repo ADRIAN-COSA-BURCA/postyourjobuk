@@ -29,4 +29,40 @@ class HomeController extends BaseController {
             'errorMessage'   => $errorMessage
         ]);
     }
+	
+	/**
+     * Renders the About Us informational layout
+     */
+    public function about() {
+        $this->render('home/about', [
+            'title' => 'About Our Platform'
+        ]);
+    }
+
+    /**
+     * Renders the Interactive Contact Form area
+     */
+    public function contact() {
+        $this->render('home/contact', [
+            'title' => 'Get In Touch'
+        ]);
+    }
+
+    /**
+     * Renders the Company Vision roadmap blueprint
+     */
+    public function vision() {
+        $this->render('home/vision', [
+            'title' => 'Our Company Vision'
+        ]);
+    }
+
+    /**
+     * Renders the Terms of Service document
+     */
+    public function terms() {
+        $this->render('home/terms', [
+            'title' => 'Terms of Service & Data Policies'
+        ]);
+    }
 }
