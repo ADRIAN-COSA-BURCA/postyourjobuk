@@ -1,9 +1,21 @@
 services:
   web:
     build: .
+    container_name: postyourjobuk-web-1
     ports:
       - "8000:80"
     volumes:
       - .:/var/www/html
+    env_file:
+      - .env
+
+  ai-worker:
+    build:
+      context: .
+      dockerfile: Dockerfile.worker
+    container_name: postyourjobuk-ai-worker-1
+    restart: always
+    volumes:
+      - .:/app
     env_file:
       - .env

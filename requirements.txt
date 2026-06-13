@@ -1,0 +1,7 @@
+mysql-connector-python
+google-genai
+PyPDF2
+python-docx
+azure-storage-queue
+azure-storage-blob
+python-dotenv

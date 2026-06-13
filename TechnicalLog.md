@@ -414,7 +414,14 @@ local AI INTEGRATION - gemini-2.5-flash
 - **File System Stability:** Relocated temp file unlinking operations down to the thread execution execution context blocks to guarantee I/O data sequence integrity.
 
 
-
+update:
+Infrastructure Containerization & Portability Integration
+- **Decoupled Python Worker Service:** Migrated the background queue processor out of the Windows host environment,
+ and into a dedicated, isolated Docker container (`postyourjobuk-ai-worker-1`).
+- **Multi-Container Architecture:** Updated `docker-compose.yml` to orchestrate both the PHP web server 
+and the Python background daemon simultaneously, using shared environmental credentials (`.env`) and volume mappings.
+- **Environment Isolation:** Standardized system runtime requirements via a dedicated `Dockerfile.worker` and `requirements.txt`, 
+making the entire application 100% portable across any machine running Docker without requiring local language installations.
 
 
 
