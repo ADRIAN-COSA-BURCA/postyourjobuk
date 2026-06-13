@@ -30,11 +30,13 @@
         </div>
     </div>
 
-    <div class="card" style="border: 1px solid var(--danger);">
+    <div class="card" style="border: 1px solid var(--danger); margin-top: 2rem;">
         <h2 style="color: var(--danger);">Infrastructure Gateway Governance</h2>
-        <p>This action will <?= $tenant['status'] === 'active' ? 'suspend' : 'restore' ?> routing authorization.</p>
+        <p>This action will <?= $tenant['status'] === 'active' ? 'suspend' : 'restore' ?> routing authorization for this workspace node.</p>
         
-        <form action="/admin/<?= $tenant['status'] === 'active' ? 'suspend' : 'activate' ?>-tenant?id=<?= $tenant['tenant_id']; ?>" method="POST" class="flex-between" style="max-width: 500px;">
+        <form action="/admin/<?= $tenant['status'] === 'active' ? 'suspend' : 'activate' ?>-tenant?id=<?= $tenant['tenant_id']; ?>" method="POST" class="flex-between" style="max-width: 500px; margin-top: 1rem;">
+            <input type="hidden" name="csrf_token" value="<?= htmlspecialchars($_SESSION['csrf_token'] ?? ''); ?>">
+            
             <input type="password" name="password" placeholder="Confirm Admin Password" required class="form-input">
             <button type="submit" class="btn" style="background: var(--danger); color: white; margin-left: 1rem;">
                 <?= $tenant['status'] === 'active' ? 'Suspend Node' : 'Restore Access' ?>

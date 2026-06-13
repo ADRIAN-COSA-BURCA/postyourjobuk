@@ -21,7 +21,7 @@
                 <?= (int)$stats['total_applicants'] ?>
             </div>
         </div>
-        </div>
+    </div>
     <?php endif; ?>
 
     <div class="card">
@@ -41,14 +41,21 @@
                     <td style="padding: 1rem; font-weight: bold; color: var(--success);">
                         <?= (int)$applicant['ai_score'] ?>%
                     </td>
-                    <td style="padding: 1rem;">
-                        <strong><?= htmlspecialchars($applicant['name']) ?></strong>
+                    <td style="padding: 1rem; max-width: 400px; vertical-align: top;">
+                        <strong style="display: block; font-size: 1.05rem; margin-bottom: 0.25rem; color: var(--text);"><?= htmlspecialchars($applicant['name']) ?></strong>
+                        
                         <?php if (!empty($applicant['ai_summary'])): ?>
-                            <br><small style="color: var(--muted);"><?= htmlspecialchars($applicant['ai_summary']) ?></small>
+                            <?php 
+                                // Strip out the HTML structure tags to show a clean inline preview string
+                                $clean_summary_preview = strip_tags($applicant['ai_summary']); 
+                            ?>
+                            <p style="color: var(--text-muted); font-size: 0.85rem; margin: 0; line-height: 1.4; display: -webkit-box; -webkit-line-clamp: 2; -webkit-box-orient: vertical; overflow: hidden; text-overflow: ellipsis;" title="<?= htmlspecialchars($clean_summary_preview) ?>">
+                                <?= htmlspecialchars($clean_summary_preview) ?>
+                            </p>
                         <?php endif; ?>
                     </td>
                     <td style="padding: 1rem; color: var(--secondary);"><?= htmlspecialchars($applicant['email']) ?></td>
-                    <td style="padding: 1rem;"><?= date('M d, Y', strtotime($applicant['applied_at'])) ?></td>
+                    <td style="padding: 1rem;"><?= date('M d, Y', strtotime($applicant['applied_at'] ?? 'now')) ?></td>
                     <td style="padding: 1rem;">
                         <a href="/applicant/view?id=<?= (int)$applicant['applicant_id'] ?>" class="btn btn-sm">Profile</a>
                         <a href="/applicant/download?id=<?= (int)$applicant['applicant_id'] ?>" class="btn btn-sm">CV</a>

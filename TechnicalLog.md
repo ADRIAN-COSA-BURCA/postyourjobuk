@@ -367,7 +367,8 @@ ero Downtime: If your Azure subscription expires or the API goes down, Applicant
  save the CV to the Docker container, and the candidate's application will still go through!
 Storage Layer: Your StorageService.php is complete, featuring a primary cloud-first strategy with a reliable local filesystem fallback, now protected against file collisions.
 
-Application Layer: Your ApplicantController.php handles multi-tenant authorization, file validation, and secures the process against BOLA (Broken Object Level Authorization) attacks.
+Application Layer: Your ApplicantController.php handles multi-tenant authorization, 
+file validation, and secures the process against BOLA (Broken Object Level Authorization) attacks.
 
 View Layer: Your details.php handles form state and provides a secure user experience.
 
@@ -376,11 +377,42 @@ Creating a local fallback in your StorageService.php is a standard enterprise pa
 
 Here is why this is the best architectural choice for your project:
 
-By having a local fallback, you can work on the bus, on a plane, or during an internet outage without breaking your flow. You can test the logic of the upload pipeline without needing cloud infrastructure credentials.
+By having a local fallback, you can work on the bus, on a plane, or during an internet outage without breaking your flow. 
+You can test the logic of the upload pipeline without needing cloud infrastructure credentials.
 
 Infrastructure Decoupling (The "Zero-Trust" Benefit):
 
-If you ever need to switch cloud providers (e.g., from Azure to AWS or Google Cloud) or if Azure has a regional outage, your application does not stop working. The code is abstracted via the StorageService, meaning you only have to update the service layer, not every controller in your app.
+If you ever need to switch cloud providers (e.g., from Azure to AWS or Google Cloud) 
+or if Azure has a regional outage, your application does not stop working. 
+The code is abstracted via the StorageService, meaning you only have to update the service layer,
+ not every controller in your app.
+
+
+
+UPDATE
+Synchronized the global navigation layout with your existing framework route configuration.
+ The Recruiter Portal now links directly to the independent /login endpoint managed by the AuthController, 
+ while Admin Entry correctly targets /admin/login managed by the AdminController
+Completely refactored footer.php; 
+more features added to main dashboard index;
+
+
+update:
+core environment database and storage is completely migrated, stable, and working with Azure,
+
+
+update:
+Recruiter Engine & Security Hardening
+local AI INTEGRATION - gemini-2.5-flash
+
+🤖 AI Recruiter Evaluation Refactoring
+- **Structured Scannability Migration:** Updated the `worker.py` processing pipeline engine to enforce strict JSON schemas via the Google GenAI SDK typing configurations.
+- **Recruiter UI Formatting Optimization:** Shifted the generic `gemini-2.5-flash` text block payload into targeted, actionable candidate evaluation blocks (`<h3>`, `<ul>`, `<li>`):
+  1. 🌟 Core Strengths & Experience
+  2. ⚠️ Key Gaps & Weak points
+  3. 🎯 Structural Fit Assessment
+- **File System Stability:** Relocated temp file unlinking operations down to the thread execution execution context blocks to guarantee I/O data sequence integrity.
+
 
 
 
@@ -394,6 +426,8 @@ git push origin main
 
 
 docker compose down
+docker compose down --remove-orphans
+docker network prune -f
 docker compose up --build -d
 docker compose up -d
 
@@ -421,7 +455,9 @@ ADMIN_PASSWORD_HASH= password
 
 
 
+cd C:\dev\postyourjobuk
 
+"C:\Users\adita\AppData\Local\Programs\Python\Python313\python.exe" src/BackgroundWorkers/worker.py
 
 
 

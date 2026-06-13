@@ -30,6 +30,7 @@ class ComposerStaticInite875ae8441d070d7dda5f4b47a2117aa
         ),
         'M' =>
         array (
+            'MicrosoftAzure\\Storage\\Queue\\' => 29,
             'MicrosoftAzure\\Storage\\Common\\' => 30,
             'MicrosoftAzure\\Storage\\Blob\\' => 28,
         ),
@@ -71,6 +72,10 @@ class ComposerStaticInite875ae8441d070d7dda5f4b47a2117aa
         'PhpOption\\' =>
         array (
             0 => __DIR__ . '/..' . '/phpoption/phpoption/src/PhpOption',
+        ),
+        'MicrosoftAzure\\Storage\\Queue\\' =>
+        array (
+            0 => __DIR__ . '/..' . '/microsoft/azure-storage-queue/src/Queue',
         ),
         'MicrosoftAzure\\Storage\\Common\\' =>
         array (

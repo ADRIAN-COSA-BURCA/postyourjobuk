@@ -81,8 +81,8 @@ class ApplicantController extends BaseController {
                 "Unauthorized profile inspection blocked for Applicant ID: $applicantId"
             );
             $_SESSION['error_message'] = "Access denied. The profile requested does not exist in your workspace.";
-            Helpers::redirect('/portal/dashboard.php');
-            return;
+			Helpers::redirect('/dashboard');
+			return;
         }
 
         // 3. Fetch associated job information for UI breadcrumbs & layout context
@@ -96,7 +96,7 @@ class ApplicantController extends BaseController {
         ]);
     }
 	
-    /**
+       /**
      * PUBLIC: Candidate submits an application form
      * Route: /applicants/store
      */
@@ -155,13 +155,25 @@ class ApplicantController extends BaseController {
             'cv_filename'     => $originalFilename,
             'status'          => 'new'
         ];
-		
-		
 
-        // 4. Save to Model
+        // 4. Save to Model and Dispatch to Asynchronous AI Queue
         try {
             $applicantModel = new Applicant();
-            $applicantModel->create($data); // Using the BaseModel's standard create method
+            
+            // Perform record creation
+            $newApplicantId = $applicantModel->create($data); 
+
+            // If your BaseModel's create() returns the last inserted ID, use it.
+            // If it returns a boolean, extract it via PDO wrapper directly:
+            if (!$newApplicantId || is_bool($newApplicantId)) {
+                $newApplicantId = (int)$applicantModel->getDbConnection()->lastInsertId();
+            }
+
+            // Fire-and-Forget Asynchronous Handshake dispatch to background infrastructure
+            if ($newApplicantId > 0) {
+                $queueService = new \App\Services\AzureQueueService();
+                $queueService->dispatchJob($newApplicantId);
+            }
             
             $_SESSION['success_message'] = 'Your application has been submitted successfully!';
             Helpers::redirect('/job?id=' . $jobId);

@@ -73,6 +73,15 @@
             'aliases' => array(),
             'dev_requirement' => false,
         ),
+        'microsoft/azure-storage-queue' => array(
+            'pretty_version' => '1.3.4',
+            'version' => '1.3.4.0',
+            'reference' => '750974f7a888bb7a93cacb873b3280c45e970a23',
+            'type' => 'library',
+            'install_path' => __DIR__ . '/../microsoft/azure-storage-queue',
+            'aliases' => array(),
+            'dev_requirement' => false,
+        ),
         'phpoption/phpoption' => array(
             'pretty_version' => '1.9.5',
             'version' => '1.9.5.0',
