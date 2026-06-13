@@ -10,7 +10,7 @@ class Database {
     private $connection;
 
     private function __construct() {
-        // We use constants that we will define in bootstrap.php
+        // Keeps your existing constant mapping
         $dsn = "mysql:host=" . DB_HOST . ";dbname=" . DB_NAME . ";charset=" . DB_CHARSET;
         
         $options = [
@@ -19,8 +19,8 @@ class Database {
             PDO::ATTR_EMULATE_PREPARES   => false,
         ];
 
-        // ONLY enforce SSL if we are NOT on local Docker development
-        if (defined('DB_HOST') && DB_HOST !== 'db' && ($_ENV['APP_ENV'] ?? '') !== 'development') {
+        // UPDATED: Enforce SSL whenever connecting to your cloud Azure host URL
+        if (defined('DB_HOST') && str_contains(DB_HOST, 'database.azure.com')) {
             $options[PDO::MYSQL_ATTR_SSL_CA] = ROOT_PATH . DIRECTORY_SEPARATOR . 'DigiCertGlobalRootG2.crt.pem';
             $options[PDO::MYSQL_ATTR_SSL_VERIFY_SERVER_CERT] = true;
         }
@@ -33,7 +33,7 @@ class Database {
         }
     }
 
-    // 1. Singleton Instance
+    // Retain all your existing singleton, query, and fetch helper methods exactly as they are below...
     public static function getInstance() {
         if (self::$instance === null) {
             self::$instance = new self();
@@ -41,14 +41,12 @@ class Database {
         return self::$instance; 
     }
 
-    // 2. Query helper
     public function query($sql, $params = []) {
         $stmt = $this->connection->prepare($sql);
         $stmt->execute($params);
         return $stmt;
     }
 
-    // 3. Data fetch methods
     public function fetchOne($sql, $params = []) {
         return $this->query($sql, $params)->fetch();
     }
@@ -61,7 +59,6 @@ class Database {
         return $this->query($sql, $params)->fetchColumn();
     }
 
-    // 4. Required for BaseModel integration
     public function lastInsertId() {
         return $this->connection->lastInsertId();
     }
@@ -70,7 +67,6 @@ class Database {
         return $this->connection->prepare($sql);
     }
 
-    // Prevent cloning and unserialization
     private function __clone() {}
     
     public function __wakeup() {
