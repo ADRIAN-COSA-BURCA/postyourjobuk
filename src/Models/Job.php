@@ -150,20 +150,27 @@ class Job extends BaseModel {
     /**
      * Get a single job by ID with its associated tenant details.
      */
-    public function getJobWithTenant(int $jobId): ?array {
-        $sql = "
-            SELECT j.*, t.company_name, t.logo_url
-            FROM {$this->table} j
-            INNER JOIN tenants t ON j.tenant_id = t.tenant_id
-            WHERE j.job_id = ?
-        ";
-        
-        $stmt = $this->db->prepare($sql);
-        $stmt->execute([$jobId]);
-        $result = $stmt->fetch();
-        
-        return $result ?: null;
-    }
+    public function getJobWithTenant(int $jobId) {
+    // We update the SELECT clause to pull all the new profile fields from 't' (tenants)
+    $sql = "
+        SELECT 
+            j.*, 
+            t.company_name, 
+            t.contact_person, 
+            t.email as company_email, 
+            t.phone_number, 
+            t.website_url, 
+            t.industry, 
+            t.company_address 
+        FROM jobs j
+        JOIN tenants t ON j.tenant_id = t.tenant_id
+        WHERE j.job_id = ?
+    ";
+    
+    $stmt = $this->db->prepare($sql);
+    $stmt->execute([$jobId]);
+    return $stmt->fetch();
+}
     
     public function getPostCountLastHour(int $tenantId): int {
         $sql = "SELECT COUNT(*) FROM {$this->table} 

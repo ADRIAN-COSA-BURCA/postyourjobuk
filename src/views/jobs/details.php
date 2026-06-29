@@ -1,4 +1,3 @@
-
 <?php if (isset($_SESSION['success_message'])): ?>
     <div style="background-color: #d1fae5; border: 1px solid #10b981; color: #065f46; padding: 1rem; border-radius: var(--radius-sm); margin-bottom: 1.5rem; font-weight: 600;">
         ✓ <?= e($_SESSION['success_message']) ?>
@@ -42,7 +41,35 @@
             <div>💷 <strong style="color: var(--text);">Salary:</strong> <?= e($job['salary'] ?? 'Competitive') ?></div>
             <div>📅 <strong style="color: var(--text);">Posted:</strong> <?= time_ago($job['created_at']) ?></div>
         </div>
-    </div>
+
+        <div style="margin-top: 2.5rem; background: var(--bg); border-radius: var(--radius-sm); padding: 1.5rem; border-left: 4px solid var(--primary); border-top: 1px solid var(--border); border-right: 1px solid var(--border); border-bottom: 1px solid var(--border);">
+            <h3 style="margin-top: 0; margin-bottom: 1.25rem; font-family: 'Outfit', sans-serif; font-size: 1.2rem;">About the Employer</h3>
+            
+            <div style="display: grid; grid-template-columns: repeat(auto-fit, minmax(200px, 1fr)); gap: 1.5rem; font-size: 0.95rem; margin-bottom: 1rem;">
+                <div>
+                    <strong style="color: var(--text); display: block; margin-bottom: 0.25rem;">Industry</strong>
+                    <span style="color: var(--text-muted);"><?= e($job['industry'] ?? 'Not Specified') ?></span>
+                </div>
+                <div>
+                    <strong style="color: var(--text); display: block; margin-bottom: 0.25rem;">Contact Person</strong>
+                    <span style="color: var(--text-muted);"><?= e($job['contact_person'] ?? 'Hiring Manager') ?></span>
+                </div>
+                <?php if (!empty($job['website_url'])): ?>
+                <div>
+                    <strong style="color: var(--text); display: block; margin-bottom: 0.25rem;">Website</strong>
+                    <a href="<?= e($job['website_url']) ?>" target="_blank" style="color: var(--primary); font-weight: 600; text-decoration: none;">Visit Company Site ↗</a>
+                </div>
+                <?php endif; ?>
+            </div>
+            
+            <?php if (!empty($job['company_address'])): ?>
+            <div style="font-size: 0.95rem; margin-top: 0.5rem;">
+                <strong style="color: var(--text); display: block; margin-bottom: 0.25rem;">Headquarters</strong>
+                <span style="color: var(--text-muted);"><?= nl2br(e($job['company_address'])) ?></span>
+            </div>
+            <?php endif; ?>
+        </div>
+        </div>
 
     <div class="card" style="padding: 2rem; margin-bottom: 2rem;">
         <h2 style="margin-bottom: 1rem; border-bottom: 1px solid var(--border); padding-bottom: 0.5rem; font-family: 'Outfit', sans-serif;">Job Description</h2>

@@ -1,5 +1,42 @@
 <div class="dashboard-container dashboard-flow">
-    <h1>Welcome to your Dashboard</h1>
+    <div class="card" style="margin-bottom: 2rem; border-top: 4px solid #4f46e5; background: #111827; border: 1px solid #374151;">
+        <h1 style="margin-bottom: 0.5rem; color: #ffffff;">Welcome, <?= htmlspecialchars($tenant['company_name'] ?? 'Recruiter') ?></h1>
+        <p class="text-muted" style="margin-bottom: 1.5rem; color: #94a3b8;">Your Corporate Profile Dashboard</p>
+        
+        <div style="display: grid; grid-template-columns: repeat(auto-fit, minmax(200px, 1fr)); gap: 1rem; background: #1f2937; padding: 1.5rem; border-radius: 8px; border: 1px solid #374151;">
+            <div>
+                <span style="display: block; font-size: 0.875rem; color: #94a3b8; margin-bottom: 0.25rem;">Industry</span>
+                <strong style="color: #ffffff;"><?= htmlspecialchars($tenant['industry'] ?? 'Not Specified') ?></strong>
+            </div>
+            <div>
+                <span style="display: block; font-size: 0.875rem; color: #94a3b8; margin-bottom: 0.25rem;">Contact Person</span>
+                <strong style="color: #ffffff;"><?= htmlspecialchars($tenant['contact_person'] ?? 'Not Specified') ?></strong>
+            </div>
+            <div>
+                <span style="display: block; font-size: 0.875rem; color: #94a3b8; margin-bottom: 0.25rem;">Email Address</span>
+                <strong style="color: #ffffff;"><?= htmlspecialchars($tenant['email'] ?? 'Not Specified') ?></strong>
+            </div>
+            <div>
+                <span style="display: block; font-size: 0.875rem; color: #94a3b8; margin-bottom: 0.25rem;">Phone Number</span>
+                <strong style="color: #ffffff;"><?= htmlspecialchars($tenant['phone_number'] ?? 'Not Specified') ?></strong>
+            </div>
+            <div>
+                <span style="display: block; font-size: 0.875rem; color: #94a3b8; margin-bottom: 0.25rem;">Website</span>
+                <?php if (!empty($tenant['website_url'])): ?>
+                    <a href="<?= htmlspecialchars($tenant['website_url']) ?>" target="_blank" style="color: #6366f1; font-weight: 600; text-decoration: none;">Visit Site ↗</a>
+                <?php else: ?>
+                    <strong style="color: #ffffff;">Not Specified</strong>
+                <?php endif; ?>
+            </div>
+        </div>
+        
+        <?php if (!empty($tenant['company_address'])): ?>
+        <div style="margin-top: 1.5rem; padding: 0 0.5rem;">
+            <span style="display: block; font-size: 0.875rem; color: #94a3b8; margin-bottom: 0.25rem;">Headquarters / Address</span>
+            <p style="margin: 0; font-size: 0.95rem; color: #ffffff;"><?= nl2br(htmlspecialchars($tenant['company_address'])) ?></p>
+        </div>
+        <?php endif; ?>
+    </div>
 
     <?php if (isset($_SESSION['success_message'])): ?>
         <div class="alert alert-success">✅ <?= htmlspecialchars($_SESSION['success_message']) ?></div>
@@ -46,14 +83,13 @@
                 <tbody>
                     <?php if (empty($jobs)): ?>
                         <tr>
-                            <td colspan="5" style="text-align: center; color: #d7dae0; padding: 2rem;">
+                            <td colspan="5" style="text-align: center; color: #6b7280; padding: 2rem;">
                                 No job postings detected inside this corporate tenant workspace.
                             </td>
                         </tr>
                     <?php else: ?>
                         <?php foreach ($jobs as $job): ?>
                             <?php 
-                                // Map semantic conditional statuses to CSS flags cleanly
                                 $statusStr = strtolower($job['status']);
                                 $statusClass = ($statusStr === 'active') ? 'badge-success' : 'badge-muted';
                             ?>
@@ -69,20 +105,14 @@
                                 <td>
                                     <strong style="color: #4f46e5;"><?= (int)$job['applicant_count'] ?></strong> applicants
                                 </td>
-                                <td style="color: #6b7280; font-size: 0.875rem;">
+                                <td style="color: #9ca3af; font-size: 0.875rem;">
                                     <?= function_exists('time_ago') ? time_ago($job['created_at']) : htmlspecialchars($job['created_at']) ?>
                                 </td>
                                 <td>
                                     <div class="dashboard-action-links" style="display: flex; gap: 0.75rem;">
-                                        <a href="/applicants?job_id=<?= (int)$job['job_id'] ?>" class="btn btn-sm btn-ghost" style="color: #2563eb;">
-                                            👥 Applicants
-                                        </a>
-                                        <a href="/jobs/edit?id=<?= (int)$job['job_id'] ?>" class="btn btn-sm btn-ghost" style="color: #16a34a;">
-                                            ✏️ Edit
-                                        </a>
-                                        <a href="/jobs/delete?id=<?= (int)$job['job_id'] ?>" class="btn btn-sm btn-ghost" style="color: #dc2626;" onclick="return confirm('Are you sure you want to delete this job posting? This will permanently wipe all associated applicants and evaluation data.');">
-                                            🗑️ Delete
-                                        </a>
+                                        <a href="/applicants?job_id=<?= (int)$job['job_id'] ?>" class="btn btn-sm btn-ghost" style="color: #3b82f6;">👥 Applicants</a>
+                                        <a href="/jobs/edit?id=<?= (int)$job['job_id'] ?>" class="btn btn-sm btn-ghost" style="color: #10b981;">✏️ Edit</a>
+                                        <a href="/jobs/delete?id=<?= (int)$job['job_id'] ?>" class="btn btn-sm btn-ghost" style="color: #ef4444;" onclick="return confirm('Are you sure you want to delete this job posting?');">🗑️ Delete</a>
                                     </div>
                                 </td>
                             </tr>
