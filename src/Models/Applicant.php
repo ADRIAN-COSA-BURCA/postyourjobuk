@@ -29,6 +29,41 @@ class Applicant extends BaseModel {
             $data['ai_score'] = null;
         }
     }
+	
+	/**
+     * Securely deletes an applicant and returns their CV storage path
+     */
+    public function deleteSecure(int $tenantId, int $applicantId): ?string {
+        // First, fetch the storage path, ensuring the tenant actually owns this record
+        $sql = "SELECT cv_storage_path FROM {$this->table} WHERE applicant_id = ? AND tenant_id = ?";
+        $path = $this->db->fetchColumn($sql, [$applicantId, $tenantId]);
+
+        // If the query returns a string (even an empty one), the tenant is authorized
+        if ($path !== false) {
+            $deleteSql = "DELETE FROM {$this->table} WHERE applicant_id = ? AND tenant_id = ?";
+            $this->db->query($deleteSql, [$applicantId, $tenantId]);
+            return (string)$path;
+        }
+        
+        return null; // Unauthorized or record not found
+    }
+	
+	
+	/**
+     * Securely deletes ALL applicants for a specific job and returns their CV paths
+     */
+    public function deleteAllForJobSecure(int $tenantId, int $jobId): array {
+        // 1. Fetch all storage paths first so we know what to wipe from the cloud
+        $sql = "SELECT cv_storage_path FROM {$this->table} WHERE tenant_id = ? AND job_id = ?";
+        $paths = $this->db->fetchAll($sql, [$tenantId, $jobId]);
+        
+        // 2. Wipe the database records
+        $deleteSql = "DELETE FROM {$this->table} WHERE tenant_id = ? AND job_id = ?";
+        $this->db->query($deleteSql, [$tenantId, $jobId]);
+        
+        // 3. Flatten the array to just return a simple list of path strings
+        return array_column($paths, 'cv_storage_path');
+    }
 
     public function getJobApplicants(int $tenantId, int $jobId, string $sortBy = 'ai_score', string $order = 'DESC'): array {
         // Validate sort column to prevent SQL injection in the ORDER BY clause

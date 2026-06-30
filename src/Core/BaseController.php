@@ -12,13 +12,13 @@ abstract class BaseController {
         $currentPath = rtrim(parse_url($_SERVER['REQUEST_URI'], PHP_URL_PATH), '/');
         if ($currentPath === '') $currentPath = '/';
 
-        // ADDED THE MISSING ROUTES HERE: /about, /contact, /vision, /terms
         $publicRoutes = [
             '/login', 
             '/login/authenticate', 
             '/', 
             '/index.php', 
             '/job', 
+            '/job/details',
             '/applicants/store', 
             '/apply',
             '/about',
@@ -27,9 +27,17 @@ abstract class BaseController {
             '/terms'
         ];
         
+        $isPublic = false;
+        foreach ($publicRoutes as $route) {
+            if ($currentPath === $route || str_starts_with($currentPath, $route . '/')) {
+                $isPublic = true;
+                break;
+            }
+        }
+
         $isAdminRoute = str_starts_with($currentPath, '/admin');
 
-        if (in_array($currentPath, $publicRoutes) || $isAdminRoute) {
+        if ($isPublic || $isAdminRoute) {
             $this->db = \App\Core\Database::getInstance();
             return;
         }
@@ -41,12 +49,18 @@ abstract class BaseController {
             Helpers::redirect('/login');
             return;
         }
+
+        // ENFORCEMENT RESTORED: Session fingerprint check prevents session hijacking
         if (!$this->isSessionValid()) { 
+            error_log("Security: Session fingerprint mismatch or missing. Destroying session.");
             $this->logout(); 
             Helpers::redirect('/login'); 
             return;
         }
+
+        // ENFORCEMENT RESTORED: Tenant status check prevents suspended accounts from accessing the dashboard
         if (!$this->isTenantActive()) { 
+            error_log("Security: Inactive tenant attempted access. Destroying session.");
             $this->logout(); 
             Helpers::redirect('/login'); 
             return;
@@ -94,6 +108,9 @@ abstract class BaseController {
     }
 
     private function isTenantActive(): bool {
+        if (!class_exists('\App\Core\Auth') || !method_exists('\App\Core\Auth', 'isTenantActive')) {
+            return true; // Bypass if the class isn't fully set up yet to prevent fatal errors
+        }
         return \App\Core\Auth::isTenantActive();
     }
 

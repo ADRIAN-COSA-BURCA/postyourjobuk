@@ -14,27 +14,24 @@ class Admin {
      * Fetch central system diagnostics and counters using native PDO
      */
     public function getSystemStats(): array {
-        try {
-            // Count total active tenants/workspaces
-            $tenantStmt = $this->db->query("SELECT COUNT(*) FROM tenants WHERE is_super_admin = 0");
-            $totalTenants = (int)$tenantStmt->fetchColumn();
+    try {
+        // Count total non-admin tenants
+        $totalStmt = $this->db->query("SELECT COUNT(*) FROM tenants WHERE is_super_admin = 0");
+        $totalTenants = (int)$totalStmt->fetchColumn();
 
-            // Count total jobs listed globally across all tenants
-            $jobStmt = $this->db->query("SELECT COUNT(*) FROM jobs");
-            $totalJobs = (int)$jobStmt->fetchColumn();
+        // Count ONLY active tenants
+        $activeStmt = $this->db->query("SELECT COUNT(*) FROM tenants WHERE is_super_admin = 0 AND status = 'active'");
+        $activeTenants = (int)$activeStmt->fetchColumn();
 
-            // Count total applicants across all job posts
-            $applicantStmt = $this->db->query("SELECT COUNT(*) FROM applicants");
-            $totalApplicants = (int)$applicantStmt->fetchColumn();
+        $jobStmt = $this->db->query("SELECT COUNT(*) FROM jobs");
+        $totalJobs = (int)$jobStmt->fetchColumn();
 
-            return [
-                'total_tenants'    => $totalTenants,
-                'active_tenants'   => $totalTenants, // Added to fix the dashboard view lookup warning
-                'total_jobs'       => $totalJobs,
-                'total_applicants' => $totalApplicants
-            ];
-
-        } catch (\PDOException $e) {
+        return [
+            'total_tenants'    => $totalTenants,
+            'active_tenants'   => $activeTenants, // Now correctly reflects the DB
+            'total_jobs'       => $totalJobs
+        ];
+    } catch (\PDOException $e) {
             error_log("Admin Model Stats Failure: " . $e->getMessage());
             return [
                 'total_tenants'    => 0,

@@ -243,6 +243,97 @@ class ApplicantController extends BaseController {
 
         die('Invalid storage path format.');
     }
+	
+	
+	/**
+     * PROTECTED: Recruiter deletes a single applicant
+     * Route: /applicant/delete (POST)
+     */
+    public function delete() {
+        if (!isset($_POST['csrf_token']) || !Helpers::csrf_verify($_POST['csrf_token'])) {
+            SecurityLogger::logAlert("CSRF_DELETE_VIOLATION", $_SESSION['tenant_id'] ?? 0, "Unauthorized applicant deletion attempt.");
+            die("Security Token Mismatch.");
+        }
+
+        $applicantId = isset($_POST['applicant_id']) ? (int)$_POST['applicant_id'] : 0;
+        $jobId = isset($_POST['job_id']) ? (int)$_POST['job_id'] : 0; // Used to redirect back to the correct job list
+        $tenantId = (int)$_SESSION['tenant_id'];
+
+        $applicantModel = new Applicant();
+        
+        // This securely drops the DB row AND gives us the file path back
+        $storagePath = $applicantModel->deleteSecure($tenantId, $applicantId);
+
+        if ($storagePath !== null) {
+            // If there's an actual file path, wipe it from Azure or Local Volume
+            if (!empty($storagePath)) {
+                try {
+                    $storageService = new StorageService();
+                    $storageService->delete($storagePath);
+                } catch (\Exception $e) {
+                    error_log("Azure/Local CV Deletion error on applicant ID $applicantId: " . $e->getMessage());
+                }
+            }
+            
+            SecurityLogger::logAlert("APPLICANT_RECORD_DELETED", $tenantId, "Applicant deleted (ID: $applicantId).");
+            $_SESSION['success_message'] = 'Candidate and associated CV have been permanently deleted.';
+        } else {
+            SecurityLogger::logAlert("UNAUTHORIZED_DELETE_ATTEMPT", $tenantId, "Attempted deletion on unauthorized applicant ID: $applicantId");
+            $_SESSION['error_message'] = 'Deletion failed: Access denied or applicant missing.';
+        }
+
+        Helpers::redirect('/applicants?job_id=' . $jobId);
+    }
+	
+	
+	/**
+     * PROTECTED: Recruiter deletes ALL applicants for a specific job
+     * Route: /applicant/delete-all (POST)
+     */
+    public function deleteAll() {
+        if (!isset($_POST['csrf_token']) || !Helpers::csrf_verify($_POST['csrf_token'])) {
+            SecurityLogger::logAlert("CSRF_MASS_DELETE_VIOLATION", $_SESSION['tenant_id'] ?? 0, "Unauthorized mass deletion attempt.");
+            die("Security Token Mismatch.");
+        }
+
+        $jobId = isset($_POST['job_id']) ? (int)$_POST['job_id'] : 0;
+        $tenantId = (int)$_SESSION['tenant_id'];
+
+        $jobModel = new Job();
+        $applicantModel = new Applicant();
+
+        // 1. Verify the tenant actually owns this job before doing a mass wipe
+        if (!$jobModel->belongsToTenant($jobId, $tenantId)) {
+            SecurityLogger::logAlert("UNAUTHORIZED_MASS_DELETE", $tenantId, "Attempted mass delete on unowned job ID: $jobId");
+            $_SESSION['error_message'] = 'Unauthorized action.';
+            Helpers::redirect('/dashboard');
+            return;
+        }
+
+        // 2. Wipe database rows and get the list of cloud files
+        $storagePaths = $applicantModel->deleteAllForJobSecure($tenantId, $jobId);
+
+        // 3. Loop through and wipe the files from Azure / Local Storage
+        if (!empty($storagePaths)) {
+            $storageService = new StorageService();
+            $deletedCount = 0;
+            
+            foreach ($storagePaths as $path) {
+                if (!empty($path)) {
+                    try {
+                        $storageService->delete($path);
+                        $deletedCount++;
+                    } catch (\Exception $e) {
+                        error_log("Mass CV Deletion error on path $path: " . $e->getMessage());
+                    }
+                }
+            }
+            SecurityLogger::logAlert("MASS_APPLICANT_DELETE", $tenantId, "Deleted $deletedCount candidates for Job ID: $jobId");
+        }
+
+        $_SESSION['success_message'] = "All candidates and their CVs have been permanently wiped.";
+        Helpers::redirect('/applicants?job_id=' . $jobId);
+    }
 
     /**
      * Helper to output secure HTTP download headers

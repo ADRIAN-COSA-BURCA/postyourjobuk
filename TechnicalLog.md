@@ -12,10 +12,14 @@ analyse below the work has been done for this project;
 
 
 Level 6 final project
-Title that was chosen for this project: 50-70 words:
-Next-Generation Recruitment Analytics: A Scalable, Multi-Tenant SaaS Platform Leveraging Azure Serverless Architecture and Event-Driven AI. Developing an enterprise-grade recruitment ecosystem that utilizes Azure App Service for scalable frontend delivery alongside Azure Functions to facilitate asynchronous, event-driven CV processing, while simultaneously leveraging Azure AI to interpret, rank, and select top-tier candidates to deliver real-time, data-driven insights.
+## Title :
+Next-Generation Recruitment Analytics: A Scalable, Multi-Tenant SaaS Platform Leveraging Azure Serverless Architecture
+ and Event-Driven AI. Developing an enterprise-grade recruitment ecosystem that utilizes 
+ Azure App Service for scalable frontend delivery alongside Azure Functions 
+ to facilitate asynchronous, event-driven CV processing, while simultaneously leveraging Azure AI 
+ to interpret, rank, and select top-tier candidates to deliver real-time, data-driven insights.
 
-Project Overview
+## Project Overview
 •	What it does: Automates the processing and scoring of CVs against job descriptions, providing recruiters with instant, data-driven candidate rankings.
 •	Structure: A hybrid-modular architecture consisting of a PHP-based web frontend and an event-driven "serverless" analytical backend.
 •	Core Services & Connections:
@@ -24,7 +28,7 @@ o	Analytical Engine (Azure Functions with Python): Acts as the "intelligence" la
 o	Data Storage (Azure Database for MySQL flexible servers): Central repository for job data, tenant information, and candidate rankings.
 o	File Storage (Azure Blob Storage): A secure, cloud-based vault for storing CVs and resumes, replacing local server storage.
 
-Azure’s Role
+## Azure’s Role
 Azure acts as the "backbone" of your platform, providing:
 1.	High Availability: Database and storage systems that are accessible 24/7.
 2.	Serverless Processing: Azure Functions execute your Python AI code on-demand, ensuring costs are low and performance is high.
@@ -32,7 +36,7 @@ Azure acts as the "backbone" of your platform, providing:
 
 
 
-Summary of Workflow
+## Summary of Workflow
 1.	User Input: A candidate applies via your PHP portal.
 2.	Data Persistence: PHP stores metadata in Azure Database for MySQL flexible servers
 and the file in Azure Blob Storage.
@@ -426,10 +430,48 @@ making the entire application 100% portable across any machine running Docker wi
 
 
 update:
-mplementation of Standardized Page Architecture
-
+work done:
+implementation of Standardized Page Architecture
 Action: Created new instances of about.php, contact.php, terms.php, and vision.php
 Ensures perfect UI parity between public pages and the secure dashboard while eliminating structural CSS drift
+
+Analysis of Work AccomplishedYour web application has matured into a sophisticated system with the following pillars:
+Dockerized Infrastructure: By containerizing the environment, you have ensured "write once, run anywhere" 
+parity between your local machine and the eventual Azure cloud deployment.
+ This handles environment consistency, package dependencies, and server configuration.  
+ Persistent Cloud Data Layer: By incorporating Azure Database, 
+ you have moved away from local, volatile storage to a managed, scalable relational database. 
+ Your integration with Azure Blob Storage allows the platform to handle candidate documents
+ (resumes, certifications) securely and at scale, separating heavy binary data from your primary database.  
+ Architectural Uniformity: Through the recent refactoring, 
+ you have implemented a robust BaseController that acts as a central security gatekeeper, 
+ ensuring all routes—public or private—adhere to strict authentication and tenancy standards. 
+ Design System Parity: You have moved from fragmented, inline-styled pages to a unified design system using main.css. 
+ This ensures the UI remains consistent across all modules, including the Dashboard and new informational pages. 
+ AI Integration: Your current implementation of local AI capabilities has served as a foundational proof-of-concept 
+ for automated screening and intelligent data processing
+
+
+The Current Workings of Your WebappYour application operates on a Model-View-Controller (MVC) pattern 
+designed for enterprise scalability:Security Gatekeeping: 
+Every request is intercepted by the BaseController constructor, which validates sessions and tenant activity before allowing access.
+  Intelligent Routing: The system distinguishes between "public" (About, Vision, Contact) 
+  and "secure" (Dashboard) routes, applying strict enforcement only where necessary.  
+  Decoupled Logic: Your controllers (e.g., DashboardController, HomeController) focus solely on application flow, 
+  while models manage the data interactions with your Azure Database, and views focus on rendering the UI via the global layout
+
+
+going forward: 
+We are shifting from a Synchronous/Local model to an Asynchronous/Cloud-Native model.Current State:
+ Your web app performs file processing within the same process that handles user requests. 
+ This blocks the user and limits scalability.  Goal State: 
+ The web app (Azure Web App) will receive a job/file and drop it into a queue (Azure Storage Queue). 
+ An Azure Function will "trigger" on that message, 
+ perform the heavy AI processing, and update the database, completely independent of the user's session
+
+
+
+
 
 git status
 git add .
@@ -441,6 +483,7 @@ git push origin main
 docker compose down
 docker compose down --remove-orphans
 docker network prune -f
+
 docker compose up --build -d
 docker compose up -d
 
@@ -462,10 +505,30 @@ Email: recruiter@test.com
 Password: password
 
 
+Email: tech@postyourjobhere.com
+Password: password
+
+Email: test@company.com
+Password: password
+
+
+mycompany@jobs.com
+1234567
+
+test2@jobs.com
+1234567
+
 http://localhost:8000/admin/login
 ADMIN_EMAIL=admin@postyourjobhere.com
 ADMIN_PASSWORD_HASH= password
 
+
+
+
+Azure cli
+mysql -h hr-analytical-db.mysql.database.azure.com -u admindatabase -p'Gelutu@010380'
+
+USE postyourjobhere;
 
 
 cd C:\dev\postyourjobuk

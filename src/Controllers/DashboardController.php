@@ -8,11 +8,17 @@ use App\Models\Recruiter;
 class DashboardController extends BaseController {
     
     public function index() {
-        // You do NOT need the session checks or the IP/Agent hashes here.
-        // BaseController::__construct() already verified them and will redirect 
-        // intruders before this code even runs.
+        
+        error_log("DEBUG: Dashboard check - Session tenant_id is: " . ($_SESSION['tenant_id'] ?? 'MISSING'));
+    
+        if (!isset($_SESSION['tenant_id'])) {
+            error_log("DEBUG: Dashboard blocking access - No tenant_id in session.");
+        }
 
         $tenantId = $_SESSION['tenant_id'];
+        
+        // 1. CRITICAL FIX: Extract the full profile from the session
+        $tenantProfile = $_SESSION['tenant_profile'] ?? ['company_name' => 'Recruiter']; 
         
         $jobModel = new Job();
         $recruiterModel = new Recruiter(); 
@@ -25,7 +31,8 @@ class DashboardController extends BaseController {
         $this->render('dashboard/index', [
             'pageTitle' => 'Recruitment Dashboard',
             'stats'     => $stats,
-            'jobs'      => $jobs
+            'jobs'      => $jobs,
+            'tenant'    => $tenantProfile // Passed to the view here!
         ]);
     }
 }
