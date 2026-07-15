@@ -21,6 +21,9 @@
                 <label class="form-label">Password</label>
                 <input type="password" name="password" class="form-control" required style="width: 100%; padding: 0.75rem; border: 1px solid var(--border); border-radius: 6px;">
             </div>
+			<div class="form-group mt-2">
+    <a href="/reset-password" class="text-muted" style="font-size: 0.9em;">Forgot your password?</a>
+</div>
             
             <button type="submit" class="btn btn-primary" style="width: 100%; padding: 0.75rem; border: none; border-radius: 6px; cursor: pointer;">
                 Sign In

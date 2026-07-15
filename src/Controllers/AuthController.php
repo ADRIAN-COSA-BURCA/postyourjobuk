@@ -5,15 +5,18 @@ use App\Core\BaseController;
 use App\Models\Recruiter;
 use App\Core\Helpers;
 use App\Core\AuditLogger;
+use App\Core\Database; // Added to handle the password update
 
 class AuthController extends BaseController {
     
     public function login() {
         $error = $_SESSION['error_message'] ?? null;
-        unset($_SESSION['error_message']); 
+        $success = $_SESSION['success_message'] ?? null;
+        unset($_SESSION['error_message'], $_SESSION['success_message']); 
 
         $this->render('auth/login', [
-            'errorMessage' => $error
+            'errorMessage' => $error,
+            'successMessage' => $success
         ]);
     }
 
@@ -32,15 +35,14 @@ class AuthController extends BaseController {
         // Security check for account status
         if ($user) {
             if (($user['deleted_at'] ?? null) !== null || ($user['status'] ?? '') === 'suspended') {
-                // Pass Company Name as userLabel
-                AuditLogger::log('TENANT_LOGIN_FAILED', $user['company_name'], $user['tenant_id'], 'tenant', $user['tenant_id'], ['email' => $email, 'reason' => 'account_suspended']);
+                AuditLogger::log('TENANT_LOGIN_FAILED', $user['company_name'], 'WARNING', $user['tenant_id'], 'tenant', $user['tenant_id'], ['email' => $email, 'reason' => 'account_suspended']);
                 $_SESSION['error_message'] = "Access Denied: Account state invalid.";
                 Helpers::redirect('/login');
                 return;
             }
         } else {
-            // No user found, use 'Guest' as label
-            AuditLogger::log('TENANT_LOGIN_FAILED', 'Guest', 0, 'tenant', 0, ['email' => $email, 'reason' => 'user_not_found']);
+            // No user found, use 'Guest' as label with WARNING severity
+            AuditLogger::log('TENANT_LOGIN_FAILED', 'Guest', 'WARNING', 0, 'tenant', 0, ['email' => $email, 'reason' => 'user_not_found']);
             $_SESSION['error_message'] = "Invalid credentials.";
             Helpers::redirect('/login');
             return;
@@ -57,22 +59,23 @@ class AuthController extends BaseController {
             $_SESSION['user_agent'] = $_SERVER['HTTP_USER_AGENT'] ?? 'unknown';
             $_SESSION['client_ip_hash'] = hash('sha256', $_SERVER['REMOTE_ADDR'] ?? '127.0.0.1');
             
+			if (empty($_SESSION['csrf_token'])) {$_SESSION['csrf_token'] = bin2hex(random_bytes(32));}
+			
             $recruiterModel->updateLastLogin($user['tenant_id']);
             
-            // Pass Company Name as userLabel
-            AuditLogger::log('TENANT_LOGIN_SUCCESS', $user['company_name'], $user['tenant_id'], 'tenant', $user['tenant_id'], ['email' => $email]);
+            // Success logged as INFO
+            AuditLogger::log('TENANT_LOGIN_SUCCESS', $user['company_name'], 'INFO', $user['tenant_id'], 'tenant', $user['tenant_id'], ['email' => $email]);
             
             Helpers::redirect('/dashboard');
         } else {
-            // Pass Company Name as userLabel
-            AuditLogger::log('TENANT_LOGIN_FAILED', $user['company_name'], $user['tenant_id'], 'tenant', $user['tenant_id'], ['email' => $email, 'reason' => 'invalid_password']);
+            // Invalid password logged as WARNING
+            AuditLogger::log('TENANT_LOGIN_FAILED', $user['company_name'], 'WARNING', $user['tenant_id'], 'tenant', $user['tenant_id'], ['email' => $email, 'reason' => 'invalid_password']);
             $_SESSION['error_message'] = "Invalid credentials.";
             Helpers::redirect('/login');
         }
     }
 
     public function logout() {
-        // Capture identity BEFORE destroying the session
         $userLabel = $_SESSION['tenant_profile']['company_name'] ?? 'Unknown Tenant';
         $tenantId = $_SESSION['tenant_id'] ?? 0;
         
@@ -81,9 +84,89 @@ class AuthController extends BaseController {
             session_destroy();
         }
         
-        // Pass the captured label to the logger
-        AuditLogger::log('TENANT_LOGOUT', $userLabel, $tenantId, 'tenant', $tenantId, ['status' => 'logged_out']);
+        // Logout logged as INFO
+        AuditLogger::log('TENANT_LOGOUT', $userLabel, 'INFO', $tenantId, 'tenant', $tenantId, ['status' => 'logged_out']);
         
+        Helpers::redirect('/login');
+    }
+
+    // ==========================================
+    // PASSWORD RESET METHODS
+    // ==========================================
+
+    public function showResetForm() {
+    $error = $_SESSION['error_message'] ?? null;
+    unset($_SESSION['error_message']); 
+
+    // ADD THIS BLOCK: Generate CSRF token for the public form
+    if (empty($_SESSION['csrf_token'])) {
+        $_SESSION['csrf_token'] = bin2hex(random_bytes(32));
+    }
+
+    $this->render('auth/reset-password', [
+        'errorMessage' => $error
+    ]);
+}
+
+    public function handleResetSubmit() {
+        if (!isset($_POST['csrf_token']) || $_POST['csrf_token'] !== ($_SESSION['csrf_token'] ?? '')) {
+        AuditLogger::log('CSRF_FAILURE', 'System', 'CRITICAL', 0, 'system', 0, ['action' => 'password_reset']);
+        die("Invalid security token.");
+    }
+
+    if ($_SERVER['REQUEST_METHOD'] !== 'POST') {
+        Helpers::redirect('/reset-password');
+        return;
+    }
+
+        $email = trim($_POST['email'] ?? '');
+        $recoveryCode = trim($_POST['recovery_code'] ?? '');
+        $newPassword = $_POST['new_password'] ?? '';
+
+        if (empty($email) || empty($recoveryCode) || empty($newPassword)) {
+            $_SESSION['error_message'] = "All fields are required.";
+            Helpers::redirect('/reset-password');
+            return;
+        }
+
+        $recruiterModel = new Recruiter();
+        $user = $recruiterModel->findByEmail($email);
+
+        if (!$user) {
+            AuditLogger::log('PASSWORD_RESET_FAILED', 'Guest', 'WARNING', 0, 'tenant', 0, ['email' => $email, 'reason' => 'user_not_found']);
+            $_SESSION['error_message'] = "Invalid email address or recovery code.";
+            Helpers::redirect('/reset-password');
+            return;
+        }
+
+        // Security check for account status
+        if (($user['deleted_at'] ?? null) !== null || ($user['status'] ?? '') === 'suspended') {
+            AuditLogger::log('PASSWORD_RESET_FAILED', $user['company_name'], 'WARNING', $user['tenant_id'], 'tenant', $user['tenant_id'], ['email' => $email, 'reason' => 'account_suspended']);
+            $_SESSION['error_message'] = "Access Denied: Account state invalid.";
+            Helpers::redirect('/reset-password');
+            return;
+        }
+
+        // Validate the recovery code (case-insensitive for better UX)
+        if (strtoupper($user['recovery_code'] ?? '') !== strtoupper($recoveryCode)) {
+            AuditLogger::log('PASSWORD_RESET_FAILED', $user['company_name'], 'WARNING', $user['tenant_id'], 'tenant', $user['tenant_id'], ['email' => $email, 'reason' => 'invalid_recovery_code']);
+            $_SESSION['error_message'] = "Invalid email address or recovery code.";
+            Helpers::redirect('/reset-password');
+            return;
+        }
+
+        // Hash the new password securely
+        $hashedPassword = password_hash($newPassword, PASSWORD_BCRYPT);
+
+        // Update the database securely using the Database singleton
+        $stmt = $this->db->prepare("UPDATE tenants SET password_hash = ? WHERE tenant_id = ?");
+        $stmt->execute([$hashedPassword, $user['tenant_id']]);
+
+        // Log success
+        AuditLogger::log('PASSWORD_RESET_SUCCESS', $user['company_name'], 'INFO', $user['tenant_id'], 'tenant', $user['tenant_id'], ['email' => $email]);
+
+        // Redirect to login with a success message
+        $_SESSION['success_message'] = "Password updated successfully! You can now log in.";
         Helpers::redirect('/login');
     }
 }

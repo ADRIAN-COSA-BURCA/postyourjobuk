@@ -37,4 +37,19 @@ class Recruiter extends BaseModel {
         $stmt = $this->db->prepare($sql);
         return $stmt->execute([$id]);
     }
+	
+	public function create(array $data) {
+    // Generate placeholder string: :company_name, :email, ...
+    $keys = array_keys($data);
+    $fields = implode(', ', $keys);
+    $placeholders = ':' . implode(', :', $keys);
+
+    $sql = "INSERT INTO {$this->table} ($fields) VALUES ($placeholders)";
+    $stmt = $this->db->prepare($sql);
+    return $stmt->execute($data);
+}
+
+public function getLastInsertId() {
+    return $this->db->lastInsertId();
+}
 }

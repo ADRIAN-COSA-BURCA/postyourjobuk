@@ -5,7 +5,7 @@ use App\Core\BaseController;
 use App\Models\Admin;
 use App\Models\Recruiter;
 use App\Core\Helpers;
-use App\Core\AuditLogger; // Integrated AuditLogger
+use App\Core\AuditLogger;
 use App\Middleware\AdminAuth;
 
 class AdminController extends BaseController {
@@ -33,14 +33,14 @@ class AdminController extends BaseController {
         $admin = $stmt->fetch();
 
         if (!$admin) {
-            AuditLogger::log('ADMIN_LOGIN_FAILED', 'System', 0, 'admin', 0, ['email' => $email, 'reason' => 'user not found']);
+            AuditLogger::log('ADMIN_LOGIN_FAILED', 'System', 'WARNING', 0, 'admin', 0, ['email' => $email, 'reason' => 'user not found']);
             $_SESSION['error_message'] = "Admin user not found or inactive.";
             Helpers::redirect('/admin/login');
             return;
         }
 
         if (!password_verify($password, $admin['password_hash'])) {
-            AuditLogger::log('ADMIN_LOGIN_FAILED', 'Admin: ' . $email, 0, 'admin', 0, ['email' => $email, 'reason' => 'invalid password']);
+            AuditLogger::log('ADMIN_LOGIN_FAILED', 'Admin: ' . $email, 'WARNING', 0, 'admin', 0, ['email' => $email, 'reason' => 'invalid password']);
             $_SESSION['error_message'] = "Invalid credentials.";
             Helpers::redirect('/admin/login');
             return;
@@ -50,7 +50,10 @@ class AdminController extends BaseController {
             session_start();
         }
         
+        // SECURITY FIX: Clear old session data before elevating to Admin status
+        session_unset();
         session_regenerate_id(true);
+        
         $_SESSION['admin_logged_in'] = true;
         $_SESSION['admin_email'] = $admin['email'];
         $_SESSION['admin_user_agent'] = $_SERVER['HTTP_USER_AGENT'] ?? '';
@@ -60,7 +63,7 @@ class AdminController extends BaseController {
             $_SESSION['csrf_token'] = bin2hex(random_bytes(32));
         }
 
-        AuditLogger::log('ADMIN_LOGIN_SUCCESS', 'Admin: ' . $admin['email'], 0, 'admin', 0, ['email' => $email]);
+        AuditLogger::log('ADMIN_LOGIN_SUCCESS', 'Admin: ' . $admin['email'], 'INFO', 0, 'admin', 0, ['email' => $email]);
         Helpers::redirect('/admin');
     }
     
@@ -68,7 +71,9 @@ class AdminController extends BaseController {
         $email = $_SESSION['admin_email'] ?? 'unknown';
         $userLabel = 'Admin: ' . $email;
         
-        $_SESSION = [];
+        // SECURITY FIX: Force complete session destruction (Memory + Cookie)
+        session_unset();
+        session_destroy();
 
         if (ini_get("session.use_cookies")) {
             $params = session_get_cookie_params();
@@ -78,8 +83,7 @@ class AdminController extends BaseController {
             );
         }
 
-        session_destroy();
-        AuditLogger::log('ADMIN_LOGOUT', $userLabel, 0, 'admin', 0, ['email' => $email]);
+        AuditLogger::log('ADMIN_LOGOUT', $userLabel, 'INFO', 0, 'admin', 0, ['email' => $email]);
         Helpers::redirect('/admin/login');
     }
 
@@ -123,49 +127,77 @@ class AdminController extends BaseController {
             'currentFilter' => $filter
         ]);
     }
+	
+	public function analytics() {
+        // 1. Ensure only admins can access this page
+        AdminAuth::check(); 
+
+        // 2. Fetch the data from the Admin Model
+        $adminModel = new Admin();
+        $analyticsData = $adminModel->getAnalyticsData();
+        
+        // 3. Render the new view and pass the data to it
+        $this->render('admin/analytics', [
+            'pageTitle' => 'Platform Analytics',
+            'analytics' => $analyticsData
+        ]);
+    }
     
     public function createTenant() {
-        AdminAuth::check();
+    AdminAuth::check();
 
-        if (!isset($_POST['csrf_token']) || $_POST['csrf_token'] !== ($_SESSION['csrf_token'] ?? '')) {
-            $_SESSION['error_message'] = "Security token validation failed.";
-            Helpers::redirect('/admin');
-            return;
-        }
-
-        if (empty($_POST['company_name']) || empty($_POST['email']) || empty($_POST['password'])) {
-            $_SESSION['error_message'] = "Company name, email, and password are required.";
-            Helpers::redirect('/admin');
-            return;
-        }
-
-        $recruiterModel = new Recruiter();
-        $data = [
-            'company_name'   => $_POST['company_name'],
-            'contact_person' => $_POST['contact_person'] ?? null,
-            'email'          => $_POST['email'],
-            'phone_number'   => $_POST['phone_number'] ?? null,
-            'website_url'    => $_POST['website_url'] ?? null,
-            'company_address'=> $_POST['company_address'] ?? null,
-            'industry'       => $_POST['industry'] ?? null,
-            'password_hash'  => password_hash($_POST['password'], PASSWORD_DEFAULT),
-            'status'         => 'active',
-            'is_active'      => 1,
-            'is_super_admin' => 0,
-            'created_at'     => date('Y-m-d H:i:s')
-        ];
-
-        if ($recruiterModel->create($data)) {
-            $newId = $this->db->lastInsertId();
-            $adminLabel = 'Admin: ' . ($_SESSION['admin_email'] ?? 'Unknown');
-            AuditLogger::log('TENANT_CREATED', $adminLabel, 0, 'tenant', $newId, ['company' => $_POST['company_name']]);
-            $_SESSION['success_message'] = "Tenant created successfully.";
-        } else {
-            $_SESSION['error_message'] = "Creation failed.";
-        }
-        
+    // 1. Verify CSRF Token
+    if (!isset($_POST['csrf_token']) || $_POST['csrf_token'] !== ($_SESSION['csrf_token'] ?? '')) {
+        $_SESSION['error_message'] = "Security token validation failed.";
         Helpers::redirect('/admin');
+        return;
     }
+
+    // 2. Validate required fields (Added recovery_code to requirements)
+    if (empty($_POST['company_name']) || empty($_POST['email']) || empty($_POST['password']) || empty($_POST['recovery_code'])) {
+        $_SESSION['error_message'] = "Company name, email, password, and recovery code are required.";
+        Helpers::redirect('/admin');
+        return;
+    }
+
+    // 3. Prepare data array
+    $recruiterModel = new Recruiter();
+    $data = [
+        'company_name'    => trim($_POST['company_name']),
+        'contact_person'  => $_POST['contact_person'] ?? null,
+        'email'           => trim($_POST['email']),
+        'phone_number'    => $_POST['phone_number'] ?? null,
+        'website_url'     => $_POST['website_url'] ?? null,
+        'company_address' => $_POST['company_address'] ?? null,
+        'industry'        => $_POST['industry'] ?? null,
+        'password_hash'   => password_hash($_POST['password'], PASSWORD_DEFAULT),
+        // Use the input from the form instead of a generated one
+        'recovery_code'   => strtoupper(trim($_POST['recovery_code'])),
+        'status'          => 'active',
+        'is_active'       => 1,
+        'is_super_admin'  => 0,
+        'created_at'      => date('Y-m-d H:i:s')
+    ];
+
+    // 4. Create and Log
+    if ($recruiterModel->create($data)) {
+        // Assuming your Recruiter model or $this->db handles the insert
+        // Ensure $this->db is defined or use the appropriate database connection
+        $newId = $recruiterModel->getLastInsertId(); 
+        
+        $adminLabel = 'Admin: ' . ($_SESSION['admin_email'] ?? 'Unknown');
+        AuditLogger::log('TENANT_CREATED', $adminLabel, 'INFO', 0, 'tenant', $newId, [
+            'company' => $data['company_name'],
+            'email'   => $data['email']
+        ]);
+        
+        $_SESSION['success_message'] = "Tenant '{$data['company_name']}' created successfully with recovery code.";
+    } else {
+        $_SESSION['error_message'] = "Database error: Could not create tenant.";
+    }
+    
+    Helpers::redirect('/admin');
+}
 
     public function viewTenant() {
         AdminAuth::check(); 
@@ -233,7 +265,7 @@ class AdminController extends BaseController {
         $stmt->execute([$tenantId]);
 
         $adminLabel = 'Admin: ' . ($_SESSION['admin_email'] ?? 'Unknown');
-        AuditLogger::log('TENANT_SUSPEND', $adminLabel, 0, 'tenant', $tenantId, ['status' => 'suspended']);
+        AuditLogger::log('TENANT_SUSPEND', $adminLabel, 'CRITICAL', 0, 'tenant', $tenantId, ['status' => 'suspended']);
         $_SESSION['success_message'] = "Tenant workspace suspended successfully.";
         Helpers::redirect('/admin/view-tenant?id=' . $tenantId);
     }
@@ -258,7 +290,7 @@ class AdminController extends BaseController {
         $stmt->execute([$tenantId]);
 
         $adminLabel = 'Admin: ' . ($_SESSION['admin_email'] ?? 'Unknown');
-        AuditLogger::log('TENANT_ACTIVATE', $adminLabel, 0, 'tenant', $tenantId, ['status' => 'active']);
+        AuditLogger::log('TENANT_ACTIVATE', $adminLabel, 'CRITICAL', 0, 'tenant', $tenantId, ['status' => 'active']);
         $_SESSION['success_message'] = "Tenant workspace activated successfully.";
         Helpers::redirect('/admin/view-tenant?id=' . $tenantId);
     }
@@ -294,6 +326,14 @@ class AdminController extends BaseController {
                     $fields[] = "$key = :$key";
                 }
             }
+
+            // LOGIC FIX: Prevent "Ghost Updates" if the form is empty or manipulated
+            if (empty($fields)) {
+                $_SESSION['error_message'] = "No valid fields were provided for update.";
+                Helpers::redirect('/admin/view-tenant?id=' . $tenantId);
+                return;
+            }
+
             $data['updated_at'] = date('Y-m-d H:i:s');
             $fields[] = "updated_at = :updated_at";
             $data['tenant_id'] = $tenantId;
@@ -303,7 +343,7 @@ class AdminController extends BaseController {
             $stmt = $this->db->prepare($sql);
             if ($stmt->execute($data)) {
                 $adminLabel = 'Admin: ' . ($_SESSION['admin_email'] ?? 'Unknown');
-                AuditLogger::log('TENANT_UPDATED', $adminLabel, 0, 'tenant', $tenantId, ['company' => $data['company_name']]);
+                AuditLogger::log('TENANT_UPDATED', $adminLabel, 'INFO', 0, 'tenant', $tenantId, ['company' => $data['company_name']]);
                 $_SESSION['success_message'] = "Tenant details updated successfully.";
             } else {
                 $_SESSION['error_message'] = "Update failed.";
@@ -314,4 +354,10 @@ class AdminController extends BaseController {
 
         $this->render('admin/edit_tenant', ['tenant' => $tenant]);
     }
+	
+	
+	private function generateRecoveryCode() {
+    return 'PJH-' . strtoupper(bin2hex(random_bytes(3))); // e.g., PJH-A1B2C3
+}
+
 }

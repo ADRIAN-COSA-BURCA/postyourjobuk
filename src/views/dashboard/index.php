@@ -105,7 +105,7 @@
                                 <td>
                                     <strong style="color: #4f46e5;"><?= (int)$job['applicant_count'] ?></strong> applicants
                                 </td>
-                                <td style="color: #9ca3af; font-size: 0.875rem;">
+                                <td class="col-posted" style="color: #9ca3af; font-size: 0.875rem;">
                                     <?= function_exists('time_ago') ? time_ago($job['created_at']) : htmlspecialchars($job['created_at']) ?>
                                 </td>
                                 <td>

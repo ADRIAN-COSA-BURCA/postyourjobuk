@@ -341,9 +341,7 @@ small { font-size: 0.8rem; color: var(--text-muted); }
 }
 
 
-/* =========================================================================
-   8. FORMS & INPUTS
-   ========================================================================= */
+
 /* =========================================================================
    8. FORMS & INPUTS
    ========================================================================= */
@@ -579,6 +577,49 @@ select {
 /* =========================================================================
    10. TABLES
    ========================================================================= */
+.table-responsive {
+    overflow-x: auto;
+    -webkit-overflow-scrolling: touch;
+}
+
+.table-responsive table {
+    border-collapse: separate;
+    border-spacing: 0;
+    width: 100%;
+    min-width: 650px; /* table won't get squished below this; card scrolls instead */
+}
+
+.table-responsive th,
+.table-responsive td {
+    padding: 0.85rem 1.5rem;
+    white-space: nowrap;
+}
+
+.table-responsive th {
+    text-align: left;
+}
+
+.table-responsive th:nth-child(1), .table-responsive td:nth-child(1) { min-width: 160px; }
+.table-responsive th:nth-child(2), .table-responsive td:nth-child(2) { min-width: 130px; }
+.table-responsive th:nth-child(3), .table-responsive td:nth-child(3) { min-width: 140px; }
+.table-responsive th:nth-child(4), .table-responsive td:nth-child(4) { min-width: 140px; }
+
+
+.col-posted {
+    padding-right: 2.5rem !important;
+	padding-left: 2.5rem !important;
+}
+
+@media (max-width: 640px) {
+    .table-responsive th,
+    .table-responsive td {
+        padding: 0.65rem 1rem;
+    }
+    .col-posted {
+        padding-right: 1.5rem;
+    }
+}
+
 .app-table,
 .admin-table-view {
     width: 100%;
@@ -1253,6 +1294,35 @@ select {
     grid-template-columns: repeat(auto-fit, minmax(240px, 1fr)) !important;
     gap: 1.5rem !important; /* Spacing between individual metric cards */
     margin-bottom: 0 !important; /* Prevents double-margin stacking */
+}
+
+
+/* Added !important to force the browser to prioritize these styles */
+[class^="badge-"] {
+    padding: 4px 10px !important;
+    border-radius: 4px !important;
+    font-size: 0.75rem !important;
+    font-weight: bold !important;
+    color: #fff !important;
+    display: inline-block !important;
+}
+
+.badge-info { background-color: #17a2b8 !important; }
+.badge-warning { background-color: #ffc107 !important; color: #000 !important; }
+.badge-critical { background-color: #dc3545 !important; }
+
+
+
+/* Define the specific colors */
+.badge-info { 
+    background-color: #17a2b8; 
+}
+.badge-warning { 
+    background-color: #ffc107; 
+    color: #000; /* Black text for better readability on yellow */
+}
+.badge-critical { 
+    background-color: #dc3545; 
 }
 
 

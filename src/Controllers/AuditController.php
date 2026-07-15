@@ -20,13 +20,17 @@ class AuditController extends BaseController {
         $where = "1=1";
 
         if ($action !== 'all') {
-            $where .= " AND action_type = :action";
-            $params['action'] = $action;
-        }
+    // Correcting the column name to action_type
+    $where .= " AND action_type LIKE :action";
+    $params['action'] = $action . '%'; 
+}
 
         // 2. Fetch Logs
         $sql = "SELECT * FROM system_logs WHERE $where ORDER BY $sort $order LIMIT 100";
         $logs = $db->fetchAll($sql, $params);
+		
+		// DEBUG: Look at the raw data returned from your database
+error_log("DEBUG: Log Data Structure: " . print_r($logs, true));
 
         // 3. Render View
         $this->render('admin/logs', [

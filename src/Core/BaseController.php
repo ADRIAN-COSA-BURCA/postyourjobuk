@@ -24,7 +24,9 @@ abstract class BaseController {
             '/about',
             '/contact',
             '/vision',
-            '/terms'
+            '/terms',
+			'/reset-password',
+            '/reset-password/submit'
         ];
         
         $isPublic = false;

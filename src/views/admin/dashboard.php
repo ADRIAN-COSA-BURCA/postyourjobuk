@@ -1,16 +1,20 @@
 <div class="container admin-wrapper-view">
     <div class="card" style="margin-bottom: 2rem;"> 
     <div style="display: flex; justify-content: space-between; align-items: center;">
-    <div>
-        <h2>System Overview</h2>
+        <div>
+            <h2>System Overview</h2>
+        </div>
+        <div style="display: flex; gap: 10px; align-items: center;">
+            <a href="/admin/logs" class="btn btn-secondary">View System Logs</a>
+            
+            <!-- NEW: Analytics Button placed exactly between Logs and Create Recruiter -->
+            <a href="/admin/analytics" class="btn btn-secondary">📊 Platform Analytics</a>
+            
+            <button onclick="document.getElementById('createTenantModal').style.display='flex'" class="btn btn-primary">
+                + Create New Recruiter
+            </button>
+        </div>
     </div>
-    <div style="display: flex; gap: 10px;">
-        <a href="/admin/logs" class="btn btn-secondary">View System Logs</a>
-        <button onclick="document.getElementById('createTenantModal').style.display='flex'" class="btn btn-primary">
-            + Create New Recruiter
-        </button>
-    </div>
-</div>
 </div>
 
     <div id="createTenantModal" style="display: none; position: fixed; top: 0; left: 0; width: 100%; height: 100%; background: rgba(0,0,0,0.5); z-index: 1000; align-items: center; justify-content: center;">
@@ -27,7 +31,7 @@
                 <div style="margin-bottom: 1rem;"><label>Industry</label><input type="text" name="industry" style="width: 100%; padding: 0.5rem;"></div>
                 <div style="margin-bottom: 1rem;"><label>Company Address</label><textarea name="company_address" style="width: 100%; padding: 0.5rem;"></textarea></div>
                 <div style="margin-bottom: 1rem;"><label>Initial Password</label><input type="password" name="password" required style="width: 100%; padding: 0.5rem;"></div>
-                
+                <div style="margin-bottom: 1rem;"><label>Recovery Code (Unique Identifier)</label><input type="text" name="recovery_code" required style="width: 100%; padding: 0.5rem;" placeholder="e.g., PJH-12345"></div>
                 <div style="display: flex; gap: 10px; justify-content: flex-end;">
                     <button type="button" onclick="document.getElementById('createTenantModal').style.display='none'" class="btn btn-secondary">Cancel</button>
                     <button type="submit" class="btn btn-primary">Create Account</button>

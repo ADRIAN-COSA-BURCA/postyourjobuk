@@ -429,13 +429,14 @@ making the entire application 100% portable across any machine running Docker wi
 
 
 
-update:
+## update:
 work done:
 implementation of Standardized Page Architecture
 Action: Created new instances of about.php, contact.php, terms.php, and vision.php
 Ensures perfect UI parity between public pages and the secure dashboard while eliminating structural CSS drift
 
-Analysis of Work AccomplishedYour web application has matured into a sophisticated system with the following pillars:
+## Analysis of Work Accomplished
+Your web application has matured into a sophisticated system with the following pillars:
 Dockerized Infrastructure: By containerizing the environment, you have ensured "write once, run anywhere" 
 parity between your local machine and the eventual Azure cloud deployment.
  This handles environment consistency, package dependencies, and server configuration.  
@@ -452,6 +453,7 @@ parity between your local machine and the eventual Azure cloud deployment.
  for automated screening and intelligent data processing
 
 
+## Model-View-Controller (MVC)
 The Current Workings of Your WebappYour application operates on a Model-View-Controller (MVC) pattern 
 designed for enterprise scalability:Security Gatekeeping: 
 Every request is intercepted by the BaseController constructor, which validates sessions and tenant activity before allowing access.
@@ -461,7 +463,34 @@ Every request is intercepted by the BaseController constructor, which validates 
   while models manage the data interactions with your Azure Database, and views focus on rendering the UI via the global layout
 
 
-going forward: 
+## update:
+Corporate Profile Dashboard Integration: Implemented a persistent "Business Card" section in the recruiter dashboard to display detailed tenant profile information, including industry, contact details, and headquarters.
+Database-Level Tenant Data Retrieval: Optimized the Job model using SQL JOIN operations to securely and efficiently aggregate job postings with their corresponding tenant/company profile data for both internal and public-facing views.
+Public Profile Transparency: Updated the job application view to include an "About the Employer" module.
+Security & Data Integrity: Maintained strict multi-tenancy guards throughout the update.
+
+
+## Update
+Admin dashboard updates with sorting / filtering of tenants implemented; 
+
+## Update
+Security audit implementation is successfully completed:
+Context-Aware Identity Attribution: We now capture the user_label (Company Name or Admin email) 
+at the exact moment of every action. This ensures forensic integrity even after session destruction.
+
+Proactive Threat Mitigation: Every authentication failure is logged with a specific reason code. 
+This creates a data set for detecting brute-force attacks and supporting AI-driven threat monitoring.
+
+
+## Update
+Successfully implemented the dynamic severity badge system.
+INFO events:
+Categorization: If you trigger a WARNING (e.g., failed login), you will now see a Yellow badge.
+Alerting: If you trigger a CRITICAL event (e.g., suspending a tenant), you will see a Red badge.
+
+
+
+## going forward: 
 We are shifting from a Synchronous/Local model to an Asynchronous/Cloud-Native model.Current State:
  Your web app performs file processing within the same process that handles user requests. 
  This blocks the user and limits scalability.  Goal State: 
@@ -501,6 +530,7 @@ http://localhost:8000
 
 
 http://localhost:8000/login
+
 Email: recruiter@test.com
 Password: password
 
@@ -517,6 +547,10 @@ mycompany@jobs.com
 
 test2@jobs.com
 1234567
+
+adrian@engine.com
+919273
+aabbcc
 
 http://localhost:8000/admin/login
 ADMIN_EMAIL=admin@postyourjobhere.com
@@ -537,19 +571,183 @@ cd C:\dev\postyourjobuk
 
 
 
+
+database:
+Tables_in_postyourjobhere |
++---------------------------+
+| applicants                |
+| jobs                      |
+| system_logs               |
+| tenants   
+
+
+
+DESCRIBE system_logs;
++---------------+--------------+------+-----+-------------------+-------------------+
+| Field         | Type         | Null | Key | Default           | Extra             |
++---------------+--------------+------+-----+-------------------+-------------------+
+| id            | bigint       | NO   | PRI | NULL              | auto_increment    |
+| tenant_id     | int          | YES  |     | NULL              |                   |
+| user_label    | varchar(255) | YES  |     | NULL              |                   |
+| user_email    | varchar(255) | YES  |     | NULL              |                   |
+| action_type   | varchar(50)  | YES  | MUL | NULL              |                   |
+| severity      | varchar(20)  | YES  |     | INFO              |                   |
+| resource_type | varchar(50)  | YES  |     | NULL              |                   |
+| resource_id   | int          | YES  |     | NULL              |                   |
+| ip_address    | varchar(45)  | YES  |     | NULL              |                   |
+| details       | json         | YES  |     | NULL              |                   |
+| created_at    | timestamp    | YES  | MUL | CURRENT_TIMESTAMP | DEFAULT_GENERATED |
++---------------+--------------+------+-----+-------------------+-------------------+
+11 rows in set (0.034 sec)
+
+
+DESCRIBE tenants;
++-----------------------+----------------------------+------+-----+-------------------+-----------------------------+
+| Field                 | Type                       | Null | Key | Default           | Extra                       |
++-----------------------+----------------------------+------+-----+-------------------+-----------------------------+
+| tenant_id             | int unsigned               | NO   | PRI | NULL              | auto_increment              |
+| company_name          | varchar(100)               | NO   |     | NULL              |                             |
+| contact_person        | varchar(100)               | YES  |     | NULL              |                             |
+| phone_number          | varchar(20)                | YES  |     | NULL              |                             |
+| website_url           | varchar(255)               | YES  |     | NULL              |                             |
+| company_address       | text                       | YES  |     | NULL              |                             |
+| industry              | varchar(100)               | YES  |     | NULL              |                             |
+| is_active             | tinyint(1)                 | NO   | MUL | 1                 |                             |
+| email                 | varchar(100)               | NO   | UNI | NULL              |                             |
+| password_hash         | varchar(255)               | NO   |     | NULL              |                             |
+| is_super_admin        | tinyint(1)                 | NO   | MUL | 0                 |                             |
+| logo_url              | varchar(500)               | YES  |     | NULL              |                             |
+| status                | enum('active','suspended') | YES  | MUL | active            |                             |
+| created_at            | timestamp                  | NO   | MUL | CURRENT_TIMESTAMP | DEFAULT_GENERATED           |
+| updated_at            | timestamp                  | YES  |     | NULL              | on update CURRENT_TIMESTAMP |
+| last_login            | timestamp                  | YES  |     | NULL              |                             |
+| failed_login_attempts | int                        | NO   |     | 0                 |                             |
+| lockout_until         | datetime                   | YES  |     | NULL              |                             |
+| deleted_at            | datetime                   | YES  |     | NULL              |                             |
++-----------------------+----------------------------+------+-----+-------------------+-----------------------------+
+19 rows in set (0.034 sec)
+
+
+DESCRIBE tenants;
++-----------------------+----------------------------+------+-----+-------------------+-----------------------------+
+| Field                 | Type                       | Null | Key | Default           | Extra                       |
++-----------------------+----------------------------+------+-----+-------------------+-----------------------------+
+| tenant_id             | int unsigned               | NO   | PRI | NULL              | auto_increment              |
+| company_name          | varchar(100)               | NO   |     | NULL              |                             |
+| contact_person        | varchar(100)               | YES  |     | NULL              |                             |
+| phone_number          | varchar(20)                | YES  |     | NULL              |                             |
+| website_url           | varchar(255)               | YES  |     | NULL              |                             |
+| company_address       | text                       | YES  |     | NULL              |                             |
+| industry              | varchar(100)               | YES  |     | NULL              |                             |
+| is_active             | tinyint(1)                 | NO   | MUL | 1                 |                             |
+| email                 | varchar(100)               | NO   | UNI | NULL              |                             |
+| password_hash         | varchar(255)               | NO   |     | NULL              |                             |
+| is_super_admin        | tinyint(1)                 | NO   | MUL | 0                 |                             |
+| logo_url              | varchar(500)               | YES  |     | NULL              |                             |
+| status                | enum('active','suspended') | YES  | MUL | active            |                             |
+| created_at            | timestamp                  | NO   | MUL | CURRENT_TIMESTAMP | DEFAULT_GENERATED           |
+| updated_at            | timestamp                  | YES  |     | NULL              | on update CURRENT_TIMESTAMP |
+| last_login            | timestamp                  | YES  |     | NULL              |                             |
+| failed_login_attempts | int                        | NO   |     | 0                 |                             |
+| lockout_until         | datetime                   | YES  |     | NULL              |                             |
+| deleted_at            | datetime                   | YES  |     | NULL              |                             |
+| recovery_code         | varchar(16)                | YES  |     | NULL              |                             |
++-----------------------+----------------------------+------+-----+-------------------+-----------------------------+
+20 rows in set (0.036 sec)
+
+
+
+
+DESCRIBE jobs;
++-----------------+-------------------------------------------------------+------+-----+-------------------+-----------------------------------------------+
+| Field           | Type                                                  | Null | Key | Default           | Extra                                         |
++-----------------+-------------------------------------------------------+------+-----+-------------------+-----------------------------------------------+
+| job_id          | int unsigned                                          | NO   | PRI | NULL              | auto_increment                                |
+| tenant_id       | int unsigned                                          | NO   | MUL | NULL              |                                               |
+| title           | varchar(200)                                          | NO   |     | NULL              |                                               |
+| description     | text                                                  | NO   |     | NULL              |                                               |
+| requirements    | text                                                  | NO   |     | NULL              |                                               |
+| location        | varchar(100)                                          | YES  |     | NULL              |                                               |
+| salary          | varchar(50)                                           | YES  |     | NULL              |                                               |
+| employment_type | enum('full-time','part-time','contract','internship') | YES  | MUL | full-time         |                                               |
+| status          | enum('active','inactive','closed')                    | YES  | MUL | active            |                                               |
+| created_at      | timestamp                                             | NO   |     | CURRENT_TIMESTAMP | DEFAULT_GENERATED                             |
+| updated_at      | timestamp                                             | NO   |     | CURRENT_TIMESTAMP | DEFAULT_GENERATED on update CURRENT_TIMESTAMP |
+| closed_at       | timestamp                                             | YES  |     | NULL              |                                               |
+| is_active       | tinyint(1)                                            | NO   |     | 1                 |                                               |
++-----------------+-------------------------------------------------------+------+-----+-------------------+-----------------------------------------------+
+13 rows in set (0.035 sec)
+
+DESCRIBE applicants;
++-----------------+-------------------------------------------------+------+-----+-------------------+-------------------+
+| Field           | Type                                            | Null | Key | Default           | Extra             |
++-----------------+-------------------------------------------------+------+-----+-------------------+-------------------+
+| applicant_id    | int unsigned                                    | NO   | PRI | NULL              | auto_increment    |
+| job_id          | int unsigned                                    | NO   | MUL | NULL              |                   |
+| tenant_id       | int unsigned                                    | NO   | MUL | NULL              |                   |
+| name            | varchar(100)                                    | NO   |     | NULL              |                   |
+| email           | varchar(100)                                    | NO   | MUL | NULL              |                   |
+| phone           | varchar(20)                                     | YES  |     | NULL              |                   |
+| cv_filename     | varchar(255)                                    | NO   |     | NULL              |                   |
+| cv_storage_path | varchar(500)                                    | NO   |     | NULL              |                   |
+| cv_file_size    | int unsigned                                    | YES  |     | NULL              |                   |
+| ai_score        | int unsigned                                    | YES  | MUL | 0                 |                   |
+| ai_summary      | mediumtext                                      | YES  |     | NULL              |                   |
+| ai_processed_at | timestamp                                       | YES  |     | NULL              |                   |
+| status          | enum('new','reviewed','shortlisted','rejected') | NO   | MUL | new               |                   |
+| applied_at      | timestamp                                       | NO   |     | CURRENT_TIMESTAMP | DEFAULT_GENERATED |
+| ip_address      | varchar(45)                                     | YES  |     | NULL              |                   |
+| created_at      | timestamp                                       | YES  |     | CURRENT_TIMESTAMP | DEFAULT_GENERATED |
++-----------------+-------------------------------------------------+------+-----+-------------------+-------------------+
+
+
+
+
 file structure at this point:
 
-C:.
 |   .env
 |   .gitignore
-|   azure_database.sql
 |   bootstrap.php
 |   composer.json
 |   composer.lock
 |   DigiCertGlobalRootG2.crt.pem
+|   docker
 |   docker-compose.yml
 |   Dockerfile
+|   Dockerfile.worker
+|   live_azure_dump.sql
+|   requirements.txt
+|   SECURITY_LOGGING_README.md
 |   TechnicalLog.md
+|   test_hash.php
+|
++---.git
+|   |   COMMIT_EDITMSG
+|   |   config
+|   |   description
+|   |   HEAD
+|   |   index
+|   |
+|   +---hooks
+|   |       applypatch-msg.sample
+|   |       commit-msg.sample
+|   |       fsmonitor-watchman.sample
+|   |       post-update.sample
+|   |       pre-applypatch.sample
+|   |       pre-commit.sample
+|   |       pre-merge-commit.sample
+|   |       pre-push.sample
+|   |       pre-rebase.sample
+|   |       pre-receive.sample
+|   |       prepare-commit-msg.sample
+|   |       push-to-checkout.sample
+|   |       sendemail-validate.sample
+|   |       update.sample
+
++---azure_function_project
+|       function_app.py
+|       host.json
+|       requirements.txt
 |
 +---public
 |   |   .htaccess
@@ -560,9 +758,13 @@ C:.
 |               main.css
 |
 +---src
+|   +---BackgroundWorkers
+|   |       worker.py
+|   |
 |   +---Controllers
 |   |       AdminController.php
 |   |       ApplicantController.php
+|   |       AuditController.php
 |   |       AuthController.php
 |   |       Controller.php
 |   |       DashboardController.php
@@ -570,6 +772,7 @@ C:.
 |   |       JobController.php
 |   |
 |   +---Core
+|   |       AuditLogger.php
 |   |       Auth.php
 |   |       BaseController.php
 |   |       BaseModel.php
@@ -588,13 +791,21 @@ C:.
 |   |       Recruiter.php
 |   |
 |   +---Services
+|   |       AzureBlobStorage.php
+|   |       AzureQueueService.php
 |   |       StorageService.php
 |   |
 |   \---views
 |       +---admin
 |       |       dashboard.php
+|       |       edit_tenant.php
 |       |       login.php
+|       |       logs.php
 |       |       view_tenant.php
+|       |
+|       +---applicants
+|       |       list.php
+|       |       view.php
 |       |
 |       +---auth
 |       |       login.php
@@ -602,511 +813,30 @@ C:.
 |       +---dashboard
 |       |       index.php
 |       |
+|       +---home
+|       |       about.php
+|       |       contact.php
+|       |       index.php
+|       |       terms.php
+|       |       vision.php
+|       |
 |       +---jobs
 |       |       create.php
 |       |       details.php
+|       |       edit.php
 |       |
 |       +---layouts
 |       |       footer.php
 |       |       header.php
+|       |       login_layout.php
+|       |       main.php
 |       |
 |       \---portal
 |               dashboard.php
 |
-+---vendor
-|   |   autoload.php
-|   |
-|   +---composer
-|   |       autoload_classmap.php
-|   |       autoload_files.php
-|   |       autoload_namespaces.php
-|   |       autoload_psr4.php
-|   |       autoload_real.php
-|   |       autoload_static.php
-|   |       ClassLoader.php
-|   |       installed.json
-|   |       installed.php
-|   |       InstalledVersions.php
-|   |       LICENSE
-|   |       platform_check.php
-|   |
-|   +---graham-campbell
-|   |   \---result-type
-|   |       |   composer.json
-|   |       |   LICENSE
-|   |       |
-|   |       \---src
-|   |               Error.php
-|   |               Result.php
-|   |               Success.php
-|   |
-|   +---guzzlehttp
-|   |   +---guzzle
-|   |   |   |   CHANGELOG.md
-|   |   |   |   composer.json
-|   |   |   |   LICENSE
-|   |   |   |   package-lock.json
-|   |   |   |   README.md
-|   |   |   |   UPGRADING.md
-|   |   |   |
-|   |   |   \---src
-|   |   |       |   BodySummarizer.php
-|   |   |       |   BodySummarizerInterface.php
-|   |   |       |   Client.php
-|   |   |       |   ClientInterface.php
-|   |   |       |   ClientTrait.php
-|   |   |       |   functions.php
-|   |   |       |   functions_include.php
-|   |   |       |   HandlerStack.php
-|   |   |       |   MessageFormatter.php
-|   |   |       |   MessageFormatterInterface.php
-|   |   |       |   Middleware.php
-|   |   |       |   Pool.php
-|   |   |       |   PrepareBodyMiddleware.php
-|   |   |       |   RedirectMiddleware.php
-|   |   |       |   RequestOptions.php
-|   |   |       |   RetryMiddleware.php
-|   |   |       |   TransferStats.php
-|   |   |       |   TransportSharing.php
-|   |   |       |   Utils.php
-|   |   |       |
-|   |   |       +---Cookie
-|   |   |       |       CookieJar.php
-|   |   |       |       CookieJarInterface.php
-|   |   |       |       FileCookieJar.php
-|   |   |       |       SessionCookieJar.php
-|   |   |       |       SetCookie.php
-|   |   |       |
-|   |   |       +---Exception
-|   |   |       |       BadResponseException.php
-|   |   |       |       ClientException.php
-|   |   |       |       ConnectException.php
-|   |   |       |       GuzzleException.php
-|   |   |       |       InvalidArgumentException.php
-|   |   |       |       RequestException.php
-|   |   |       |       ServerException.php
-|   |   |       |       TooManyRedirectsException.php
-|   |   |       |       TransferException.php
-|   |   |       |
-|   |   |       \---Handler
-|   |   |               CurlFactory.php
-|   |   |               CurlFactoryInterface.php
-|   |   |               CurlHandler.php
-|   |   |               CurlMultiHandler.php
-|   |   |               CurlShareHandleState.php
-|   |   |               EasyHandle.php
-|   |   |               HeaderProcessor.php
-|   |   |               MockHandler.php
-|   |   |               Proxy.php
-|   |   |               StreamHandler.php
-|   |   |
-|   |   +---promises
-|   |   |   |   CHANGELOG.md
-|   |   |   |   composer.json
-|   |   |   |   LICENSE
-|   |   |   |   README.md
-|   |   |   |   UPGRADING.md
-|   |   |   |
-|   |   |   \---src
-|   |   |           AggregateException.php
-|   |   |           CancellationException.php
-|   |   |           Coroutine.php
-|   |   |           Create.php
-|   |   |           Each.php
-|   |   |           EachPromise.php
-|   |   |           FulfilledPromise.php
-|   |   |           Is.php
-|   |   |           Promise.php
-|   |   |           PromiseInterface.php
-|   |   |           PromisorInterface.php
-|   |   |           RejectedPromise.php
-|   |   |           RejectionException.php
-|   |   |           TaskQueue.php
-|   |   |           TaskQueueInterface.php
-|   |   |           Utils.php
-|   |   |
-|   |   \---psr7
-|   |       |   CHANGELOG.md
-|   |       |   composer.json
-|   |       |   LICENSE
-|   |       |   README.md
-|   |       |   UPGRADING.md
-|   |       |
-|   |       \---src
-|   |           |   AppendStream.php
-|   |           |   BufferStream.php
-|   |           |   CachingStream.php
-|   |           |   DroppingStream.php
-|   |           |   FnStream.php
-|   |           |   Header.php
-|   |           |   HttpFactory.php
-|   |           |   InflateStream.php
-|   |           |   LazyOpenStream.php
-|   |           |   LimitStream.php
-|   |           |   Message.php
-|   |           |   MessageTrait.php
-|   |           |   MimeType.php
-|   |           |   MultipartStream.php
-|   |           |   NoSeekStream.php
-|   |           |   PumpStream.php
-|   |           |   Query.php
-|   |           |   Request.php
-|   |           |   Response.php
-|   |           |   Rfc3986.php
-|   |           |   Rfc7230.php
-|   |           |   ServerRequest.php
-|   |           |   Stream.php
-|   |           |   StreamDecoratorTrait.php
-|   |           |   StreamWrapper.php
-|   |           |   UploadedFile.php
-|   |           |   Uri.php
-|   |           |   UriComparator.php
-|   |           |   UriNormalizer.php
-|   |           |   UriResolver.php
-|   |           |   Utils.php
-|   |           |
-|   |           \---Exception
-|   |                   MalformedUriException.php
-|   |
-|   +---microsoft
-|   |   +---azure-storage-blob
-|   |   |   |   BreakingChanges.md
-|   |   |   |   ChangeLog.md
-|   |   |   |   composer.json
-|   |   |   |   CONTRIBUTING.md
-|   |   |   |   LICENSE
-|   |   |   |   README.md
-|   |   |   |
-|   |   |   \---src
-|   |   |       \---Blob
-|   |   |           |   BlobRestProxy.php
-|   |   |           |   BlobSharedAccessSignatureHelper.php
-|   |   |           |
-|   |   |           +---Internal
-|   |   |           |       BlobResources.php
-|   |   |           |       IBlob.php
-|   |   |           |
-|   |   |           \---Models
-|   |   |                   AccessCondition.php
-|   |   |                   AccessTierTrait.php
-|   |   |                   AppendBlockOptions.php
-|   |   |                   AppendBlockResult.php
-|   |   |                   Blob.php
-|   |   |                   BlobAccessPolicy.php
-|   |   |                   BlobBlockType.php
-|   |   |                   BlobPrefix.php
-|   |   |                   BlobProperties.php
-|   |   |                   BlobServiceOptions.php
-|   |   |                   BlobType.php
-|   |   |                   Block.php
-|   |   |                   BlockList.php
-|   |   |                   BreakLeaseResult.php
-|   |   |                   CommitBlobBlocksOptions.php
-|   |   |                   Container.php
-|   |   |                   ContainerAccessPolicy.php
-|   |   |                   ContainerACL.php
-|   |   |                   ContainerProperties.php
-|   |   |                   CopyBlobFromURLOptions.php
-|   |   |                   CopyBlobOptions.php
-|   |   |                   CopyBlobResult.php
-|   |   |                   CopyState.php
-|   |   |                   CreateBlobBlockOptions.php
-|   |   |                   CreateBlobOptions.php
-|   |   |                   CreateBlobPagesOptions.php
-|   |   |                   CreateBlobPagesResult.php
-|   |   |                   CreateBlobSnapshotOptions.php
-|   |   |                   CreateBlobSnapshotResult.php
-|   |   |                   CreateBlockBlobOptions.php
-|   |   |                   CreateContainerOptions.php
-|   |   |                   CreatePageBlobFromContentOptions.php
-|   |   |                   CreatePageBlobOptions.php
-|   |   |                   DeleteBlobOptions.php
-|   |   |                   GetBlobMetadataOptions.php
-|   |   |                   GetBlobMetadataResult.php
-|   |   |                   GetBlobOptions.php
-|   |   |                   GetBlobPropertiesOptions.php
-|   |   |                   GetBlobPropertiesResult.php
-|   |   |                   GetBlobResult.php
-|   |   |                   GetContainerACLResult.php
-|   |   |                   GetContainerPropertiesResult.php
-|   |   |                   LeaseMode.php
-|   |   |                   LeaseResult.php
-|   |   |                   ListBlobBlocksOptions.php
-|   |   |                   ListBlobBlocksResult.php
-|   |   |                   ListBlobsOptions.php
-|   |   |                   ListBlobsResult.php
-|   |   |                   ListContainersOptions.php
-|   |   |                   ListContainersResult.php
-|   |   |                   ListPageBlobRangesDiffResult.php
-|   |   |                   ListPageBlobRangesOptions.php
-|   |   |                   ListPageBlobRangesResult.php
-|   |   |                   PageWriteOption.php
-|   |   |                   PublicAccessType.php
-|   |   |                   PutBlobResult.php
-|   |   |                   PutBlockResult.php
-|   |   |                   SetBlobMetadataResult.php
-|   |   |                   SetBlobPropertiesOptions.php
-|   |   |                   SetBlobPropertiesResult.php
-|   |   |                   SetBlobTierOptions.php
-|   |   |                   UndeleteBlobOptions.php
-|   |   |
-|   |   \---azure-storage-common
-|   |       |   BreakingChanges.md
-|   |       |   ChangeLog.md
-|   |       |   composer.json
-|   |       |   CONTRIBUTING.md
-|   |       |   LICENSE
-|   |       |   README.md
-|   |       |
-|   |       \---src
-|   |           \---Common
-|   |               |   CloudConfigurationManager.php
-|   |               |   LocationMode.php
-|   |               |   Logger.php
-|   |               |   MarkerContinuationTokenTrait.php
-|   |               |   SharedAccessSignatureHelper.php
-|   |               |
-|   |               +---Exceptions
-|   |               |       InvalidArgumentTypeException.php
-|   |               |       ServiceException.php
-|   |               |
-|   |               +---Internal
-|   |               |   |   ACLBase.php
-|   |               |   |   ConnectionStringParser.php
-|   |               |   |   ConnectionStringSource.php
-|   |               |   |   MetadataTrait.php
-|   |               |   |   Resources.php
-|   |               |   |   RestProxy.php
-|   |               |   |   ServiceRestProxy.php
-|   |               |   |   ServiceRestTrait.php
-|   |               |   |   ServiceSettings.php
-|   |               |   |   StorageServiceSettings.php
-|   |               |   |   Utilities.php
-|   |               |   |   Validate.php
-|   |               |   |
-|   |               |   +---Authentication
-|   |               |   |       IAuthScheme.php
-|   |               |   |       SharedAccessSignatureAuthScheme.php
-|   |               |   |       SharedKeyAuthScheme.php
-|   |               |   |       TokenAuthScheme.php
-|   |               |   |
-|   |               |   +---Http
-|   |               |   |       HttpCallContext.php
-|   |               |   |       HttpFormatter.php
-|   |               |   |
-|   |               |   +---Middlewares
-|   |               |   |       CommonRequestMiddleware.php
-|   |               |   |
-|   |               |   \---Serialization
-|   |               |           ISerializer.php
-|   |               |           JsonSerializer.php
-|   |               |           MessageSerializer.php
-|   |               |           XmlSerializer.php
-|   |               |
-|   |               +---Middlewares
-|   |               |       HistoryMiddleware.php
-|   |               |       IMiddleware.php
-|   |               |       MiddlewareBase.php
-|   |               |       MiddlewareStack.php
-|   |               |       RetryMiddleware.php
-|   |               |       RetryMiddlewareFactory.php
-|   |               |
-|   |               \---Models
-|   |                       AccessPolicy.php
-|   |                       ContinuationToken.php
-|   |                       CORS.php
-|   |                       GetServicePropertiesResult.php
-|   |                       GetServiceStatsResult.php
-|   |                       Logging.php
-|   |                       MarkerContinuationToken.php
-|   |                       Metrics.php
-|   |                       Range.php
-|   |                       RangeDiff.php
-|   |                       RetentionPolicy.php
-|   |                       ServiceOptions.php
-|   |                       ServiceProperties.php
-|   |                       SignedIdentifier.php
-|   |                       TransactionalMD5Trait.php
-|   |
-|   +---phpoption
-|   |   \---phpoption
-|   |       |   composer.json
-|   |       |   LICENSE
-|   |       |
-|   |       \---src
-|   |           \---PhpOption
-|   |                   LazyOption.php
-|   |                   None.php
-|   |                   Option.php
-|   |                   Some.php
-|   |
-|   +---psr
-|   |   +---http-client
-|   |   |   |   CHANGELOG.md
-|   |   |   |   composer.json
-|   |   |   |   LICENSE
-|   |   |   |   README.md
-|   |   |   |
-|   |   |   \---src
-|   |   |           ClientExceptionInterface.php
-|   |   |           ClientInterface.php
-|   |   |           NetworkExceptionInterface.php
-|   |   |           RequestExceptionInterface.php
-|   |   |
-|   |   +---http-factory
-|   |   |   |   composer.json
-|   |   |   |   LICENSE
-|   |   |   |   README.md
-|   |   |   |
-|   |   |   \---src
-|   |   |           RequestFactoryInterface.php
-|   |   |           ResponseFactoryInterface.php
-|   |   |           ServerRequestFactoryInterface.php
-|   |   |           StreamFactoryInterface.php
-|   |   |           UploadedFileFactoryInterface.php
-|   |   |           UriFactoryInterface.php
-|   |   |
-|   |   \---http-message
-|   |       |   CHANGELOG.md
-|   |       |   composer.json
-|   |       |   LICENSE
-|   |       |   README.md
-|   |       |
-|   |       +---docs
-|   |       |       PSR7-Interfaces.md
-|   |       |       PSR7-Usage.md
-|   |       |
-|   |       \---src
-|   |               MessageInterface.php
-|   |               RequestInterface.php
-|   |               ResponseInterface.php
-|   |               ServerRequestInterface.php
-|   |               StreamInterface.php
-|   |               UploadedFileInterface.php
-|   |               UriInterface.php
-|   |
-|   +---ralouphie
-|   |   \---getallheaders
-|   |       |   composer.json
-|   |       |   LICENSE
-|   |       |   README.md
-|   |       |
-|   |       \---src
-|   |               getallheaders.php
-|   |
-|   +---symfony
-|   |   +---deprecation-contracts
-|   |   |       CHANGELOG.md
-|   |   |       composer.json
-|   |   |       function.php
-|   |   |       LICENSE
-|   |   |       README.md
-|   |   |
-|   |   +---polyfill-ctype
-|   |   |       bootstrap.php
-|   |   |       bootstrap80.php
-|   |   |       composer.json
-|   |   |       Ctype.php
-|   |   |       LICENSE
-|   |   |       README.md
-|   |   |
-|   |   +---polyfill-mbstring
-|   |   |   |   bootstrap.php
-|   |   |   |   bootstrap72.php
-|   |   |   |   bootstrap80.php
-|   |   |   |   composer.json
-|   |   |   |   LICENSE
-|   |   |   |   Mbstring.php
-|   |   |   |   README.md
-|   |   |   |
-|   |   |   \---Resources
-|   |   |       \---unidata
-|   |   |               caseFolding.php
-|   |   |               lowerCase.php
-|   |   |               titleCaseRegexp.php
-|   |   |               upperCase.php
-|   |   |
-|   |   \---polyfill-php80
-|   |       |   bootstrap.php
-|   |       |   composer.json
-|   |       |   LICENSE
-|   |       |   Php80.php
-|   |       |   PhpToken.php
-|   |       |   README.md
-|   |       |
-|   |       \---Resources
-|   |           \---stubs
-|   |                   Attribute.php
-|   |                   PhpToken.php
-|   |                   Stringable.php
-|   |                   UnhandledMatchError.php
-|   |                   ValueError.php
-|   |
-|   \---vlucas
-|       \---phpdotenv
-|           |   composer.json
-|           |   LICENSE
-|           |
-|           \---src
-|               |   Dotenv.php
-|               |   Validator.php
-|               |
-|               +---Exception
-|               |       ExceptionInterface.php
-|               |       InvalidEncodingException.php
-|               |       InvalidFileException.php
-|               |       InvalidPathException.php
-|               |       ValidationException.php
-|               |
-|               +---Loader
-|               |       Loader.php
-|               |       LoaderInterface.php
-|               |       Resolver.php
-|               |
-|               +---Parser
-|               |       Entry.php
-|               |       EntryParser.php
-|               |       Lexer.php
-|               |       Lines.php
-|               |       Parser.php
-|               |       ParserInterface.php
-|               |       Value.php
-|               |
-|               +---Repository
-|               |   |   AdapterRepository.php
-|               |   |   RepositoryBuilder.php
-|               |   |   RepositoryInterface.php
-|               |   |
-|               |   \---Adapter
-|               |           AdapterInterface.php
-|               |           ApacheAdapter.php
-|               |           ArrayAdapter.php
-|               |           EnvConstAdapter.php
-|               |           GuardedWriter.php
-|               |           ImmutableWriter.php
-|               |           MultiReader.php
-|               |           MultiWriter.php
-|               |           PutenvAdapter.php
-|               |           ReaderInterface.php
-|               |           ReplacingWriter.php
-|               |           ServerConstAdapter.php
-|               |           WriterInterface.php
-|               |
-|               +---Store
-|               |   |   FileStore.php
-|               |   |   StoreBuilder.php
-|               |   |   StoreInterface.php
-|               |   |   StringStore.php
-|               |   |
-|               |   \---File
-|               |           Paths.php
-|               |           Reader.php
-|               |
-|               \---Util
-|                       Regex.php
-|                       Str.php
-|
-\---views
-    +---auth
-    \---home
-            index.php
++---uploads
+|   \---cvs
+\---vendor
+    |   autoload.php
+    |
+    +---composer

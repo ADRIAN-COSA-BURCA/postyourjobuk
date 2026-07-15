@@ -4,18 +4,23 @@ ini_set('display_errors', 0);
 ini_set('log_errors', 1);
 error_reporting(E_ALL);
 
-// 2. SESSION INITIALIZATION (Must be the very first step)
+// 2. SESSION & SECURITY HEADERS (Moved to the very top)
 if (session_status() === PHP_SESSION_NONE) {
     session_set_cookie_params([
         'lifetime' => 0,
         'path' => '/',
         'domain' => '',
-        'secure' => false,
+        'secure' => false, // Set to true if using HTTPS
         'httponly' => true,
         'samesite' => 'Lax'
     ]);
     session_start();
 }
+
+// Prevent browser caching immediately
+header("Cache-Control: no-store, no-cache, must-revalidate, max-age=0");
+header("Cache-Control: post-check=0, pre-check=0", false);
+header("Pragma: no-cache");
 
 // 3. CORE BOOTSTRAP & AUTOLOADER
 require_once __DIR__ . '/../bootstrap.php';
@@ -29,30 +34,36 @@ spl_autoload_register(function ($class) {
     if (file_exists($file)) require $file;
 });
 
-// 4. PREPARE REQUEST CONTEXT
+// 4. PREPARE REQUEST CONTEXT (Normalized to match Router)
 $requestUri = parse_url($_SERVER['REQUEST_URI'], PHP_URL_PATH);
 $cleanPath = ($requestUri === '/') ? '/' : rtrim($requestUri, '/');
 
-// 5. AUTHENTICATION MIDDLEWARE
-$allowedPublicPaths = ['/', '/index.php', '/about', '/contact', '/vision', '/terms', '/login', '/login/authenticate', '/admin/login', '/apply', '/job'];
-$isPublic = false;
+// 5. AUTHENTICATION & ROLE-BASED MIDDLEWARE
+$allowedPublicPaths = [
+    '/', '/index.php', '/about', '/contact', '/vision', '/terms', 
+    '/login', '/login/authenticate', '/admin/login', '/apply', '/job',
+    '/reset-password', '/reset-password/submit'
+];
 
-foreach ($allowedPublicPaths as $route) {
-    if ($cleanPath === $route || str_starts_with($cleanPath, $route . '/')) {
-        $isPublic = true;
-        break;
-    }
+$isPublic = in_array($cleanPath, $allowedPublicPaths);
+if (!$isPublic) {
+    error_log("DEBUG: Middleware blocked access to: " . $cleanPath);
 }
 
-// DEBUG: Log status after variables are set
-error_log("DEBUG: Path: " . $cleanPath . " | Session Tenant: " . ($_SESSION['tenant_id'] ?? 'NONE'));
 
-if (!$isPublic && !isset($_SESSION['tenant_id']) && !isset($_SESSION['admin_logged_in'])) {
-    header('Location: /login');
-    exit;
+
+// 6. VIEW CONTEXT
+$viewContext = 'public';
+if (str_starts_with($cleanPath, '/admin')) {
+    $viewContext = 'admin';
+} elseif (str_starts_with($cleanPath, '/dashboard') || str_starts_with($cleanPath, '/jobs') || str_starts_with($cleanPath, '/applicants')) {
+    $viewContext = 'tenant';
+} elseif (str_contains($cleanPath, '/login')) {
+    $viewContext = 'login';
 }
+$GLOBALS['viewContext'] = $viewContext;
 
-// 6. ROUTER & DISPATCH
+// 7. ROUTER INITIALIZATION
 $router = new \App\Core\Router();
 
 // =========================================================================
@@ -62,10 +73,12 @@ $router = new \App\Core\Router();
 // --- Admin Portal Core & Authentication Routes ---
 $router->add('GET',  '/admin',               [\App\Controllers\AdminController::class, 'index']);
 $router->add('GET',  '/admin/index.php',     [\App\Controllers\AdminController::class, 'index']);
+$router->add('GET',  '/admin/analytics',     [\App\Controllers\AdminController::class, 'analytics']);
 $router->add('GET',  '/admin/logs',          [\App\Controllers\AuditController::class, 'index']);
 $router->add('GET',  '/admin/login',         [\App\Controllers\AdminController::class, 'login']);
 $router->add('POST', '/admin/login',         [\App\Controllers\AdminController::class, 'authenticateAdmin']);
 $router->add('GET',  '/admin/logout',        [\App\Controllers\AdminController::class, 'logout']);
+
 
 // --- Admin Tenant Management Operations ---
 $router->add('GET',  '/admin/view-tenant',      [\App\Controllers\AdminController::class, 'viewTenant']);
@@ -90,6 +103,9 @@ $router->add('GET',  '/terms',                  [\App\Controllers\HomeController
 $router->add('GET',  '/login',                  [\App\Controllers\AuthController::class, 'login']);
 $router->add('POST', '/login/authenticate',     [\App\Controllers\AuthController::class, 'authenticate']);
 $router->add('GET',  '/logout',                 [\App\Controllers\AuthController::class, 'logout']);
+// Password Reset Routes
+$router->add('GET',  '/reset-password', [\App\Controllers\AuthController::class, 'showResetForm']);
+$router->add('POST', '/reset-password/submit', [\App\Controllers\AuthController::class, 'handleResetSubmit']);
 
 // --- Protected Workspace Tenant Routes ---
 $router->add('GET',  '/dashboard',              [\App\Controllers\DashboardController::class, 'index']);
@@ -112,34 +128,10 @@ $router->add('POST', '/applicant/delete-all',   [\App\Controllers\ApplicantContr
 $router->add('GET', '/applicant/view',          [\App\Controllers\ApplicantController::class, 'view']);
 $router->add('GET', '/applicant/download',      [\App\Controllers\ApplicantController::class, 'download']);
 
-
-// =========================================================================
-// 4. CONTEXT-AWARE AUTHENTICATION BYPASS MIDDLEWARE
-// =========================================================================
-$requestUri = parse_url($_SERVER['REQUEST_URI'], PHP_URL_PATH);
-$cleanPath = ($requestUri === '/') ? '/' : rtrim($requestUri, '/');
-
-$allowedPublicPaths = ['/', '/index.php', '/about', '/contact', '/vision', '/terms', '/login', '/login/authenticate', '/admin/login', '/apply', '/job'];
-
-$isPublic = false;
-foreach ($allowedPublicPaths as $route) {
-    if ($cleanPath === $route || str_starts_with($cleanPath, $route . '/')) {
-        $isPublic = true;
-        break;
-    }
-}
-
-// DEBUG: Log the exact state before the check
-error_log("DEBUG: Middleware Checking Path: $cleanPath | Session: " . json_encode($_SESSION));
-
-// FIX: Ensure we are checking for the presence of the session keys correctly
-$isAuthenticated = isset($_SESSION['tenant_id']) || isset($_SESSION['admin_logged_in']);
-
-if (!$isPublic && !$isAuthenticated) {
-    error_log("DEBUG: Access Denied. Redirecting to /login");
-    header('Location: /login');
-    exit;
-}
+// 5.5 PREVENT PAGE CACHING (Crucial for Logout functionality)
+header("Cache-Control: no-store, no-cache, must-revalidate, max-age=0");
+header("Cache-Control: post-check=0, pre-check=0", false);
+header("Pragma: no-cache");
 
 // 6. DISPATCH
 $router->dispatch($_SERVER['REQUEST_URI'], $_SERVER['REQUEST_METHOD']);

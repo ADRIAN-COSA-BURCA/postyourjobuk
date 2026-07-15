@@ -35,12 +35,14 @@
                 <span class="form-label">Website</span>
                 <p><a href="<?= htmlspecialchars($tenant['website_url'] ?? '#'); ?>" target="_blank"><?= htmlspecialchars($tenant['website_url'] ?? 'N/A'); ?></a></p>
             </div>
+			
             <div>
                 <span class="form-label">Current Gateway Status</span>
                 <span class="status-badge-flag <?= strtolower($tenant['status']); ?>">
                     <?= ucfirst(htmlspecialchars($tenant['status'])); ?>
                 </span>
             </div>
+			
         </div>
         <div style="margin-top: 1rem;">
             <span class="form-label">Address</span>
