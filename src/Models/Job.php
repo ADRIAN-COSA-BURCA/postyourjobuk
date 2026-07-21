@@ -181,6 +181,75 @@ class Job extends BaseModel {
         $stmt->execute([$tenantId]);
         return (int)$stmt->fetchColumn();
     }
+	
+	
+	/**
+ * Get applicant counts grouped by status for the Funnel Chart
+ */
+public function getApplicantFunnelData(int $tenantId): array {
+    $sql = "
+        SELECT 
+            status, 
+            COUNT(*) as count 
+        FROM applicants 
+        WHERE tenant_id = ? 
+        GROUP BY status
+    ";
+    
+    $stmt = $this->db->prepare($sql);
+    $stmt->execute([$tenantId]);
+    
+    // Return an associative array: ['applied' => 10, 'interviewing' => 3, ...]
+    $results = $stmt->fetchAll(PDO::FETCH_KEY_PAIR);
+    
+    // Ensure all expected keys exist to prevent Chart.js errors
+    return array_merge([
+        'applied' => 0, 
+        'interviewing' => 0, 
+        'offered' => 0, 
+        'hired' => 0
+    ], $results);
+}
+
+public function getTrendData(int $tenantId): array {
+    $sql = "
+        SELECT DATE(created_at) as date, COUNT(*) as count 
+        FROM applicants 
+        WHERE tenant_id = ? 
+        AND created_at >= DATE_SUB(NOW(), INTERVAL 7 DAY)
+        GROUP BY DATE(created_at)
+        ORDER BY date ASC
+    ";
+    
+    $stmt = $this->db->prepare($sql);
+    $stmt->execute([$tenantId]);
+    $results = $stmt->fetchAll(PDO::FETCH_ASSOC);
+
+    // Format for Chart.js
+    $labels = [];
+    $data = [];
+    foreach ($results as $row) {
+        $labels[] = $row['date'];
+        $data[] = (int)$row['count'];
+    }
+    
+    return ['labels' => $labels, 'data' => $data];
+}
+
+public function getTopPerformingJobs(int $tenantId, int $limit = 5): array {
+    $sql = "
+        SELECT j.title, COUNT(a.applicant_id) as applicant_count
+        FROM jobs j
+        LEFT JOIN applicants a ON j.job_id = a.job_id
+        WHERE j.tenant_id = ?
+        GROUP BY j.job_id
+        ORDER BY applicant_count DESC
+        LIMIT ?
+    ";
+    $stmt = $this->db->prepare($sql);
+    $stmt->execute([$tenantId, $limit]);
+    return $stmt->fetchAll(PDO::FETCH_ASSOC);
+}
 
     /**
      * Security check: Verify if a job belongs to a specific tenant.

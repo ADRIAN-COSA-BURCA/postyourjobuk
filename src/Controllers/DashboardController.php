@@ -35,4 +35,46 @@ class DashboardController extends BaseController {
             'tenant'    => $tenantProfile // Passed to the view here!
         ]);
     }
+
+    public function analytics() {
+        if (!isset($_SESSION['tenant_id'])) {
+            header("Location: /login");
+            exit;
+        }
+
+        $tenantId = $_SESSION['tenant_id'];
+        $tenantProfile = $_SESSION['tenant_profile'] ?? ['company_name' => 'Recruiter'];
+
+        $jobModel = new Job();
+        
+        // Fetch base stats
+        $stats = method_exists($jobModel, 'getStats') ? $jobModel->getStats($tenantId) : [
+            'total_jobs' => 0, 'active_jobs' => 0, 'inactive_jobs' => 0, 'total_applicants' => 0
+        ];
+
+        // Fetch funnel data
+        $funnelData = method_exists($jobModel, 'getApplicantFunnelData') 
+            ? $jobModel->getApplicantFunnelData($tenantId) 
+            : ['applied' => 0, 'interviewing' => 0, 'offered' => 0, 'hired' => 0];
+
+        // Fetch trend data
+        $trendData = method_exists($jobModel, 'getTrendData') 
+            ? $jobModel->getTrendData($tenantId) 
+            : ['labels' => [], 'data' => []];
+
+        // NEW: Fetch top performing jobs
+        $topJobs = method_exists($jobModel, 'getTopPerformingJobs') 
+            ? $jobModel->getTopPerformingJobs($tenantId) 
+            : [];
+
+        // Render the analytics view with all datasets
+        $this->render('dashboard/analytics', [
+            'pageTitle'  => 'Dashboard Analytics',
+            'tenant'     => $tenantProfile,
+            'stats'      => $stats,
+            'funnelData' => $funnelData,
+            'trendData'  => $trendData,
+            'topJobs'    => $topJobs // Pass the new data here
+        ]);
+    }
 }

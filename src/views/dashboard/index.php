@@ -1,9 +1,16 @@
-<div class="dashboard-container dashboard-flow">
-    <div class="card" style="margin-bottom: 2rem; border-top: 4px solid #4f46e5; background: #111827; border: 1px solid #374151;">
-        <h1 style="margin-bottom: 0.5rem; color: #ffffff;">Welcome, <?= htmlspecialchars($tenant['company_name'] ?? 'Recruiter') ?></h1>
-        <p class="text-muted" style="margin-bottom: 1.5rem; color: #94a3b8;">Your Corporate Profile Dashboard</p>
+<div class="card" style="margin-bottom: 2rem; border-top: 4px solid #4f46e5; background: #111827; border: 1px solid #374151;">
         
-        <div style="display: grid; grid-template-columns: repeat(auto-fit, minmax(200px, 1fr)); gap: 1rem; background: #1f2937; padding: 1.5rem; border-radius: 8px; border: 1px solid #374151;">
+        <!-- NEW HEADER FLEX CONTAINER -->
+        <div style="display: flex; justify-content: space-between; align-items: flex-start; margin-bottom: 1.5rem;">
+            <div>
+                <h1 style="margin-bottom: 0.5rem; margin-top: 0; color: #ffffff;">Welcome, <?= htmlspecialchars($tenant['company_name'] ?? 'Recruiter') ?></h1>
+                <p class="text-muted" style="margin-bottom: 0; color: #94a3b8;">Your Corporate Profile Dashboard</p>
+            </div>
+            <a href="/dashboard/analytics" class="btn btn-primary">📊 View Analytics</a>
+        </div>
+        <!-- END NEW HEADER FLEX CONTAINER -->
+        
+        <div style="display: grid; grid-template-columns: repeat(auto-fit, minmax(200px, 1fr)); gap: 1rem; background: #1f2937; padding: 1rem; border-radius: 8px; border: 1px solid #374151;">
             <div>
                 <span style="display: block; font-size: 0.875rem; color: #94a3b8; margin-bottom: 0.25rem;">Industry</span>
                 <strong style="color: #ffffff;"><?= htmlspecialchars($tenant['industry'] ?? 'Not Specified') ?></strong>
@@ -48,7 +55,7 @@
         <?php unset($_SESSION['error_message']); ?>
     <?php endif; ?>
 
-    <section class="stats-grid">
+    <section class="stats-grid" style="margin-bottom: 2rem !important;">
         <div class="card">
             <h3>Total Jobs</h3>
             <p class="stat-value"><?= (int)$stats['total_jobs'] ?></p>
@@ -83,7 +90,7 @@
                 <tbody>
                     <?php if (empty($jobs)): ?>
                         <tr>
-                            <td colspan="5" style="text-align: center; color: #6b7280; padding: 2rem;">
+                            <td colspan="3" style="text-align: center; color: #6b7280; padding: 1rem;">
                                 No job postings detected inside this corporate tenant workspace.
                             </td>
                         </tr>

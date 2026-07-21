@@ -7,8 +7,8 @@ This log serves as a detailed record of the architectural, design, and implement
 
 adrian final year project disertation; 
 final project for level 6 computing; 
-analyse my project ; 
-analyse below the work has been done for this project; 
+
+** this project starts initially from implementation with local machine using XAMPP then upgrading and adding new features , moving later and updating to a Docker envinronment + azure integration + Google Gemini AI 
 
 
 Level 6 final project
@@ -16,7 +16,7 @@ Level 6 final project
 Next-Generation Recruitment Analytics: A Scalable, Multi-Tenant SaaS Platform Leveraging Azure Serverless Architecture
  and Event-Driven AI. Developing an enterprise-grade recruitment ecosystem that utilizes 
  Azure App Service for scalable frontend delivery alongside Azure Functions 
- to facilitate asynchronous, event-driven CV processing, while simultaneously leveraging Azure AI 
+ to facilitate asynchronous, event-driven CV processing, while simultaneously leveraging AI
  to interpret, rank, and select top-tier candidates to deliver real-time, data-driven insights.
 
 ## Project Overview
@@ -46,48 +46,7 @@ and the file in Azure Blob Storage.
 and displayed instantly on the recruiter's dashboard.
 
 
-
-
-
-
-
-
-
-
-To ensure your project remains modular, scalable, and easy to transition from local development to your existing Azure infrastructure, you should treat your code as Environment Agnostic.
-Here is the analysis and the strategy for your requirements, followed by the recommended development workflow.
-1. Technical Requirements & Implementation Strategy
-Requirement	Implementation Strategy
-Modularity & OOP	Use a Repository Pattern or Service Layer. Your controllers should never contain raw SQL. Create a Database interface; locally, the implementation connects to XAMPP, while in Azure, it uses your MySQL Flexible Server credentials.
-Scalability (UI)	Use CSS Flexbox and Grid. Define a standard gutter and unit system (e.g., --spacing-unit: 8px). Use media queries only to switch column counts, not to rewrite entire page logic.
-Uniformity	Use a Template Engine (like Twig or simple PHP require blocks for header.php, footer.php, nav.php). Place all global styles in global.css and page-specific logic in page-name.css.
-Azure Readiness	Use Environment Variables (.env). Never hardcode database connection strings. Your app should read these from the system environment. Locally, this is a .env file; in Azure, it is the "Configuration" blade in the App Service.
-Code Simplicity	Adhere to the "Fat Models, Skinny Controllers" approach. Keep your PHP files clean by offloading logic to classes. If a file exceeds 120 lines, it is a signal to split it into a separate class or partial view.
-
-
-
-Local vs. Direct Deployment Strategy
-The Recommendation: Local-First Development.
-Building directly in Azure will slow down your development cycle because of build times, deployment latency, and debugging challenges. A local-first approach using XAMPP is standard, provided you structure the code for easy migration.
-Strategies to make switching to Azure "Super Easy":
-1.	Abstraction of Services: Create a Config class that checks if it is running in Azure or Local.
-o	Example: If $_SERVER['AZURE_ENVIRONMENT'] is set, use managed identity credentials; otherwise, use local MySQL user/pass.
-2.	Relative Pathing: Never use absolute paths (e.g., C:\xampp\htdocs\...). Use relative paths (__DIR__ . '/../storage/cvs') to ensure your file system logic works on both Windows (local) and Linux (Azure App Service).
-3.	Dockerize Early: Since you mentioned Docker, use it locally to replicate the Azure environment. By running your local MySQL and PHP inside containers (matching your Azure setup), you eliminate the "it works on XAMPP but not on Azure" problem.
-4.	Blob Storage Wrapper: Create a simple PHP class StorageInterface. It should have methods like uploadFile() and getFile(). Initially, these methods write to a local folder. When you move to the cloud, you only update the class to use the Azure SDK for PHP to talk to Blob Storage. The rest of your application remains untouched.
-
-
-Implementation Roadmap
-•	Phase 1 (Design & Skeleton): Define your global CSS grid, color palette, and PHP base classes. Set up the local Docker environment to mimic your final cloud production environment.
-•	Phase 2 (Core Logic): Develop the UI components (forms, dashboard, tables) using OOP. Implement the local storage/database interaction using your abstraction wrappers.
-•	Phase 3 (Azure Integration): Swap the local storage/database drivers for the Azure SDK drivers. Since your code uses interfaces (e.g., StorageInterface), this is a seamless "plug-and-play" transition.
-•	Phase 4 (Validation & Polish): Test responsiveness across breakpoints (320px for mobile, 768px for tablet, 1200px+ for desktop).
-
-
-
-
-
-
+** ensure project remains modular, scalable, and easy to transition from local development to existing Azure infrastructure,  treat code as Environment Agnostic.
 
 
 ## 1. Chapter 1: Introduction & Rationale
@@ -123,31 +82,32 @@ Implementation Roadmap
 
 ## Technical Decision Log (Live Tracking)
 
-| Date | Decision | Rationale | Outcome |
-| :--- | :--- | :--- | :--- |
-| 2025-03-14 | Migration to Docker | Eliminate XAMPP dependency & ensure Azure parity. | Successful environment isolation. |
-| 2025-03-14 | Composer Integration | Modularize dependency management. | Enabled secure, automated library installs. |
-| 2025-03-14 | Singleton Database | Standardize DB connection across the app. | Improved performance and code clarity. |
+Decision | Rationale | Outcome |
+
+Migration to Docker | Eliminate XAMPP dependency & ensure Azure parity. | Successful environment isolation. |
+Composer Integration | Modularize dependency management. | Enabled secure, automated library installs. |
+Singleton Database | Standardize DB connection across the app. | Improved performance and code clarity. |
 
 
 ## Technical Decision Log (Live Tracking)
 
-| Date | Decision | Rationale | Outcome |
-| :--- | :--- | :--- | :--- |
-| 2025-03-14 | Migration to Docker | Eliminate XAMPP dependency & ensure Azure parity. | Successful environment isolation. |
-| 2025-03-14 | Composer Integration | Modularize dependency management. | Enabled secure, automated library installs. |
-| 2025-03-14 | Singleton Database | Standardize DB connection across the app. | Improved performance and code clarity. |
-| 2025-06-08 | Service Layer Adoption | Decoupled storage logic (Azure vs Local) into StorageService. | Enhanced system extensibility and maintainability. |
-| 2025-06-08 | Front Controller Pattern | Transitioned from legacy page-based routing to MVC architecture. | Centralized security, improved routing control, and cleaner URL structures. |
+Decision | Rationale | Outcome |
 
-By refactoring the business logic into distinct Model, View, and Controller (MVC) components, the system achieved a high level of Separation of Concerns (SoC).
+ Migration to Docker | Eliminate XAMPP dependency & ensure Azure parity. | Successful environment isolation. |
+ Composer Integration | Modularize dependency management. | Enabled secure, automated library installs. |
+ Singleton Database | Standardize DB connection across the app. | Improved performance and code clarity. |
+ Service Layer Adoption | Decoupled storage logic (Azure vs Local) into StorageService. | Enhanced system extensibility and maintainability. |
+ Front Controller Pattern | Transitioned from legacy page-based routing to MVC architecture. | Centralized security, improved routing control, and cleaner URL structures. |
 
-Key improvements included the introduction of a StorageService to abstract cloud-based Azure Blob storage from local file handling, and the implementation of a Front Controller pattern. 
+**By refactoring the business logic into distinct Model, View, and Controller (MVC) components, the system achieved a high level of Separation of Concerns (SoC).
+
+--Key improvements: included the introduction of a StorageService to abstract cloud-based Azure Blob storage from local file handling, and the implementation of a Front Controller pattern. 
 This allowed the application to consolidate routing logic into a single entry point, 
 facilitating enhanced security controls and laying the groundwork for a scalable, production-ready system suitable for enterprise deployment on Azure."
 
+** projects goes through several stages of Development, update sections are described below; 
 
-Project Update Documentation: Architecture Migration
+## Project Update Documentation: Architecture Migration
 1. Decoupling and Routing
 Front Controller Pattern: Implemented a central routing entry point in public/index.php. This removes the need for individual PHP files to handle their own logic, improving maintainability and security.
 
@@ -173,20 +133,7 @@ Helper Utilities: Developed global functions like e() for context-aware output e
 
 
 
-
-Up until now, we have focused on Infrastructure:
-
-Routing: (public/index.php) – Traffic is handled centrally.
-
-Logic: (HomeController) – Requests are processed cleanly.
-
-Persistence: (Database.php + bootstrap.php) – Secure, singleton-based connectivity is ready.
-
-Presentation: (views/home/index.php) – The UI is separated from the logic
-
-
-
-Architectural Summary
+## Architectural Summary
 To finalize your dissertation documentation for this stage, consider the flow we have established:
 
 Request Flow: public/index.php (Router) → HomeController (Orchestrator).
@@ -195,11 +142,10 @@ Model Interaction: HomeController queries the Job model, which uses the BaseMode
 
 Data Presentation: The data is passed back to views/home/index.php, which remains purely focused on HTML/CSS.
 
+** We have successfully built the Security Foundation (BaseController), the Authentication Layer (AuthController & Model), and the Router (public/index.php).
 
-We have successfully built the Security Foundation (BaseController), the Authentication Layer (AuthController & Model), and the Router (public/index.php).
 
-
-update:
+## update:
 Architectural Migration
 Summary of Changes:
 Migrated the application from a procedural structure to a modern Model-View-Controller (MVC) design pattern. This shift was motivated by the need to centralize security controls and decouple business logic from presentation layers.
@@ -216,7 +162,7 @@ Proactive Security Layering: Integrated CSRF validation and rate-limiting (veloc
 
 
 
-update:
+## update:
 We have successfully transitioned your application from a scattered procedural monolith to a hardened MVC framework.
 
 MVC Architecture: We implemented a clear separation of concerns using BaseController (infrastructure), JobController/DashboardController (business logic), and Job model (data access).
@@ -226,7 +172,7 @@ Zero-Trust Security: We moved from "per-file" security checks to an "architectur
 Proactive Monitoring: We integrated the SecurityLogger directly into the authentication and request flow, ensuring that anomalies like session hijacking or unauthorized workspace access are logged for SIEM (Security Information and Event Management) analysis.
 
 
-update:
+## update:
 Project Status: MVC Architectural Migration
 Accomplishments:
 
@@ -241,8 +187,7 @@ UI/UX Consistency: Migrated legacy styling to a unified Layout system (header/fo
 Data Isolation: Enforced tenant-scoped queries across all model-level operations to prevent cross-tenant data leakage.
 
 
-update:
-
+## update:
 Fix: Resolved "Undefined array key" error in the recruitment dashboard by synchronizing controller data fetching with model logic.
 
 Refactor: Migrated statistic retrieval from Recruiter model to Job model to ensure correct data mapping (total_jobs, active_jobs, total_applicants).
@@ -251,7 +196,7 @@ Security: Validated tenant_id session integrity checks for dashboard access.
 
 
 
-update:
+## update:
 You have built a secure, high-quality multi-tenant MVC framework core.
 
 Backend Engine: Your centralized routing loop (Router.php), database singletons, and query abstraction tools (BaseModel.php) are complete and functioning correctly.
@@ -261,8 +206,7 @@ Zero-Trust Security: Your authentication handling is industry-grade. You have pr
 Unified Layout Wrapper: Your rendering logic cleanly splits presentation fragments from layout structures. The browser now receives structural components uniformly via main.php.
 
 
-update:
-
+## update:
 You have successfully built the "Engine Room" of your MVC framework. You have successfully navigated:
 
 Routing & Request Dispatching: The system correctly maps URLs to Controller actions.
@@ -273,20 +217,12 @@ Model Persistence: You have robust BaseModel and Job models that handle SQL prep
 
 Security Foundations: CSRF protection, data boundary gatekeeping, and error handling are now active.
 
-Analysis of Current Status
+
+** Analysis of Current Status
 DONE: Recruiter Dashboard, Job Posting, CSRF protection, Database abstraction (BaseModel), and security logging.
 
-BROKEN/INCOMPLETE:
 
-Database Helper Methods: You currently have Fatal errors because Database.php lacks the fetchOne, fetchAll, etc., wrapper methods needed by BaseModel.
-
-Public Job Board: There is no "Front Door" for candidates to view jobs.
-
-Application Flow: You cannot yet test the "Applicants" list because no users have applied yet.
-
-
-
-update:
+## update:
 Analysis of Current Status
 Design System: Unified across Admin and Recruiter interfaces.
 
@@ -300,7 +236,7 @@ Missing Core: We lack the Public-Facing Job Board (the landing page index) and t
 
 
 
-update:
+## update:
 Design & Theming
 Unified Design System: Replaced fragmented inline styles with a centralized :root CSS variable system in main.css.
 
@@ -325,14 +261,14 @@ High-End Display: Updated the Job View interface to use a professional metadata 
 
 
 
-UPDATE:
+## update:
 You have successfully resolved the routing, authentication, and database persistence layers. 
 Main dasboard index was implemented; job posted by recruiters will populate the main dashboard index where candidates can apply for jobs;
 
 
 
-update:
-hase 1: Core Architecture (COMPLETED)
+## update:
+--phase 1: Core Architecture (COMPLETED)
 Docker Environment: Web server, database, and PHPMyAdmin are fully containerized and communicating.
 
 Routing Engine: The MVC router (index.php, Router.php, BaseController.php) cleanly separates public endpoints from protected recruiter workspaces.
@@ -341,32 +277,32 @@ Database & Persistence: The PDO wrapper (Database.php) and BaseModel.php are suc
 
 Authentication & Isolation: Multi-tenant architecture is active. Recruiter sessions are protected, IP/User-Agent hijacking defenses are in place, and users can only see their own company's data.
 
-✅ Phase 2: Job Board & Dashboard (COMPLETED)
+--Phase 2: Job Board & Dashboard (COMPLETED)
 Recruiter UI: The dashboard loads correctly, calculating live metrics (Total Jobs, Active Jobs) based on tenant ID.
 
 Job Creation: The JobController::store method successfully validates data, checks rate limits, sanitizes inputs, and saves jobs to the database.
 
 UI/UX: The dark-mode interface and form contrast issues have been stabilized.
 
-🚧 Phase 3: The Applicant Tracking System (NEXT)
+--Phase 3: The Applicant Tracking System (NEXT)
 Build ApplicantController.php: To intercept the "Apply" form submission.
 
 Build StorageService.php: To securely connect to Azure Blob and upload the CV documents (PDF/DOCX).
 
 Build the Candidate Review UI: The /applicants route needs a view for recruiters to download those CVs from Azure and review the candidates.
 
-🚧 Phase 4: Job Management Completion (PENDING)
+--Phase 4: Job Management Completion (PENDING)
 Edit & Delete Jobs: We need to build the edit() and delete() methods in JobController.php so recruiters can manage their existing postings.
 
-🚧 Phase 5: Super Admin Portal (PENDING)
+--Phase 5: Super Admin Portal (PENDING)
 Tenant Management: The /admin routes are mapped, but we need to ensure the admin can suspend or activate corporate tenants to control platform access.
 
 
 
 
-update:
+## update:
 StorageService.php so it acts as the master switchboard, utilizing the AzureBlobStorage.php worker
-ero Downtime: If your Azure subscription expires or the API goes down, ApplicantController won't crash.
+zero Downtime: If your Azure subscription expires or the API goes down, ApplicantController won't crash.
  StorageService will automatically catch the Azure error, switch to local storage, 
  save the CV to the Docker container, and the candidate's application will still go through!
 Storage Layer: Your StorageService.php is complete, featuring a primary cloud-first strategy with a reliable local filesystem fallback, now protected against file collisions.
@@ -374,18 +310,13 @@ Storage Layer: Your StorageService.php is complete, featuring a primary cloud-fi
 Application Layer: Your ApplicantController.php handles multi-tenant authorization, 
 file validation, and secures the process against BOLA (Broken Object Level Authorization) attacks.
 
-View Layer: Your details.php handles form state and provides a secure user experience.
 
-
-Creating a local fallback in your StorageService.php is a standard enterprise pattern known as Defensive Engineering or Tiered Availability. Even if your production destination is Azure, the local fallback is not "extra" work—it is an insurance policy.
-
-Here is why this is the best architectural choice for your project:
+** Creating a local fallback in your StorageService.php is a standard enterprise pattern known as Defensive Engineering or Tiered Availability. Even if your production destination is Azure, the local fallback is not "extra" work—it is an insurance policy.
 
 By having a local fallback, you can work on the bus, on a plane, or during an internet outage without breaking your flow. 
 You can test the logic of the upload pipeline without needing cloud infrastructure credentials.
 
 Infrastructure Decoupling (The "Zero-Trust" Benefit):
-
 If you ever need to switch cloud providers (e.g., from Azure to AWS or Google Cloud) 
 or if Azure has a regional outage, your application does not stop working. 
 The code is abstracted via the StorageService, meaning you only have to update the service layer,
@@ -393,19 +324,18 @@ The code is abstracted via the StorageService, meaning you only have to update t
 
 
 
-UPDATE
+## update:
 Synchronized the global navigation layout with your existing framework route configuration.
  The Recruiter Portal now links directly to the independent /login endpoint managed by the AuthController, 
- while Admin Entry correctly targets /admin/login managed by the AdminController
-Completely refactored footer.php; 
+ while Admin Entry correctly targets /admin/login managed by the AdminController; 
 more features added to main dashboard index;
 
 
-update:
+## update:
 core environment database and storage is completely migrated, stable, and working with Azure,
 
 
-update:
+## update:
 Recruiter Engine & Security Hardening
 local AI INTEGRATION - gemini-2.5-flash
 
@@ -418,7 +348,7 @@ local AI INTEGRATION - gemini-2.5-flash
 - **File System Stability:** Relocated temp file unlinking operations down to the thread execution execution context blocks to guarantee I/O data sequence integrity.
 
 
-update:
+## update:
 Infrastructure Containerization & Portability Integration
 - **Decoupled Python Worker Service:** Migrated the background queue processor out of the Windows host environment,
  and into a dedicated, isolated Docker container (`postyourjobuk-ai-worker-1`).
@@ -433,34 +363,32 @@ making the entire application 100% portable across any machine running Docker wi
 work done:
 implementation of Standardized Page Architecture
 Action: Created new instances of about.php, contact.php, terms.php, and vision.php
-Ensures perfect UI parity between public pages and the secure dashboard while eliminating structural CSS drift
+
 
 ## Analysis of Work Accomplished
 Your web application has matured into a sophisticated system with the following pillars:
-Dockerized Infrastructure: By containerizing the environment, you have ensured "write once, run anywhere" 
+a) Dockerized Infrastructure: By containerizing the environment, you have ensured "write once, run anywhere" 
 parity between your local machine and the eventual Azure cloud deployment.
  This handles environment consistency, package dependencies, and server configuration.  
- Persistent Cloud Data Layer: By incorporating Azure Database, 
+b) Persistent Cloud Data Layer: By incorporating Azure Database, 
  you have moved away from local, volatile storage to a managed, scalable relational database. 
  Your integration with Azure Blob Storage allows the platform to handle candidate documents
  (resumes, certifications) securely and at scale, separating heavy binary data from your primary database.  
- Architectural Uniformity: Through the recent refactoring, 
+c) Architectural Uniformity: Through the recent refactoring, 
  you have implemented a robust BaseController that acts as a central security gatekeeper, 
  ensuring all routes—public or private—adhere to strict authentication and tenancy standards. 
- Design System Parity: You have moved from fragmented, inline-styled pages to a unified design system using main.css. 
+d) Design System Parity: You have moved from fragmented, inline-styled pages to a unified design system using main.css. 
  This ensures the UI remains consistent across all modules, including the Dashboard and new informational pages. 
- AI Integration: Your current implementation of local AI capabilities has served as a foundational proof-of-concept 
+e) AI Integration: Your current implementation of local AI capabilities has served as a foundational proof-of-concept 
  for automated screening and intelligent data processing
 
 
 ## Model-View-Controller (MVC)
 The Current Workings of Your WebappYour application operates on a Model-View-Controller (MVC) pattern 
 designed for enterprise scalability:Security Gatekeeping: 
-Every request is intercepted by the BaseController constructor, which validates sessions and tenant activity before allowing access.
-  Intelligent Routing: The system distinguishes between "public" (About, Vision, Contact) 
-  and "secure" (Dashboard) routes, applying strict enforcement only where necessary.  
-  Decoupled Logic: Your controllers (e.g., DashboardController, HomeController) focus solely on application flow, 
-  while models manage the data interactions with your Azure Database, and views focus on rendering the UI via the global layout
+Every request is intercepted by the BaseController constructor, which validates sessions and tenant activity before allowing access. 
+Decoupled Logic: controllers (e.g., DashboardController, HomeController) focus solely on application flow,
+while models manage the data interactions with your Azure Database, and views focus on rendering the UI via the global layout
 
 
 ## update:
@@ -491,7 +419,8 @@ Alerting: If you trigger a CRITICAL event (e.g., suspending a tenant), you will 
 
 
 ## going forward: 
-We are shifting from a Synchronous/Local model to an Asynchronous/Cloud-Native model.Current State:
+shifting from a Synchronous/Local model to an Asynchronous/Cloud-Native model.
+Current State:
  Your web app performs file processing within the same process that handles user requests. 
  This blocks the user and limits scalability.  Goal State: 
  The web app (Azure Web App) will receive a job/file and drop it into a queue (Azure Storage Queue). 
@@ -572,7 +501,8 @@ cd C:\dev\postyourjobuk
 
 
 
-database:
+## database:
+
 Tables_in_postyourjobhere |
 +---------------------------+
 | applicants                |
@@ -601,31 +531,6 @@ DESCRIBE system_logs;
 11 rows in set (0.034 sec)
 
 
-DESCRIBE tenants;
-+-----------------------+----------------------------+------+-----+-------------------+-----------------------------+
-| Field                 | Type                       | Null | Key | Default           | Extra                       |
-+-----------------------+----------------------------+------+-----+-------------------+-----------------------------+
-| tenant_id             | int unsigned               | NO   | PRI | NULL              | auto_increment              |
-| company_name          | varchar(100)               | NO   |     | NULL              |                             |
-| contact_person        | varchar(100)               | YES  |     | NULL              |                             |
-| phone_number          | varchar(20)                | YES  |     | NULL              |                             |
-| website_url           | varchar(255)               | YES  |     | NULL              |                             |
-| company_address       | text                       | YES  |     | NULL              |                             |
-| industry              | varchar(100)               | YES  |     | NULL              |                             |
-| is_active             | tinyint(1)                 | NO   | MUL | 1                 |                             |
-| email                 | varchar(100)               | NO   | UNI | NULL              |                             |
-| password_hash         | varchar(255)               | NO   |     | NULL              |                             |
-| is_super_admin        | tinyint(1)                 | NO   | MUL | 0                 |                             |
-| logo_url              | varchar(500)               | YES  |     | NULL              |                             |
-| status                | enum('active','suspended') | YES  | MUL | active            |                             |
-| created_at            | timestamp                  | NO   | MUL | CURRENT_TIMESTAMP | DEFAULT_GENERATED           |
-| updated_at            | timestamp                  | YES  |     | NULL              | on update CURRENT_TIMESTAMP |
-| last_login            | timestamp                  | YES  |     | NULL              |                             |
-| failed_login_attempts | int                        | NO   |     | 0                 |                             |
-| lockout_until         | datetime                   | YES  |     | NULL              |                             |
-| deleted_at            | datetime                   | YES  |     | NULL              |                             |
-+-----------------------+----------------------------+------+-----+-------------------+-----------------------------+
-19 rows in set (0.034 sec)
 
 
 DESCRIBE tenants;
@@ -702,8 +607,12 @@ DESCRIBE applicants;
 
 
 
+## Update
+analytics implemented for recruiters and admin; 
+files and charts necessary created; 
 
-file structure at this point:
+
+## project file structure at this point:
 
 |   .env
 |   .gitignore
@@ -719,7 +628,6 @@ file structure at this point:
 |   requirements.txt
 |   SECURITY_LOGGING_README.md
 |   TechnicalLog.md
-|   test_hash.php
 |
 +---.git
 |   |   COMMIT_EDITMSG
@@ -727,22 +635,6 @@ file structure at this point:
 |   |   description
 |   |   HEAD
 |   |   index
-|   |
-|   +---hooks
-|   |       applypatch-msg.sample
-|   |       commit-msg.sample
-|   |       fsmonitor-watchman.sample
-|   |       post-update.sample
-|   |       pre-applypatch.sample
-|   |       pre-commit.sample
-|   |       pre-merge-commit.sample
-|   |       pre-push.sample
-|   |       pre-rebase.sample
-|   |       pre-receive.sample
-|   |       prepare-commit-msg.sample
-|   |       push-to-checkout.sample
-|   |       sendemail-validate.sample
-|   |       update.sample
 
 +---azure_function_project
 |       function_app.py
@@ -797,6 +689,7 @@ file structure at this point:
 |   |
 |   \---views
 |       +---admin
+|       |       analytics.php
 |       |       dashboard.php
 |       |       edit_tenant.php
 |       |       login.php
@@ -809,8 +702,10 @@ file structure at this point:
 |       |
 |       +---auth
 |       |       login.php
+|       |       reset-password.php
 |       |
 |       +---dashboard
+|       |       analytics.php
 |       |       index.php
 |       |
 |       +---home
@@ -836,7 +731,37 @@ file structure at this point:
 |
 +---uploads
 |   \---cvs
-\---vendor
-    |   autoload.php
-    |
-    +---composer
+
+
+
+
+update:
+implementing the RSS NEWS feed;
+new files created for this: src/Models/NewsArticle.php; src/Controllers/NewsController.php;
+
+updating database in azure: 
+
+Tables_in_postyourjobhere |
++---------------------------+
+| applicants                |
+| jobs                      |
+| news_articles             |
+| system_logs               |
+| tenants
+
+
+describe news_articles;
++--------------+--------------+------+-----+-------------------+-------------------+
+| Field        | Type         | Null | Key | Default           | Extra             |
++--------------+--------------+------+-----+-------------------+-------------------+
+| article_id   | int          | NO   | PRI | NULL              | auto_increment    |
+| title        | varchar(255) | NO   |     | NULL              |                   |
+| link         | varchar(500) | NO   | UNI | NULL              |                   |
+| description  | text         | YES  |     | NULL              |                   |
+| source_name  | varchar(100) | NO   |     | NULL              |                   |
+| published_at | datetime     | NO   |     | NULL              |                   |
+| created_at   | timestamp    | YES  |     | CURRENT_TIMESTAMP | DEFAULT_GENERATED |
++--------------+--------------+------+-----+-------------------+-------------------+
+7 rows in set (0.038 sec)
+
+

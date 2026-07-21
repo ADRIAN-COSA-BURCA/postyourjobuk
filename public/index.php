@@ -42,7 +42,7 @@ $cleanPath = ($requestUri === '/') ? '/' : rtrim($requestUri, '/');
 $allowedPublicPaths = [
     '/', '/index.php', '/about', '/contact', '/vision', '/terms', 
     '/login', '/login/authenticate', '/admin/login', '/apply', '/job',
-    '/reset-password', '/reset-password/submit'
+    '/reset-password', '/reset-password/submit', '/api/fetch-news', '/api/refresh-news'
 ];
 
 $isPublic = in_array($cleanPath, $allowedPublicPaths);
@@ -99,6 +99,10 @@ $router->add('GET',  '/contact',                [\App\Controllers\HomeController
 $router->add('GET',  '/vision',                 [\App\Controllers\HomeController::class, 'vision']);
 $router->add('GET',  '/terms',                  [\App\Controllers\HomeController::class, 'terms']);
 
+// --- Background Task Routes ---
+$router->add('GET', '/api/fetch-news', [\App\Controllers\NewsController::class, 'fetchFeeds']);
+$router->add('GET', '/api/refresh-news', [\App\Controllers\HomeController::class, 'refreshNews']);
+
 // --- Recruiter Authentication Identity Routes ---
 $router->add('GET',  '/login',                  [\App\Controllers\AuthController::class, 'login']);
 $router->add('POST', '/login/authenticate',     [\App\Controllers\AuthController::class, 'authenticate']);
@@ -109,6 +113,7 @@ $router->add('POST', '/reset-password/submit', [\App\Controllers\AuthController:
 
 // --- Protected Workspace Tenant Routes ---
 $router->add('GET',  '/dashboard',              [\App\Controllers\DashboardController::class, 'index']);
+$router->add('GET',  '/dashboard/analytics',    [\App\Controllers\DashboardController::class, 'analytics']);
 $router->add('GET',  '/job',                    [\App\Controllers\JobController::class, 'show']);
 
 // --- Job Creation Lifecycle Management Routes ---

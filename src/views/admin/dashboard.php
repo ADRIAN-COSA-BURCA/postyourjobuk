@@ -5,10 +5,10 @@
             <h2>System Overview</h2>
         </div>
         <div style="display: flex; gap: 10px; align-items: center;">
-            <a href="/admin/logs" class="btn btn-secondary">View System Logs</a>
+            <a href="/admin/logs" class="btn btn-primary">View System Logs</a>
             
-            <!-- NEW: Analytics Button placed exactly between Logs and Create Recruiter -->
-            <a href="/admin/analytics" class="btn btn-secondary">📊 Platform Analytics</a>
+            <!-- Analytics Button -->
+            <a href="/admin/analytics" class="btn btn-primary">📊 View Analytics</a>
             
             <button onclick="document.getElementById('createTenantModal').style.display='flex'" class="btn btn-primary">
                 + Create New Recruiter

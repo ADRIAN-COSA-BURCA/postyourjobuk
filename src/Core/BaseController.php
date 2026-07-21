@@ -26,7 +26,8 @@ abstract class BaseController {
             '/vision',
             '/terms',
 			'/reset-password',
-            '/reset-password/submit'
+            '/reset-password/submit',
+			'/api/refresh-news'
         ];
         
         $isPublic = false;
