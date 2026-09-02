@@ -25,9 +25,11 @@ abstract class BaseController {
             '/contact',
             '/vision',
             '/terms',
-			'/reset-password',
+            '/reset-password',
             '/reset-password/submit',
-			'/api/refresh-news'
+            '/api/refresh-news',
+            '/auth/google',            // ADDED for Google OAuth
+            '/auth/google/callback'    // ADDED for Google OAuth
         ];
         
         $isPublic = false;

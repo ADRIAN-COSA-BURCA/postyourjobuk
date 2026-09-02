@@ -10,24 +10,25 @@
         </div>
         <!-- END NEW HEADER FLEX CONTAINER -->
         
-        <div style="display: grid; grid-template-columns: repeat(auto-fit, minmax(200px, 1fr)); gap: 1rem; background: #1f2937; padding: 1rem; border-radius: 8px; border: 1px solid #374151;">
-            <div>
+        <!-- ADJUSTED GRID COLUMNS TO GIVE EMAIL MORE ROOM (1.8fr weight) -->
+        <div style="display: grid; grid-template-columns: 1fr 1fr 1.8fr 1fr 1fr; gap: 1rem; background: #1f2937; padding: 1rem; border-radius: 8px; border: 1px solid #374151; align-items: start;">
+            <div style="min-width: 0;">
                 <span style="display: block; font-size: 0.875rem; color: #94a3b8; margin-bottom: 0.25rem;">Industry</span>
                 <strong style="color: #ffffff;"><?= htmlspecialchars($tenant['industry'] ?? 'Not Specified') ?></strong>
             </div>
-            <div>
+            <div style="min-width: 0;">
                 <span style="display: block; font-size: 0.875rem; color: #94a3b8; margin-bottom: 0.25rem;">Contact Person</span>
                 <strong style="color: #ffffff;"><?= htmlspecialchars($tenant['contact_person'] ?? 'Not Specified') ?></strong>
             </div>
-            <div>
+            <div style="min-width: 0;">
                 <span style="display: block; font-size: 0.875rem; color: #94a3b8; margin-bottom: 0.25rem;">Email Address</span>
-                <strong style="color: #ffffff;"><?= htmlspecialchars($tenant['email'] ?? 'Not Specified') ?></strong>
+                <strong style="color: #ffffff; display: block; white-space: nowrap;"><?= htmlspecialchars($tenant['email'] ?? 'Not Specified') ?></strong>
             </div>
-            <div>
+            <div style="min-width: 0;">
                 <span style="display: block; font-size: 0.875rem; color: #94a3b8; margin-bottom: 0.25rem;">Phone Number</span>
                 <strong style="color: #ffffff;"><?= htmlspecialchars($tenant['phone_number'] ?? 'Not Specified') ?></strong>
             </div>
-            <div>
+            <div style="min-width: 0;">
                 <span style="display: block; font-size: 0.875rem; color: #94a3b8; margin-bottom: 0.25rem;">Website</span>
                 <?php if (!empty($tenant['website_url'])): ?>
                     <a href="<?= htmlspecialchars($tenant['website_url']) ?>" target="_blank" style="color: #6366f1; font-weight: 600; text-decoration: none;">Visit Site ↗</a>
@@ -90,7 +91,7 @@
                 <tbody>
                     <?php if (empty($jobs)): ?>
                         <tr>
-                            <td colspan="3" style="text-align: center; color: #6b7280; padding: 1rem;">
+                            <td colspan="5" style="text-align: center; color: #6b7280; padding: 1rem;">
                                 No job postings detected inside this corporate tenant workspace.
                             </td>
                         </tr>

@@ -735,8 +735,8 @@ files and charts necessary created;
 
 
 
-update:
-implementing the RSS NEWS feed;
+## update:
+implementing a RSS NEWS feed section on my dashboard index named index.php, which can be found at \src\views\home\index.php";
 new files created for this: src/Models/NewsArticle.php; src/Controllers/NewsController.php;
 
 updating database in azure: 
@@ -765,3 +765,148 @@ describe news_articles;
 7 rows in set (0.038 sec)
 
 
+## this is my curent database in Azure cloud:
+
+Tables_in_postyourjobhere |
++---------------------------+
+| applicants                |
+| jobs                      |
+| news_articles             |
+| system_logs               |
+| tenants
+
+
+## Full Database Schema
+
+The complete CREATE TABLE statements for all five tables in the postyourjobhere database, as retrieved directly from the live Azure MySQL Flexible Server instance.
+
+## tenants
+
+CREATE TABLE `tenants` (
+  `tenant_id` int unsigned NOT NULL AUTO_INCREMENT,
+  `company_name` varchar(100) NOT NULL COMMENT 'Display name of company',
+  `contact_person` varchar(100) DEFAULT NULL,
+  `phone_number` varchar(20) DEFAULT NULL,
+  `website_url` varchar(255) DEFAULT NULL,
+  `company_address` text,
+  `industry` varchar(100) DEFAULT NULL,
+  `is_active` tinyint(1) NOT NULL DEFAULT '1',
+  `email` varchar(100) NOT NULL COMMENT 'Login username (must be unique)',
+  `password_hash` varchar(255) NOT NULL COMMENT 'Bcrypt hashed password',
+  `is_super_admin` tinyint(1) NOT NULL DEFAULT '0',
+  `logo_url` varchar(500) DEFAULT NULL COMMENT 'URL/path to company logo (optional)',
+  `status` enum('active','suspended') DEFAULT 'active' COMMENT 'Admin can suspend accounts',
+  `created_at` timestamp NOT NULL DEFAULT CURRENT_TIMESTAMP COMMENT 'When tenant registered',
+  `updated_at` timestamp NULL DEFAULT NULL ON UPDATE CURRENT_TIMESTAMP,
+  `last_login` timestamp NULL DEFAULT NULL COMMENT 'Last successful login time',
+  `failed_login_attempts` int NOT NULL DEFAULT '0',
+  `lockout_until` datetime DEFAULT NULL,
+  `deleted_at` datetime DEFAULT NULL,
+  `recovery_code` varchar(16) DEFAULT NULL,
+  PRIMARY KEY (`tenant_id`),
+  UNIQUE KEY `email` (`email`),
+  KEY `idx_email` (`email`),
+  KEY `idx_status` (`status`),
+  KEY `idx_created` (`created_at`),
+  KEY `idx_active` (`is_active`),
+  KEY `idx_super_admin` (`is_super_admin`)
+) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4 COLLATE=utf8mb4_unicode_ci COMMENT='Company accounts that post jobs';
+
+
+
+## jobs
+
+CREATE TABLE `jobs` (
+  `job_id` int unsigned NOT NULL AUTO_INCREMENT,
+  `tenant_id` int unsigned NOT NULL COMMENT 'Which company posted this job',
+  `title` varchar(200) NOT NULL COMMENT 'Job title/position name',
+  `description` text NOT NULL COMMENT 'Full job description (rich text)',
+  `requirements` text NOT NULL COMMENT 'Required skills/qualifications',
+  `location` varchar(100) DEFAULT NULL COMMENT 'Job location (NULL = Remote)',
+  `salary` varchar(50) DEFAULT NULL COMMENT 'Salary range (flexible format)',
+  `employment_type` enum('full-time','part-time','contract','internship') DEFAULT 'full-time' COMMENT 'Type of employment',
+  `status` enum('active','inactive','closed') DEFAULT 'active' COMMENT 'active=visible on board, inactive=hidden, closed=filled',
+  `created_at` timestamp NOT NULL DEFAULT CURRENT_TIMESTAMP COMMENT 'When job was posted',
+  `updated_at` timestamp NOT NULL DEFAULT CURRENT_TIMESTAMP ON UPDATE CURRENT_TIMESTAMP COMMENT 'Last modification time',
+  `closed_at` timestamp NULL DEFAULT NULL COMMENT 'When job was closed/filled',
+  `is_active` tinyint(1) NOT NULL DEFAULT '1',
+  PRIMARY KEY (`job_id`),
+  KEY `idx_tenant_id` (`tenant_id`),
+  KEY `idx_tenant_status` (`tenant_id`,`status`),
+  KEY `idx_status_created` (`status`,`created_at`),
+  KEY `idx_employment_type` (`employment_type`),
+  CONSTRAINT `jobs_ibfk_1` FOREIGN KEY (`tenant_id`) REFERENCES `tenants` (`tenant_id`) ON DELETE CASCADE ON UPDATE CASCADE
+) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4 COLLATE=utf8mb4_unicode_ci COMMENT='Job postings from companies';
+
+
+
+## applicants
+
+CREATE TABLE `applicants` (
+  `applicant_id` int unsigned NOT NULL AUTO_INCREMENT,
+  `job_id` int unsigned NOT NULL COMMENT 'Which job they applied to',
+  `tenant_id` int unsigned NOT NULL COMMENT 'Which company owns this (denormalized for security)',
+  `name` varchar(100) NOT NULL COMMENT 'Full name',
+  `email` varchar(100) NOT NULL COMMENT 'Contact email',
+  `phone` varchar(20) DEFAULT NULL COMMENT 'Contact phone (optional)',
+  `cv_filename` varchar(255) NOT NULL COMMENT 'Original uploaded filename',
+  `cv_storage_path` varchar(500) NOT NULL COMMENT 'Full server path to file',
+  `cv_file_size` int unsigned DEFAULT NULL COMMENT 'File size in bytes',
+  `ai_score` int unsigned DEFAULT '0' COMMENT 'AI score 0-100 (0=not processed yet)',
+  `ai_summary` mediumtext COMMENT 'AI-generated detailed candidate evaluation matrix',
+  `ai_processed_at` timestamp NULL DEFAULT NULL COMMENT 'When AI finished processing',
+  `status` enum('new','reviewed','shortlisted','rejected') NOT NULL DEFAULT 'new',
+  `applied_at` timestamp NOT NULL DEFAULT CURRENT_TIMESTAMP COMMENT 'When application submitted',
+  `ip_address` varchar(45) DEFAULT NULL COMMENT 'Applicant IP address (IPv4/IPv6)',
+  `created_at` timestamp NULL DEFAULT CURRENT_TIMESTAMP,
+  PRIMARY KEY (`applicant_id`),
+  UNIQUE KEY `unique_email_job` (`email`,`job_id`),
+  KEY `idx_job_id` (`job_id`),
+  KEY `idx_tenant_id` (`tenant_id`),
+  KEY `idx_job_score` (`job_id`,`ai_score`),
+  KEY `idx_tenant_date` (`tenant_id`,`applied_at`),
+  KEY `idx_email` (`email`),
+  KEY `idx_status` (`status`),
+  KEY `idx_ai_score` (`ai_score`),
+  KEY `idx_tenant_job_score` (`tenant_id`,`job_id`,`ai_score`),
+  CONSTRAINT `applicants_ibfk_1` FOREIGN KEY (`job_id`) REFERENCES `jobs` (`job_id`) ON DELETE CASCADE ON UPDATE CASCADE,
+  CONSTRAINT `applicants_ibfk_2` FOREIGN KEY (`tenant_id`) REFERENCES `tenants` (`tenant_id`) ON DELETE CASCADE ON UPDATE CASCADE
+) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4 COLLATE=utf8mb4_unicode_ci COMMENT='Job applications with AI scoring';
+
+
+
+## system_logs
+
+CREATE TABLE `system_logs` (
+  `id` bigint NOT NULL AUTO_INCREMENT,
+  `tenant_id` int DEFAULT NULL,
+  `user_label` varchar(255) DEFAULT NULL,
+  `user_email` varchar(255) DEFAULT NULL,
+  `action_type` varchar(50) DEFAULT NULL,
+  `severity` varchar(20) DEFAULT 'INFO',
+  `resource_type` varchar(50) DEFAULT NULL,
+  `resource_id` int DEFAULT NULL,
+  `ip_address` varchar(45) DEFAULT NULL,
+  `details` json DEFAULT NULL,
+  `created_at` timestamp NULL DEFAULT CURRENT_TIMESTAMP,
+  PRIMARY KEY (`id`),
+  KEY `idx_action` (`action_type`),
+  KEY `idx_created` (`created_at`)
+) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4 COLLATE=utf8mb4_unicode_ci;
+
+
+
+
+## news_articles
+
+CREATE TABLE `news_articles` (
+  `article_id` int NOT NULL AUTO_INCREMENT,
+  `title` varchar(255) NOT NULL,
+  `link` varchar(500) NOT NULL,
+  `description` text,
+  `source_name` varchar(100) NOT NULL,
+  `published_at` datetime NOT NULL,
+  `created_at` timestamp NULL DEFAULT CURRENT_TIMESTAMP,
+  PRIMARY KEY (`article_id`),
+  UNIQUE KEY `link` (`link`)
+) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4 COLLATE=utf8mb4_unicode_ci;

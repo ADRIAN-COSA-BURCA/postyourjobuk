@@ -42,15 +42,14 @@ $cleanPath = ($requestUri === '/') ? '/' : rtrim($requestUri, '/');
 $allowedPublicPaths = [
     '/', '/index.php', '/about', '/contact', '/vision', '/terms', 
     '/login', '/login/authenticate', '/admin/login', '/apply', '/job',
-    '/reset-password', '/reset-password/submit', '/api/fetch-news', '/api/refresh-news'
+    '/reset-password', '/reset-password/submit', '/api/fetch-news', '/api/refresh-news',
+    '/auth/google', '/auth/google/callback' // ADDED for Google OAuth
 ];
 
 $isPublic = in_array($cleanPath, $allowedPublicPaths);
 if (!$isPublic) {
     error_log("DEBUG: Middleware blocked access to: " . $cleanPath);
 }
-
-
 
 // 6. VIEW CONTEXT
 $viewContext = 'public';
@@ -79,7 +78,6 @@ $router->add('GET',  '/admin/login',         [\App\Controllers\AdminController::
 $router->add('POST', '/admin/login',         [\App\Controllers\AdminController::class, 'authenticateAdmin']);
 $router->add('GET',  '/admin/logout',        [\App\Controllers\AdminController::class, 'logout']);
 
-
 // --- Admin Tenant Management Operations ---
 $router->add('GET',  '/admin/view-tenant',      [\App\Controllers\AdminController::class, 'viewTenant']);
 $router->add('POST', '/admin/suspend-tenant',   [\App\Controllers\AdminController::class, 'suspendTenant']);
@@ -88,7 +86,6 @@ $router->add('POST', '/admin/tenant/create', [\App\Controllers\AdminController::
 
 $router->add('GET',  '/admin/tenant/edit', [\App\Controllers\AdminController::class, 'editTenant']);
 $router->post('/admin/tenant/edit', [\App\Controllers\AdminController::class, 'editTenant']);
-
 
 // --- Public Base Routes ---
 $router->add('GET',  '/',                       [\App\Controllers\HomeController::class, 'index']);
@@ -107,9 +104,14 @@ $router->add('GET', '/api/refresh-news', [\App\Controllers\HomeController::class
 $router->add('GET',  '/login',                  [\App\Controllers\AuthController::class, 'login']);
 $router->add('POST', '/login/authenticate',     [\App\Controllers\AuthController::class, 'authenticate']);
 $router->add('GET',  '/logout',                 [\App\Controllers\AuthController::class, 'logout']);
+
 // Password Reset Routes
 $router->add('GET',  '/reset-password', [\App\Controllers\AuthController::class, 'showResetForm']);
 $router->add('POST', '/reset-password/submit', [\App\Controllers\AuthController::class, 'handleResetSubmit']);
+
+// --- Google OAuth Routes (ADDED) ---
+$router->add('GET',  '/auth/google',            [\App\Controllers\AuthController::class, 'googleLogin']);
+$router->add('GET',  '/auth/google/callback',   [\App\Controllers\AuthController::class, 'googleCallback']);
 
 // --- Protected Workspace Tenant Routes ---
 $router->add('GET',  '/dashboard',              [\App\Controllers\DashboardController::class, 'index']);
