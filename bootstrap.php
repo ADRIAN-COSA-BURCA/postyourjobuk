@@ -29,7 +29,7 @@ function time_ago($datetime) {
 }
 
 // 4. Define Constants
-define('BASE_URL', $_ENV['BASE_URL'] ?? 'http://localhost');
+define('BASE_URL', $_ENV['BASE_URL'] ?? 'https://postyourjobuk-web-gxfzh2bcb9azbadw.polandcentral-01.azurewebsites.net');
 define('ROOT_PATH', __DIR__); // Essential for finding your SSL certificate
 
 

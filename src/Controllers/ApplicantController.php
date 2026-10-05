@@ -178,9 +178,10 @@ class ApplicantController extends BaseController {
             $_SESSION['success_message'] = 'Your application has been submitted successfully!';
             Helpers::redirect('/job?id=' . $jobId);
         } catch (\Exception $e) {
-            error_log("Applicant creation error: " . $e->getMessage());
-            $_SESSION['error_message'] = 'An error occurred while submitting your application.';
-            Helpers::redirect('/job?id=' . $jobId);
+            echo "<h1>CRITICAL ERROR:</h1>";
+            echo "<pre>" . htmlspecialchars($e->getMessage()) . "</pre>";
+            echo "<p>File: " . $e->getFile() . " on line " . $e->getLine() . "</p>";
+            exit;
         }
     }
 

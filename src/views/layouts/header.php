@@ -6,7 +6,7 @@
         <div style="display: flex; align-items: center; gap: 1.5rem; flex-wrap: wrap;">
             <!-- KEEP YOUR ORIGINAL LOGIC HERE -->
             <a href="<?= (isset($_SESSION['tenant_id']) ? '/dashboard' : '/') ?>" class="logo" style="text-decoration: none; font-size: 1.25rem; font-weight: bold; color: var(--text);">
-                📋 PostYourJobHere.com
+                📋 PostYourJobUK
             </a>
 
             <!-- Removed fixed margin-left and added flex-wrap -->

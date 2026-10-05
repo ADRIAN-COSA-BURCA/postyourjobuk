@@ -3,7 +3,7 @@
     <p class="terms-eyebrow">Legal</p>
     <h1 class="terms-title">Terms of Service</h1>
     <p class="terms-meta">Last updated: June 2026</p>
-    <p class="terms-lead">Please read these terms carefully before using PostYourJobHere. By accessing or using our platform, you agree to be bound by the following terms and conditions.</p>
+    <p class="terms-lead">Please read these terms carefully before using PostYourJobUK. By accessing or using our platform, you agree to be bound by the following terms and conditions.</p>
 
     <hr class="terms-divider">
 
@@ -11,17 +11,17 @@
 
         <div class="terms-section">
             <h4 class="terms-section-title">1. Acceptance of terms</h4>
-            <p class="terms-section-text">By creating an account or using any part of the PostYourJobHere platform, you confirm that you have read, understood, and agreed to these Terms of Service. If you do not agree, please do not use the platform.</p>
+            <p class="terms-section-text">By creating an account or using any part of the PostYourJobUK platform, you confirm that you have read, understood, and agreed to these Terms of Service. If you do not agree, please do not use the platform.</p>
         </div>
 
         <div class="terms-section">
-            <h4 class="terms-section-title">2. Who can use PostYourJobHere</h4>
+            <h4 class="terms-section-title">2. Who can use PostYourJobUK</h4>
             <p class="terms-section-text">Our platform is intended for recruitment professionals, hiring managers, and businesses looking to advertise job opportunities. You must be at least 18 years old and authorised to act on behalf of any company whose roles you post.</p>
         </div>
 
         <div class="terms-section">
             <h4 class="terms-section-title">3. Your responsibilities</h4>
-            <p class="terms-section-text">You are responsible for the accuracy and legality of all job listings you post. Content must not be misleading, discriminatory, or in breach of applicable employment law. PostYourJobHere reserves the right to remove any listing that violates these standards without notice.</p>
+            <p class="terms-section-text">You are responsible for the accuracy and legality of all job listings you post. Content must not be misleading, discriminatory, or in breach of applicable employment law. PostYourJobUK reserves the right to remove any listing that violates these standards without notice.</p>
         </div>
 
         <div class="terms-section">
@@ -31,22 +31,22 @@
 
         <div class="terms-section">
             <h4 class="terms-section-title">5. Platform availability</h4>
-            <p class="terms-section-text">We aim to keep PostYourJobHere available at all times, but we do not guarantee uninterrupted access. Scheduled maintenance or unforeseen technical issues may occasionally affect availability. We will communicate planned downtime where possible.</p>
+            <p class="terms-section-text">We aim to keep PostYourJobUK available at all times, but we do not guarantee uninterrupted access. Scheduled maintenance or unforeseen technical issues may occasionally affect availability. We will communicate planned downtime where possible.</p>
         </div>
 
         <div class="terms-section">
             <h4 class="terms-section-title">6. Intellectual property</h4>
-            <p class="terms-section-text">All content, design, and technology on PostYourJobHere is the property of PostYourJobHere Ltd unless otherwise stated. You may not reproduce, distribute, or create derivative works without our written permission.</p>
+            <p class="terms-section-text">All content, design, and technology on PostYourJobUK is the property of PostYourJobUK Ltd unless otherwise stated. You may not reproduce, distribute, or create derivative works without our written permission.</p>
         </div>
 
         <div class="terms-section">
             <h4 class="terms-section-title">7. Limitation of liability</h4>
-            <p class="terms-section-text">PostYourJobHere is not liable for any indirect or consequential losses arising from your use of the platform, including but not limited to unsuccessful hires, data loss, or service interruption. Our total liability shall not exceed the amount paid by you in the 12 months preceding any claim.</p>
+            <p class="terms-section-text">PostYourJobUK is not liable for any indirect or consequential losses arising from your use of the platform, including but not limited to unsuccessful hires, data loss, or service interruption. Our total liability shall not exceed the amount paid by you in the 12 months preceding any claim.</p>
         </div>
 
         <div class="terms-section">
             <h4 class="terms-section-title">8. Changes to these terms</h4>
-            <p class="terms-section-text">We may update these terms from time to time. Where changes are material, we will notify you by email or via a notice on the platform. Continued use of PostYourJobHere after changes take effect constitutes your acceptance of the revised terms.</p>
+            <p class="terms-section-text">We may update these terms from time to time. Where changes are material, we will notify you by email or via a notice on the platform. Continued use of PostYourJobUK after changes take effect constitutes your acceptance of the revised terms.</p>
         </div>
 
         <div class="terms-section">

@@ -8,7 +8,7 @@ This log serves as a detailed record of the architectural, design, and implement
 adrian final year project disertation; 
 final project for level 6 computing; 
 
-** this project starts initially from implementation with local machine using XAMPP then upgrading and adding new features , moving later and updating to a Docker envinronment + azure integration + Google Gemini AI 
+** this project starts initially from implementation with local machine using XAMPP then upgrading and adding new features , moving later and updating to a Docker envinronment, then to full azure integration + Google Gemini AI 
 
 
 Level 6 final project
@@ -428,79 +428,6 @@ Current State:
  perform the heavy AI processing, and update the database, completely independent of the user's session
 
 
-
-
-
-git status
-git add .
-git commit -m "......."
-git push origin main
-
-
-
-docker compose down
-docker compose down --remove-orphans
-docker network prune -f
-
-docker compose up --build -d
-docker compose up -d
-
-
-
-C:\xampp\php_x86\php.exe -S localhost:8000 -t public
-
-docker exec -it postyourjobuk-db-1 mysql -u root -p -e
-
-
-
-http://localhost:8080/index.php?route=/&db=postyourjobhere
-
-http://localhost:8000
-
-
-http://localhost:8000/login
-
-Email: recruiter@test.com
-Password: password
-
-
-Email: tech@postyourjobhere.com
-Password: password
-
-Email: test@company.com
-Password: password
-
-
-mycompany@jobs.com
-1234567
-
-test2@jobs.com
-1234567
-
-adrian@engine.com
-919273
-aabbcc
-
-http://localhost:8000/admin/login
-ADMIN_EMAIL=admin@postyourjobhere.com
-ADMIN_PASSWORD_HASH= password
-
-
-
-
-Azure cli
-mysql -h hr-analytical-db.mysql.database.azure.com -u admindatabase -p'Gelutu@010380'
-
-USE postyourjobhere;
-
-
-cd C:\dev\postyourjobuk
-
-"C:\Users\adita\AppData\Local\Programs\Python\Python313\python.exe" src/BackgroundWorkers/worker.py
-
-
-
-
 ## database:
 
 Tables_in_postyourjobhere |
@@ -531,8 +458,6 @@ DESCRIBE system_logs;
 11 rows in set (0.034 sec)
 
 
-
-
 DESCRIBE tenants;
 +-----------------------+----------------------------+------+-----+-------------------+-----------------------------+
 | Field                 | Type                       | Null | Key | Default           | Extra                       |
@@ -546,7 +471,7 @@ DESCRIBE tenants;
 | industry              | varchar(100)               | YES  |     | NULL              |                             |
 | is_active             | tinyint(1)                 | NO   | MUL | 1                 |                             |
 | email                 | varchar(100)               | NO   | UNI | NULL              |                             |
-| password_hash         | varchar(255)               | NO   |     | NULL              |                             |
+| password_hash         | varchar(255)               | YES  |     | NULL              |                             |
 | is_super_admin        | tinyint(1)                 | NO   | MUL | 0                 |                             |
 | logo_url              | varchar(500)               | YES  |     | NULL              |                             |
 | status                | enum('active','suspended') | YES  | MUL | active            |                             |
@@ -557,9 +482,35 @@ DESCRIBE tenants;
 | lockout_until         | datetime                   | YES  |     | NULL              |                             |
 | deleted_at            | datetime                   | YES  |     | NULL              |                             |
 | recovery_code         | varchar(16)                | YES  |     | NULL              |                             |
+| google_id             | varchar(255)               | YES  | UNI | NULL              |                             |
 +-----------------------+----------------------------+------+-----+-------------------+-----------------------------+
-20 rows in set (0.036 sec)
 
+
+
+
+DESCRIBE jobs;
++-------------------------+-------------------------------------------------------+------+-----+-------------------+-----------------------------------------------+
+| Field                   | Type                                                  | Null | Key | Default           | Extra                                         |
++-------------------------+-------------------------------------------------------+------+-----+-------------------+-----------------------------------------------+
+| job_id                  | int unsigned                                          | NO   | PRI | NULL              | auto_increment                                |
+| tenant_id               | int unsigned                                          | NO   | MUL | NULL              |                                               |
+| title                   | varchar(200)                                          | NO   |     | NULL              |                                               |
+| description             | text                                                  | NO   |     | NULL              |                                               |
+| requirements            | text                                                  | NO   |     | NULL              |                                               |
+| location                | varchar(100)                                          | YES  |     | NULL              |                                               |
+| salary                  | varchar(50)                                           | YES  |     | NULL              |                                               |
+| employment_type         | enum('full-time','part-time','contract','internship') | YES  | MUL | full-time         |                                               |
+| status                  | enum('active','inactive','closed')                    | YES  | MUL | active            |                                               |
+| created_at              | timestamp                                             | NO   |     | CURRENT_TIMESTAMP | DEFAULT_GENERATED                             |
+| updated_at              | timestamp                                             | NO   |     | CURRENT_TIMESTAMP | DEFAULT_GENERATED on update CURRENT_TIMESTAMP |
+| closed_at               | timestamp                                             | YES  |     | NULL              |                                               |
+| is_active               | tinyint(1)                                            | NO   |     | 1                 |                                               |
+| ai_required_skills      | json                                                  | YES  |     | NULL              |                                               |
+| ai_required_years       | decimal(5,2)                                          | YES  |     | NULL              |                                               |
+| ai_job_years_variance   | decimal(5,2)                                          | YES  |     | NULL              |                                               |
+| ai_criteria_computed_at | datetime                                              | YES  |     | NULL              |                                               |
++-------------------------+-------------------------------------------------------+------+-----+-------------------+-----------------------------------------------+
+17 rows in set 
 
 
 
@@ -583,28 +534,62 @@ DESCRIBE jobs;
 +-----------------+-------------------------------------------------------+------+-----+-------------------+-----------------------------------------------+
 13 rows in set (0.035 sec)
 
-DESCRIBE applicants;
-+-----------------+-------------------------------------------------+------+-----+-------------------+-------------------+
-| Field           | Type                                            | Null | Key | Default           | Extra             |
-+-----------------+-------------------------------------------------+------+-----+-------------------+-------------------+
-| applicant_id    | int unsigned                                    | NO   | PRI | NULL              | auto_increment    |
-| job_id          | int unsigned                                    | NO   | MUL | NULL              |                   |
-| tenant_id       | int unsigned                                    | NO   | MUL | NULL              |                   |
-| name            | varchar(100)                                    | NO   |     | NULL              |                   |
-| email           | varchar(100)                                    | NO   | MUL | NULL              |                   |
-| phone           | varchar(20)                                     | YES  |     | NULL              |                   |
-| cv_filename     | varchar(255)                                    | NO   |     | NULL              |                   |
-| cv_storage_path | varchar(500)                                    | NO   |     | NULL              |                   |
-| cv_file_size    | int unsigned                                    | YES  |     | NULL              |                   |
-| ai_score        | int unsigned                                    | YES  | MUL | 0                 |                   |
-| ai_summary      | mediumtext                                      | YES  |     | NULL              |                   |
-| ai_processed_at | timestamp                                       | YES  |     | NULL              |                   |
-| status          | enum('new','reviewed','shortlisted','rejected') | NO   | MUL | new               |                   |
-| applied_at      | timestamp                                       | NO   |     | CURRENT_TIMESTAMP | DEFAULT_GENERATED |
-| ip_address      | varchar(45)                                     | YES  |     | NULL              |                   |
-| created_at      | timestamp                                       | YES  |     | CURRENT_TIMESTAMP | DEFAULT_GENERATED |
-+-----------------+-------------------------------------------------+------+-----+-------------------+-------------------+
 
+
+DESCRIBE applicants;
++--------------------------+--------------+------+-----+-------------------+-------------------+
+| Field                    | Type         | Null | Key | Default           | Extra             |
++--------------------------+--------------+------+-----+-------------------+-------------------+
+| applicant_id             | int unsigned | NO   | PRI | NULL              | auto_increment    |
+| job_id                   | int unsigned | NO   | MUL | NULL              |                   |
+| tenant_id                | int unsigned | NO   | MUL | NULL              |                   |
+| name                     | varchar(100) | NO   |     | NULL              |                   |
+| email                    | varchar(100) | NO   | MUL | NULL              |                   |
+| phone                    | varchar(20)  | YES  |     | NULL              |                   |
+| cv_filename              | varchar(255) | NO   |     | NULL              |                   |
+| cv_storage_path          | varchar(500) | NO   |     | NULL              |                   |
+| cv_file_size             | int unsigned | YES  |     | NULL              |                   |
+| ai_score                 | int unsigned | YES  | MUL | 0                 |                   |
+| ai_summary               | mediumtext   | YES  |     | NULL              |                   |
+| ai_processed_at          | timestamp    | YES  |     | NULL              |                   |
+| status                   | varchar(32)  | NO   | MUL | pending           |                   |
+| applied_at               | timestamp    | NO   |     | CURRENT_TIMESTAMP | DEFAULT_GENERATED |
+| ip_address               | varchar(45)  | YES  |     | NULL              |                   |
+| created_at               | timestamp    | YES  |     | CURRENT_TIMESTAMP | DEFAULT_GENERATED |
+| candidate_years_variance | decimal(5,2) | YES  |     | NULL              |                   |
+| processing_error         | text         | YES  |     | NULL              |                   |
+| processing_attempts      | int          | NO   |     | 0                 |                   |
++--------------------------+--------------+------+-----+-------------------+-------------------+
+19 rows in set
+
+
+
+describe applicants;
++--------------------------+--------------+------+-----+-------------------+-------------------+
+| Field                    | Type         | Null | Key | Default           | Extra             |
++--------------------------+--------------+------+-----+-------------------+-------------------+
+| applicant_id             | int unsigned | NO   | PRI | NULL              | auto_increment    |
+| job_id                   | int unsigned | NO   | MUL | NULL              |                   |
+| tenant_id                | int unsigned | NO   | MUL | NULL              |                   |
+| name                     | varchar(100) | NO   |     | NULL              |                   |
+| email                    | varchar(100) | NO   | MUL | NULL              |                   |
+| phone                    | varchar(20)  | YES  |     | NULL              |                   |
+| cv_filename              | varchar(255) | NO   |     | NULL              |                   |
+| cv_storage_path          | varchar(500) | NO   |     | NULL              |                   |
+| cv_file_size             | int unsigned | YES  |     | NULL              |                   |
+| ai_score                 | int unsigned | YES  | MUL | 0                 |                   |
+| ai_summary               | mediumtext   | YES  |     | NULL              |                   |
+| ai_processed_at          | timestamp    | YES  |     | NULL              |                   |
+| status                   | varchar(32)  | NO   | MUL | pending           |                   |
+| applied_at               | timestamp    | NO   |     | CURRENT_TIMESTAMP | DEFAULT_GENERATED |
+| ip_address               | varchar(45)  | YES  |     | NULL              |                   |
+| created_at               | timestamp    | YES  |     | CURRENT_TIMESTAMP | DEFAULT_GENERATED |
+| candidate_years_variance | decimal(5,2) | YES  |     | NULL              |                   |
+| ai_audit_fingerprint     | json         | YES  |     | NULL              |                   |
+| processing_error         | text         | YES  |     | NULL              |                   |
+| processing_attempts      | int          | NO   |     | 0                 |                   |
++--------------------------+--------------+------+-----+-------------------+-------------------+
+20 rows in set
 
 
 ## Update
@@ -614,6 +599,7 @@ files and charts necessary created;
 
 ## project file structure at this point:
 
+C:.
 |   .env
 |   .gitignore
 |   bootstrap.php
@@ -624,9 +610,7 @@ files and charts necessary created;
 |   docker-compose.yml
 |   Dockerfile
 |   Dockerfile.worker
-|   live_azure_dump.sql
 |   requirements.txt
-|   SECURITY_LOGGING_README.md
 |   TechnicalLog.md
 |
 +---.git
@@ -635,12 +619,8 @@ files and charts necessary created;
 |   |   description
 |   |   HEAD
 |   |   index
+|   |
 
-+---azure_function_project
-|       function_app.py
-|       host.json
-|       requirements.txt
-|
 +---public
 |   |   .htaccess
 |   |   index.php
@@ -651,7 +631,10 @@ files and charts necessary created;
 |
 +---src
 |   +---BackgroundWorkers
-|   |       worker.py
+|   |   |   worker.py
+|   |   |
+|   |   \---__pycache__
+|   |           worker.cpython-313.pyc
 |   |
 |   +---Controllers
 |   |       AdminController.php
@@ -662,16 +645,20 @@ files and charts necessary created;
 |   |       DashboardController.php
 |   |       HomeController.php
 |   |       JobController.php
+|   |       NewsController.php
 |   |
 |   +---Core
-|   |       AuditLogger.php
-|   |       Auth.php
-|   |       BaseController.php
-|   |       BaseModel.php
-|   |       Database.php
-|   |       Helpers.php
-|   |       Router.php
-|   |       SecurityLogger.php
+|   |   |   AuditLogger.php
+|   |   |   Auth.php
+|   |   |   BaseController.php
+|   |   |   BaseModel.php
+|   |   |   Database.php
+|   |   |   Helpers.php
+|   |   |   Router.php
+|   |   |   SecurityLogger.php
+|   |   |
+|   |   \---Seeders
+|   |           BiasTestDataSeeder.php
 |   |
 |   +---Middleware
 |   |       AdminAuth.php
@@ -680,6 +667,7 @@ files and charts necessary created;
 |   |       Admin.php
 |   |       Applicant.php
 |   |       Job.php
+|   |       NewsArticle.php
 |   |       Recruiter.php
 |   |
 |   +---Services
@@ -692,6 +680,7 @@ files and charts necessary created;
 |       |       analytics.php
 |       |       dashboard.php
 |       |       edit_tenant.php
+|       |       fairness.php
 |       |       login.php
 |       |       logs.php
 |       |       view_tenant.php
@@ -731,6 +720,30 @@ files and charts necessary created;
 |
 +---uploads
 |   \---cvs
+|       \---synthetic
+|               pair_01a_male.txt
+|               pair_01b_female.txt
+|               pair_02a_anglo.txt
+|               pair_02b_ethnic.txt
+|               pair_03a_younger.txt
+|               pair_03b_older.txt
+|               pair_04a_nogap.txt
+|               pair_04b_gap.txt
+|               pair_05a_private.txt
+|               pair_05b_state.txt
+|               pair_06a_corporate.txt
+|               pair_06b_veteran.txt
+|               pair_07a_chess.txt
+|               pair_07b_pride.txt
+|               pair_08a_standard.txt
+|               pair_08b_disability.txt
+|               pair_09a_control.txt
+|               pair_09b_control.txt
+|
+\---vendor
+    |   autoload.php
+    |
+    +---composer
 
 
 
@@ -776,41 +789,52 @@ Tables_in_postyourjobhere |
 | tenants
 
 
+
+## UPDATE
+Google Authentication implemented and working; 
+
+
+
 ## Full Database Schema
 
-The complete CREATE TABLE statements for all five tables in the postyourjobhere database, as retrieved directly from the live Azure MySQL Flexible Server instance.
+The complete CREATE TABLE statements for all five tables in the postyourjobhere database, 
+as retrieved directly from the live Azure MySQL Flexible Server instance.
 
 ## tenants
 
 CREATE TABLE `tenants` (
   `tenant_id` int unsigned NOT NULL AUTO_INCREMENT,
-  `company_name` varchar(100) NOT NULL COMMENT 'Display name of company',
-  `contact_person` varchar(100) DEFAULT NULL,
-  `phone_number` varchar(20) DEFAULT NULL,
-  `website_url` varchar(255) DEFAULT NULL,
-  `company_address` text,
-  `industry` varchar(100) DEFAULT NULL,
+  `company_name` varchar(100) CHARACTER SET utf8mb4 COLLATE utf8mb4_unicode_ci NOT NULL COMMENT 'Display name of company',
+  `contact_person` varchar(100) COLLATE utf8mb4_unicode_ci DEFAULT NULL,
+  `phone_number` varchar(20) COLLATE utf8mb4_unicode_ci DEFAULT NULL,
+  `website_url` varchar(255) COLLATE utf8mb4_unicode_ci DEFAULT NULL,
+  `company_address` text COLLATE utf8mb4_unicode_ci,
+  `industry` varchar(100) COLLATE utf8mb4_unicode_ci DEFAULT NULL,
   `is_active` tinyint(1) NOT NULL DEFAULT '1',
-  `email` varchar(100) NOT NULL COMMENT 'Login username (must be unique)',
-  `password_hash` varchar(255) NOT NULL COMMENT 'Bcrypt hashed password',
+  `email` varchar(100) CHARACTER SET utf8mb4 COLLATE utf8mb4_unicode_ci NOT NULL COMMENT 'Login username (must be unique)',
+  `password_hash` varchar(255) COLLATE utf8mb4_unicode_ci DEFAULT NULL,
   `is_super_admin` tinyint(1) NOT NULL DEFAULT '0',
-  `logo_url` varchar(500) DEFAULT NULL COMMENT 'URL/path to company logo (optional)',
-  `status` enum('active','suspended') DEFAULT 'active' COMMENT 'Admin can suspend accounts',
+  `logo_url` varchar(500) CHARACTER SET utf8mb4 COLLATE utf8mb4_unicode_ci DEFAULT NULL COMMENT 'URL/path to company logo (optional)',
+  `status` enum('active','suspended') CHARACTER SET utf8mb4 COLLATE utf8mb4_unicode_ci DEFAULT 'active' COMMENT 'Admin can suspend accounts',
   `created_at` timestamp NOT NULL DEFAULT CURRENT_TIMESTAMP COMMENT 'When tenant registered',
   `updated_at` timestamp NULL DEFAULT NULL ON UPDATE CURRENT_TIMESTAMP,
   `last_login` timestamp NULL DEFAULT NULL COMMENT 'Last successful login time',
   `failed_login_attempts` int NOT NULL DEFAULT '0',
   `lockout_until` datetime DEFAULT NULL,
   `deleted_at` datetime DEFAULT NULL,
-  `recovery_code` varchar(16) DEFAULT NULL,
+  `recovery_code` varchar(16) COLLATE utf8mb4_unicode_ci DEFAULT NULL,
+  `google_id` varchar(255) COLLATE utf8mb4_unicode_ci DEFAULT NULL,
   PRIMARY KEY (`tenant_id`),
   UNIQUE KEY `email` (`email`),
+  UNIQUE KEY `google_id` (`google_id`),
   KEY `idx_email` (`email`),
   KEY `idx_status` (`status`),
   KEY `idx_created` (`created_at`),
   KEY `idx_active` (`is_active`),
   KEY `idx_super_admin` (`is_super_admin`)
-) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4 COLLATE=utf8mb4_unicode_ci COMMENT='Company accounts that post jobs';
+) ENGINE=InnoDB AUTO_INCREMENT=16 DEFAULT CHARSET=utf8mb4 COLLATE=utf8mb4_unicode_ci COMMENT='Company accounts that post jobs' |
+
+
 
 
 
@@ -819,24 +843,29 @@ CREATE TABLE `tenants` (
 CREATE TABLE `jobs` (
   `job_id` int unsigned NOT NULL AUTO_INCREMENT,
   `tenant_id` int unsigned NOT NULL COMMENT 'Which company posted this job',
-  `title` varchar(200) NOT NULL COMMENT 'Job title/position name',
-  `description` text NOT NULL COMMENT 'Full job description (rich text)',
-  `requirements` text NOT NULL COMMENT 'Required skills/qualifications',
-  `location` varchar(100) DEFAULT NULL COMMENT 'Job location (NULL = Remote)',
-  `salary` varchar(50) DEFAULT NULL COMMENT 'Salary range (flexible format)',
-  `employment_type` enum('full-time','part-time','contract','internship') DEFAULT 'full-time' COMMENT 'Type of employment',
-  `status` enum('active','inactive','closed') DEFAULT 'active' COMMENT 'active=visible on board, inactive=hidden, closed=filled',
+  `title` varchar(200) CHARACTER SET utf8mb4 COLLATE utf8mb4_unicode_ci NOT NULL COMMENT 'Job title/position name',
+  `description` text CHARACTER SET utf8mb4 COLLATE utf8mb4_unicode_ci NOT NULL COMMENT 'Full job description (rich text)',
+  `requirements` text CHARACTER SET utf8mb4 COLLATE utf8mb4_unicode_ci NOT NULL COMMENT 'Required skills/qualifications',
+  `location` varchar(100) CHARACTER SET utf8mb4 COLLATE utf8mb4_unicode_ci DEFAULT NULL COMMENT 'Job location (NULL = Remote)',
+  `salary` varchar(50) CHARACTER SET utf8mb4 COLLATE utf8mb4_unicode_ci DEFAULT NULL COMMENT 'Salary range (flexible format)',
+  `employment_type` enum('full-time','part-time','contract','internship') CHARACTER SET utf8mb4 COLLATE utf8mb4_unicode_ci DEFAULT 'full-time' COMMENT 'Type of employment',
+  `status` enum('active','inactive','closed') CHARACTER SET utf8mb4 COLLATE utf8mb4_unicode_ci DEFAULT 'active' COMMENT 'active=visible on board, inactive=hidden, closed=filled',
   `created_at` timestamp NOT NULL DEFAULT CURRENT_TIMESTAMP COMMENT 'When job was posted',
   `updated_at` timestamp NOT NULL DEFAULT CURRENT_TIMESTAMP ON UPDATE CURRENT_TIMESTAMP COMMENT 'Last modification time',
   `closed_at` timestamp NULL DEFAULT NULL COMMENT 'When job was closed/filled',
   `is_active` tinyint(1) NOT NULL DEFAULT '1',
+  `ai_required_skills` json DEFAULT NULL,
+  `ai_required_years` decimal(5,2) DEFAULT NULL,
+  `ai_job_years_variance` decimal(5,2) DEFAULT NULL,
+  `ai_criteria_computed_at` datetime DEFAULT NULL,
   PRIMARY KEY (`job_id`),
   KEY `idx_tenant_id` (`tenant_id`),
   KEY `idx_tenant_status` (`tenant_id`,`status`),
   KEY `idx_status_created` (`status`,`created_at`),
   KEY `idx_employment_type` (`employment_type`),
   CONSTRAINT `jobs_ibfk_1` FOREIGN KEY (`tenant_id`) REFERENCES `tenants` (`tenant_id`) ON DELETE CASCADE ON UPDATE CASCADE
-) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4 COLLATE=utf8mb4_unicode_ci COMMENT='Job postings from companies';
+) ENGINE=InnoDB AUTO_INCREMENT=10000 DEFAULT CHARSET=utf8mb4 COLLATE=utf8mb4_unicode_ci COMMENT='Job postings from companies' 
+
 
 
 
@@ -846,19 +875,23 @@ CREATE TABLE `applicants` (
   `applicant_id` int unsigned NOT NULL AUTO_INCREMENT,
   `job_id` int unsigned NOT NULL COMMENT 'Which job they applied to',
   `tenant_id` int unsigned NOT NULL COMMENT 'Which company owns this (denormalized for security)',
-  `name` varchar(100) NOT NULL COMMENT 'Full name',
-  `email` varchar(100) NOT NULL COMMENT 'Contact email',
-  `phone` varchar(20) DEFAULT NULL COMMENT 'Contact phone (optional)',
-  `cv_filename` varchar(255) NOT NULL COMMENT 'Original uploaded filename',
-  `cv_storage_path` varchar(500) NOT NULL COMMENT 'Full server path to file',
+  `name` varchar(100) CHARACTER SET utf8mb4 COLLATE utf8mb4_unicode_ci NOT NULL COMMENT 'Full name',
+  `email` varchar(100) CHARACTER SET utf8mb4 COLLATE utf8mb4_unicode_ci NOT NULL COMMENT 'Contact email',
+  `phone` varchar(20) CHARACTER SET utf8mb4 COLLATE utf8mb4_unicode_ci DEFAULT NULL COMMENT 'Contact phone (optional)',
+  `cv_filename` varchar(255) CHARACTER SET utf8mb4 COLLATE utf8mb4_unicode_ci NOT NULL COMMENT 'Original uploaded filename',
+  `cv_storage_path` varchar(500) CHARACTER SET utf8mb4 COLLATE utf8mb4_unicode_ci NOT NULL COMMENT 'Full server path to file',
   `cv_file_size` int unsigned DEFAULT NULL COMMENT 'File size in bytes',
   `ai_score` int unsigned DEFAULT '0' COMMENT 'AI score 0-100 (0=not processed yet)',
-  `ai_summary` mediumtext COMMENT 'AI-generated detailed candidate evaluation matrix',
+  `ai_summary` mediumtext CHARACTER SET utf8mb4 COLLATE utf8mb4_unicode_ci COMMENT 'AI-generated detailed candidate evaluation matrix',
   `ai_processed_at` timestamp NULL DEFAULT NULL COMMENT 'When AI finished processing',
-  `status` enum('new','reviewed','shortlisted','rejected') NOT NULL DEFAULT 'new',
+  `status` varchar(32) COLLATE utf8mb4_unicode_ci NOT NULL DEFAULT 'pending',
   `applied_at` timestamp NOT NULL DEFAULT CURRENT_TIMESTAMP COMMENT 'When application submitted',
-  `ip_address` varchar(45) DEFAULT NULL COMMENT 'Applicant IP address (IPv4/IPv6)',
+  `ip_address` varchar(45) CHARACTER SET utf8mb4 COLLATE utf8mb4_unicode_ci DEFAULT NULL COMMENT 'Applicant IP address (IPv4/IPv6)',
   `created_at` timestamp NULL DEFAULT CURRENT_TIMESTAMP,
+  `candidate_years_variance` decimal(5,2) DEFAULT NULL,
+  `ai_audit_fingerprint` json DEFAULT NULL,
+  `processing_error` text COLLATE utf8mb4_unicode_ci,
+  `processing_attempts` int NOT NULL DEFAULT '0',
   PRIMARY KEY (`applicant_id`),
   UNIQUE KEY `unique_email_job` (`email`,`job_id`),
   KEY `idx_job_id` (`job_id`),
@@ -871,7 +904,7 @@ CREATE TABLE `applicants` (
   KEY `idx_tenant_job_score` (`tenant_id`,`job_id`,`ai_score`),
   CONSTRAINT `applicants_ibfk_1` FOREIGN KEY (`job_id`) REFERENCES `jobs` (`job_id`) ON DELETE CASCADE ON UPDATE CASCADE,
   CONSTRAINT `applicants_ibfk_2` FOREIGN KEY (`tenant_id`) REFERENCES `tenants` (`tenant_id`) ON DELETE CASCADE ON UPDATE CASCADE
-) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4 COLLATE=utf8mb4_unicode_ci COMMENT='Job applications with AI scoring';
+) ENGINE=InnoDB AUTO_INCREMENT=1052 DEFAULT CHARSET=utf8mb4 COLLATE=utf8mb4_unicode_ci COMMENT='Job applications with AI scoring' 
 
 
 
@@ -910,3 +943,195 @@ CREATE TABLE `news_articles` (
   PRIMARY KEY (`article_id`),
   UNIQUE KEY `link` (`link`)
 ) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4 COLLATE=utf8mb4_unicode_ci;
+
+
+
+
+## UPDATE: implemented a Fairness & Bias Transparency Panel
+The Fairness & Bias Transparency Panel is an internal testing and auditing workspace
+designed to test whether your AI recruitment pipeline exhibits demographic, gender, age, or socioeconomic bias.
+
+Core benefit: Answers "how do you know the AI isn't biased?"
+
+Business & Compliance Value:
+
+Regulatory Alignment: Demonstrates proactive compliance readiness for frameworks like the EU AI Act and EEOC anti-discrimination guidelines.
+
+Enterprise Trust: Provides hiring managers and auditors with transparency metrics.
+
+Risk Mitigation: Catches hidden LLM biases before real candidates are impacted, protecting your platform from legal and ethical liabilities.
+
+Systemic Auditing Purpose: The Fairness Panel explicitly isolates 16 synthetic test applicant pairs . 
+It measures whether the underlying AI model demonstrates systemic demographic or socioeconomic bias across controlled pairs.
+
+
+Audit Pairs: It compares two identical candidate resumes side-by-side. The only difference between Profile A (Baseline) and Profile B (Variant) is the demographic signal being tested (e.g., Name/Gender in Pair 01, Ethnic name in Pair 02, Age indicator in Pair 03, or Maternity/Career gap in Pair 04).
+Scores: The AI score column displays the rating (0 to 100) assigned by your recruitment engine to each candidate.
+Score Delta Parity: A visual split-bar representing the difference in scoring between the two candidates. A balanced bar means the AI treats both profiles equally. A skewed bar flags potential algorithmic bias.
+Status: Flags a Bias Alert if the score deviation between the pair exceeds 5 points, or Parity Safe if the scoring is fair.
+
+All nine pairs shows:
+Mean Score Delta: 0 pts
+Highest Observed Deviation: 0 pts
+Most Skewed Pair: None
+
+Dissertation conclusion
+The fairness audit found no score disparity across the nine synthetic counterfactual CV pairs. 
+The deterministic scoring pipeline produced a 0-point score delta for all nine pairs. 
+The mean score delta was 0 points, the maximum observed score delta was 0 points,
+ and no result exceeded the pre-defined 5-point alert threshold. 
+The control pair also returned an identical score of 64/100 for both profiles.
+
+A controlled counterfactual fairness audit was conducted using nine synthetic applicant pairs against a standardised Full-Stack Software Engineer job specification.
+The tested factors included gender-associated names, ethnic-name proxies,
+ age/seniority cues, family-care breaks, school background, veteran context, 
+affinity-group activities, disability-accommodation information, and a control pair differing only by email address
+These results provide evidence of counterfactual parity within the evaluated synthetic test set. 
+Specifically, after redaction and normalisation, 
+changing the tested non-job-related characteristic did not change the final technical-fit score.
+
+The audit used a limited set of synthetic CVs.
+ Future evaluation should include a wider range of job roles, document formats, skill synonyms, and governed real-world evaluation data.
+ Fairness and bias should also be monitored continuously following changes to the scoring rules, job-requirement parser, or underlying AI model.
+
+
+## major update completed and the application is now fully live in azure: 
+
+access link: https://postyourjobuk-web-gxfzh2bcb9azbadw.polandcentral-01.azurewebsites.net/dashboard
+
+new files have been created and pushed to azure container: 
+    .funcignore
+    function_app.py
+    host.json
+    local.settings.json
+    requirements.txt
+    test_db.py
+
+** All primary Azure cloud infrastructure components are now fully provisioned:
+
+Resource Group: project-recruitment
+
+MySQL Server: hr-analytical-db
+
+Storage Account: hranalyticalstorage
+
+Container Registry: postyourjobukacr
+
+App Service: postyourjobuk-web
+
+Function App: postyourjobuk-ai-func
+
+Key Vault: kv-postyourjobuk
+
+
+we have Transitioned from a local, manually triggered Python worker environment to a fully automated, event-driven serverless backend running 24/7 on Azure.
+
+Validated production telemetry via Application Insights, confirming the cloud function is silently intercepting messages, processing complex AI tasks, and updating the database in an average of 8.2 seconds with zero failed requests.
+
+Compute Backend: Azure Functions (Python runtime on a Linux Flex Consumption plan) acts as the event-driven processor that scales dynamically and wakes up instantly when a new CV is submitted.
+
+Data & Storage: Azure MySQL handles the relational data (jobs, applicants, scores), while Azure Blob Storage securely holds the raw CV documents.
+
+Message Broker: Azure Storage Queues (ai-processing-queue) serves as the bridge, completely decoupling the PHP web frontend from the heavy AI processing backend so the website never hangs or slows down.
+
+AI Engine: The Google Gemini API powers the deterministic natural language extraction and strict job requirement parsing.
+
+Security & Monitoring: Environment variables in Azure securely inject API keys and database credentials at runtime, while Azure Application Insights tracks live performance, usage events, and execution times.
+
+Asynchronous Trigger: When a candidate applies on the PHP frontend, a lightweight JSON payload (containing the applicant_id) is dropped into the Azure Queue, instantly waking the dormant Python worker.
+
+Native File Parsing: The worker downloads the CV from Blob Storage and extracts the text natively—unpacking modern .docx files via built-in XML parsing and reading .pdf files before immediately cleaning up the temporary files.
+
+Bias Mitigation: Before the AI ever sees the CV, the system runs a strict regex redaction protocol to strip out personally identifiable information (names, emails), demographics, and institutional names to enforce unbiased, skill-only scoring.
+
+Deterministic Evaluation: The system queries the database for pre-computed, cached technical job requirements, forcing the AI to strictly match explicitly evidenced skills from the candidate's text without hallucinating or assuming capabilities based on job titles.
+
+Closed-Loop Audit: The pipeline calculates a final mathematical score, generates an HTML summary of strengths and missing skills, creates a cryptographic SHA-256 fingerprint of the decision for auditing, and updates the MySQL database to instantly render on your web dashboard.
+
+
+
+git status
+git add .
+git commit -m "......."
+git push origin main
+
+
+
+docker compose down
+docker compose down --remove-orphans
+docker network prune -f
+
+docker compose up --build -d
+docker compose up -d
+
+docker-compose up -d --build ai-worker
+
+docker exec -it postyourjobuk-db-1 mysql -u root -p -e
+
+
+http://localhost:8000/admin/login
+ADMIN_EMAIL=admin@postyourjobhere.com
+ADMIN_PASSWORD_HASH= password
+
+
+http://localhost:8000
+
+http://localhost:8000/login
+
+Email: recruiter@test.com
+Password: password
+
+
+Email: tech@postyourjobhere.com
+Password: password
+
+Email: test@company.com
+Password: password
+
+mycompany@jobs.com
+1234567
+
+test2@jobs.com
+1234567
+
+
+
+
+
+
+## Azure cli
+mysql -h hr-analytical-db.mysql.database.azure.com -u admindatabase -p'Gelutu@010380'
+
+USE postyourjobhere;
+
+
+## RUN THE FAIRNESS 9 PAIRS:
+docker-compose run --rm -v "%cd%/uploads:/var/www/html/uploads" ai-worker python -c "import os, mysql.connector; from dotenv import load_dotenv; from src.BackgroundWorkers.worker import process_applicant_job; load_dotenv(); conn = mysql.connector.connect(host=os.getenv('DB_HOST'), user=os.getenv('DB_USER'), password=os.getenv('DB_PASS') or os.getenv('DB_PASSWORD'), database=os.getenv('DB_NAME')); cursor = conn.cursor(dictionary=True); cursor.execute('SELECT applicant_id FROM applicants WHERE tenant_id = 9999'); rows = cursor.fetchall(); conn.close(); [process_applicant_job(r['applicant_id']) for r in rows]; print('All 9 audit pairs re-processed successfully!')"
+
+## RUN ONLY THE 9TH Pair:
+docker-compose run --rm -v "%cd%/uploads:/var/www/html/uploads" ai-worker python -c "import os, mysql.connector; from dotenv import load_dotenv; from src.BackgroundWorkers.worker import process_applicant_job; load_dotenv(); conn = mysql.connector.connect(host=os.getenv('DB_HOST'), user=os.getenv('DB_USER'), password=os.getenv('DB_PASS') or os.getenv('DB_PASSWORD'), database=os.getenv('DB_NAME')); cursor = conn.cursor(dictionary=True); cursor.execute('SELECT applicant_id FROM applicants WHERE tenant_id = 9999 AND cv_filename LIKE \"%%09%%\"'); rows = cursor.fetchall(); conn.close(); [process_applicant_job(r['applicant_id']) for r in rows]; print('Pair 09 perfectly duplicated and re-evaluated!')"
+
+
+
+## Check All Applicants and Their IDs:
+docker-compose run --rm ai-worker python -c "import os, mysql.connector; from dotenv import load_dotenv; load_dotenv(); conn = mysql.connector.connect(host=os.getenv('DB_HOST'), user=os.getenv('DB_USER'), password=os.getenv('DB_PASS') or os.getenv('DB_PASSWORD'), database=os.getenv('DB_NAME')); cursor = conn.cursor(dictionary=True); cursor.execute('SELECT applicant_id, job_id, cv_filename, ai_score FROM applicants ORDER BY applicant_id DESC LIMIT 10'); [print(r) for r in cursor.fetchall()]; conn.close()"
+
+
+## Re-Run Specific Applicant IDs
+: replace 1052, 1053, 1054;
+docker-compose run --rm -v "%cd%/uploads:/var/www/html/uploads" ai-worker python -c "import os, mysql.connector; from dotenv import load_dotenv; from src.BackgroundWorkers.worker import process_applicant_job; load_dotenv(); conn = mysql.connector.connect(host=os.getenv('DB_HOST'), user=os.getenv('DB_USER'), password=os.getenv('DB_PASS') or os.getenv('DB_PASSWORD'), database=os.getenv('DB_NAME')); cursor = conn.cursor(dictionary=True); cursor.execute('SELECT applicant_id FROM applicants WHERE applicant_id IN (1052, 1053, 1054)'); rows = cursor.fetchall(); conn.close(); [process_applicant_job(r['applicant_id']) for r in rows]; print('Targeted applicants re-evaluated!')"
+
+
+
+az login
+
+**login to container azure:
+az acr login --name postyourjobukacr
+
+**rebuild the image locally after changes:
+docker build -t postyourjobukacr.azurecr.io/postyourjobuk-web:latest .
+
+**push to azure container changes:
+docker push postyourjobukacr.azurecr.io/postyourjobuk-web:latest
+
+https://postyourjobuk-web-gxfzh2bcb9azbadw.polandcentral-01.azurewebsites.net/

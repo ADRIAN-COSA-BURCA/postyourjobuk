@@ -2,27 +2,31 @@
 
     <p class="contact-eyebrow">Get in touch</p>
     <h1 class="contact-title">We're here to help</h1>
-    <p class="contact-sub">Whether you're a recruiter looking to post your first role or an existing client with a question — our team typically responds within one business day.</p>
-
+    
     <div class="contact-grid">
 
         <!-- Left: Form -->
         <div>
-            <form action="#" method="POST" onsubmit="event.preventDefault(); alert('Message sent! We\'ll be in touch shortly.');">
+            <form action="https://api.web3forms.com/submit" method="POST">
+                
+                <!-- Web3Forms Access Key -->
+                <input type="hidden" name="access_key" value="a962a1db-8767-454d-a93a-dc6ced0192ba">
+                <!-- Spam Protection Honeypot -->
+                <input type="checkbox" name="botcheck" class="hidden" style="display: none;">
 
                 <div class="form-group">
                     <label class="form-label">Your name</label>
-                    <input type="text" class="form-control" placeholder="e.g. Sarah Mitchell" required>
+                    <input type="text" name="name" class="form-control" placeholder="e.g. Sarah Mitchell" required>
                 </div>
 
                 <div class="form-group">
                     <label class="form-label">Work email</label>
-                    <input type="email" class="form-control" placeholder="sarah@company.com" required>
+                    <input type="email" name="email" class="form-control" placeholder="sarah@company.com" required>
                 </div>
 
                 <div class="form-group">
                     <label class="form-label">How can we help?</label>
-                    <textarea class="form-control" rows="5" placeholder="Tell us about your hiring needs, a technical issue, or anything else on your mind..." required></textarea>
+                    <textarea name="message" class="form-control" rows="5" placeholder="Tell us about your hiring needs, a technical issue, or anything else on your mind..." required></textarea>
                 </div>
 
                 <button type="submit" class="btn btn-primary w-100">Send message &rarr;</button>
@@ -39,7 +43,7 @@
                 </div>
                 <div>
                     <p class="contact-info-label">Email</p>
-                    <p class="contact-info-val">hello@postyourjobhere.com</p>
+                    <p class="contact-info-val">stu176382@ardenuniversity.ac.uk</p>
                 </div>
             </div>
 
@@ -49,7 +53,7 @@
                 </div>
                 <div>
                     <p class="contact-info-label">WhatsApp</p>
-                    <p class="contact-info-val">+44 207 946 0958</p>
+                    <p class="contact-info-val">+44 07923163713</p>
                 </div>
             </div>
 

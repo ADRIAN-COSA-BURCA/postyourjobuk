@@ -1,7 +1,7 @@
 <div class="container" style="margin-top: 2rem;">
     <!-- Search Banner -->
     <div class="card" style="margin-bottom: 2rem; padding: 2rem; text-align: center;">
-        <h1 style="margin-bottom: 1rem;">📋 PostYourJobHere.com</h1>
+        <h1 style="margin-bottom: 1rem;">📋 PostYourJobUK</h1>
         <p style="color: var(--text-muted); margin-bottom: 1.5rem;">Find your dream job from top companies</p>
 
         <form method="GET" action="/" style="max-width: 600px; margin: 0 auto; display: flex; gap: 0.5rem;">

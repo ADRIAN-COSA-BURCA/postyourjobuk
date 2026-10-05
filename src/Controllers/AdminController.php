@@ -127,8 +127,8 @@ class AdminController extends BaseController {
             'currentFilter' => $filter
         ]);
     }
-	
-	public function analytics() {
+    
+    public function analytics() {
         // 1. Ensure only admins can access this page
         AdminAuth::check(); 
 
@@ -142,7 +142,77 @@ class AdminController extends BaseController {
             'analytics' => $analyticsData
         ]);
     }
-    
+
+    // =================================================================================
+    // NEW: SYSTEM BIAS AUDIT - FAIRNESS TRANSPARENCY PANEL
+    // =================================================================================
+    public function fairness() {
+        // 1. Strict Security Gate
+        \App\Middleware\AdminAuth::check();
+
+        // 2. Log access for compliance auditing
+        $adminLabel = 'Admin: ' . ($_SESSION['admin_email'] ?? 'Unknown');
+        \App\Core\AuditLogger::log('FAIRNESS_AUDIT_ACCESSED', $adminLabel, 'INFO', 0, 'system', 0, ['route' => '/admin/fairness']);
+
+        // 3. FIXED: Self-Join matching exactly "Pair 01" to "Pair 01" using SUBSTRING
+        $sql = "
+            SELECT 
+                TRIM(SUBSTRING_INDEX(SUBSTRING_INDEX(a.name, ':', 1), 'A', 1)) AS pair_code,
+                a.name AS name_a, 
+                CAST(a.ai_score AS SIGNED) AS score_a, 
+                a.ai_summary AS summary_a,
+                b.name AS name_b, 
+                CAST(b.ai_score AS SIGNED) AS score_b, 
+                b.ai_summary AS summary_b,
+                (CAST(a.ai_score AS SIGNED) - CAST(b.ai_score AS SIGNED)) AS score_delta
+            FROM applicants a
+            JOIN applicants b 
+                ON TRIM(SUBSTRING_INDEX(SUBSTRING_INDEX(a.name, ':', 1), 'A', 1)) = TRIM(SUBSTRING_INDEX(SUBSTRING_INDEX(b.name, ':', 1), 'B', 1))
+               AND a.name LIKE '%A:%' 
+               AND b.name LIKE '%B:%'
+            WHERE a.tenant_id = 9999 
+              AND b.tenant_id = 9999
+              AND a.job_id = 9999 
+              AND b.job_id = 9999
+            ORDER BY pair_code ASC;
+        ";
+
+        $stmt = $this->db->prepare($sql);
+        $stmt->execute();
+        $pairs = $stmt->fetchAll();
+
+        // 4. Calculate Aggregate Metrics
+        $totalPairs = count($pairs);
+        $totalDelta = 0;
+        $maxSkew = 0;
+        $maxSkewPair = 'None';
+
+        foreach ($pairs as $pair) {
+            $absDelta = abs($pair['score_delta']);
+            $totalDelta += $absDelta;
+            
+            if ($absDelta > $maxSkew) {
+                $maxSkew = $absDelta;
+                $maxSkewPair = $pair['pair_code'];
+            }
+        }
+
+        $meanDelta = $totalPairs > 0 ? round($totalDelta / $totalPairs, 1) : 0;
+
+        // 5. Render View
+        $this->render('admin/fairness', [
+            'pageTitle' => 'Fairness & Bias Audit',
+            'pairs' => $pairs,
+            'stats' => [
+                'total_pairs' => $totalPairs,
+                'mean_delta' => $meanDelta,
+                'max_skew' => $maxSkew,
+                'max_skew_pair' => $maxSkewPair
+            ]
+        ]);
+    }
+    // =================================================================================
+
     public function createTenant() {
     AdminAuth::check();
 
@@ -354,10 +424,9 @@ class AdminController extends BaseController {
 
         $this->render('admin/edit_tenant', ['tenant' => $tenant]);
     }
-	
-	
-	private function generateRecoveryCode() {
-    return 'PJH-' . strtoupper(bin2hex(random_bytes(3))); // e.g., PJH-A1B2C3
-}
+    
+    private function generateRecoveryCode() {
+        return 'PJH-' . strtoupper(bin2hex(random_bytes(3))); // e.g., PJH-A1B2C3
+    }
 
 }

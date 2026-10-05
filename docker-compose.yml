@@ -16,6 +16,6 @@ services:
     container_name: postyourjobuk-ai-worker-1
     restart: always
     volumes:
-      - .:/app
+      - .:/var/www/html
     env_file:
       - .env

@@ -21,7 +21,7 @@ class Database {
 
         // UPDATED: Enforce SSL whenever connecting to your cloud Azure host URL
         if (defined('DB_HOST') && str_contains(DB_HOST, 'database.azure.com')) {
-            $options[PDO::MYSQL_ATTR_SSL_CA] = ROOT_PATH . DIRECTORY_SEPARATOR . 'DigiCertGlobalRootG2.crt.pem';
+            $options[PDO::MYSQL_ATTR_SSL_CA] = '/etc/ssl/certs/ca-certificates.crt';
             $options[PDO::MYSQL_ATTR_SSL_VERIFY_SERVER_CERT] = true;
         }
 

@@ -2,7 +2,7 @@
 
     <p class="vision-eyebrow">Our vision</p>
     <h1 class="vision-title">Hiring should be simple, fast, and effective.</h1>
-    <p class="vision-lead">PostYourJobHere was built for recruiters who value their time. We believe that posting a job, reaching the right candidates, and managing applications shouldn't require a lengthy setup or a dedicated IT team. It should just work.</p>
+    <p class="vision-lead">PostYourJobUK was built for recruiters who value their time. We believe that posting a job, reaching the right candidates, and managing applications shouldn't require a lengthy setup or a dedicated IT team. It should just work.</p>
 
     <hr class="vision-divider">
 

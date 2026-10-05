@@ -1,18 +1,68 @@
+<style>
+    /* Mobile-first header: stacks heading and button group vertically */
+    .admin-overview-header {
+        display: flex;
+        flex-direction: column;
+        align-items: flex-start;
+        gap: 1rem;
+        width: 100%;
+    }
+
+    /* Mobile button group: wraps buttons so they fit on narrow screens */
+    .admin-overview-actions {
+        display: flex;
+        flex-wrap: wrap;
+        gap: 10px;
+        align-items: center;
+        width: 100%;
+    }
+
+    /* Allow buttons to expand evenly on mobile for better touch targets */
+    .admin-overview-actions .btn {
+        flex: 1 1 calc(50% - 10px);
+        min-width: 140px;
+        text-align: center;
+        justify-content: center;
+    }
+
+    /* Desktop overrides (Screens 768px and wider) */
+    @media (min-width: 768px) {
+        .admin-overview-header {
+            flex-direction: row;
+            justify-content: space-between;
+            align-items: center;
+        }
+
+        .admin-overview-actions {
+            width: auto;
+            flex-wrap: nowrap;
+        }
+
+        .admin-overview-actions .btn {
+            flex: initial;
+        }
+    }
+</style>
+
 <div class="container admin-wrapper-view">
     <div class="card" style="margin-bottom: 2rem;"> 
-    <div style="display: flex; justify-content: space-between; align-items: center;">
-        <div>
-            <h2>System Overview</h2>
-        </div>
-        <div style="display: flex; gap: 10px; align-items: center;">
-            <a href="/admin/logs" class="btn btn-primary">View System Logs</a>
-            
-            <!-- Analytics Button -->
-            <a href="/admin/analytics" class="btn btn-primary">📊 View Analytics</a>
-            
-            <button onclick="document.getElementById('createTenantModal').style.display='flex'" class="btn btn-primary">
-                + Create New Recruiter
-            </button>
+        <div class="admin-overview-header">
+            <div>
+                <h2 style="margin: 0;">System Overview</h2>
+            </div>
+            <div class="admin-overview-actions">
+                <a href="/admin/logs" class="btn btn-primary">View System Logs</a>
+                
+                <!-- Analytics Button -->
+                <a href="/admin/analytics" class="btn btn-primary">📊 View Analytics</a>
+                
+                <!-- NEW: Fairness & Bias Audit Button -->
+                <a href="/admin/fairness" class="btn btn-primary">⚖️ Fairness Audit</a>
+                
+                <button onclick="document.getElementById('createTenantModal').style.display='flex'" class="btn btn-primary">
+                    + Create New Recruiter
+                </button>
+            </div>
         </div>
     </div>
 </div>
@@ -59,7 +109,7 @@
         <div class="card-header" style="padding: 1rem 1.5rem; border-bottom: 1px solid var(--border);">
             <h2>Manage Tenants</h2>
         </div>
-		<div style="margin-bottom: 1rem;">
+        <div style="margin-bottom: 1rem;">
     <strong>Filter by Status:</strong>
     <a href="?sort=<?= $currentSort ?>&order=<?= $currentOrder ?>&filter=all" class="btn <?= $currentFilter === 'all' ? 'btn-primary' : 'btn-secondary' ?>">All</a>
     <a href="?sort=<?= $currentSort ?>&order=<?= $currentOrder ?>&filter=active" class="btn <?= $currentFilter === 'active' ? 'btn-primary' : 'btn-secondary' ?>">Active</a>

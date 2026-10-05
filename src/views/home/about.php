@@ -1,52 +1,46 @@
 <div class="container page-wrapper">
 
-    <p class="about-eyebrow">About us</p>
-    <h1 class="about-title">The team behind PostYourJobHere.</h1>
-    <p class="about-lead">PostYourJobHere was created by people who understand recruitment. We saw recruiters spending hours on clunky job boards, chasing unqualified applications, and managing chaos across spreadsheets. So we built something better — a platform that puts recruiters in control from day one.</p>
-
+    <p class="about-eyebrow">About the Platform</p>
+    <h1 class="about-title">The Engineering Behind postyourjobuk</h1>
+    <p class="about-lead">
+        Postyourjobuk is a cloud-native, multi-tenant AI recruitment SaaS ecosystem engineered as an academic dissertation project. It was designed to solve two critical industry challenges: prohibitive multi-tenant subscription costs for SMEs and black-box algorithmic bias in automated resume screening.
+    </p>
     <hr class="about-divider">
-
-    <div class="about-stats">
-        <div class="about-stat">
-            <p class="about-stat-num">500+</p>
-            <p class="about-stat-label">Recruiters using the platform</p>
-        </div>
-        <div class="about-stat">
-            <p class="about-stat-num">10k+</p>
-            <p class="about-stat-label">Jobs posted to date</p>
-        </div>
-        <div class="about-stat">
-            <p class="about-stat-num">UK &amp; beyond</p>
-            <p class="about-stat-label">Hiring across borders</p>
-        </div>
-    </div>
 
     <div class="about-grid">
 
         <div class="card">
-            <h4 class="about-card-title">Purpose-built for recruiters</h4>
-            <p class="about-card-text">We don't try to serve every type of user. PostYourJobHere is designed specifically for recruitment professionals — the tools, the workflow, and the experience all reflect that.</p>
+            <h4 class="about-card-title">Multi-Tenant Cloud Isolation</h4>
+            <p class="about-card-text">
+                Built on a custom PHP 8.3 MVC architecture with strict dynamic tenant scoping, Zero-Trust session fingerprinting, and isolated workspace data boundaries.
+            </p>
         </div>
 
         <div class="card">
-            <h4 class="about-card-title">Transparent and straightforward</h4>
-            <p class="about-card-text">No hidden fees, no confusing tiers. You know exactly what you're getting — a reliable platform to post roles and find the right people, without the noise.</p>
+            <h4 class="about-card-title">Algorithmic Bias Mitigation</h4>
+            <p class="about-card-text">
+                Candidate CVs undergo regex PII redaction before evaluation using a deterministic 100-baseline subtractive rubric via Google Gemini 2.5 Flash.
+            </p>
         </div>
 
         <div class="card">
-            <h4 class="about-card-title">Secure by default</h4>
-            <p class="about-card-text">Candidate data and company information are handled with care. We follow industry best practices so you and your clients can trust the platform completely.</p>
+            <h4 class="about-card-title">Event-Driven Asynchronous Pipeline</h4>
+            <p class="about-card-text">
+                Web ingestion is decoupled from AI compute using Azure Storage Queues and serverless Azure Functions, guaranteeing zero user-facing page timeouts.
+            </p>
         </div>
 
         <div class="card">
-            <h4 class="about-card-title">Always improving</h4>
-            <p class="about-card-text">We ship updates regularly based on real recruiter feedback. If something isn't working for you, we want to know — and we act on it.</p>
+            <h4 class="about-card-title">Transparent & Auditable</h4>
+            <p class="about-card-text">
+                Every AI evaluation generates a SHA-256 cryptographic audit fingerprint and structured HTML feedback, empowering recruiters with complete explainability.
+            </p>
         </div>
 
     </div>
 
     <div class="about-quote">
-        <p>"PostYourJobHere exists because recruitment deserves better tools. We're committed to building them."</p>
+        <p>"	Postyourjobuk was engineered to demonstrate that automated AI recruitment can be low-cost, scalable, and algorithmically transparent."</p>
     </div>
 
 </div>

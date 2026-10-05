@@ -1,60 +1,98 @@
+<style>
+    /* Mobile-first flex container for the header */
+    .dashboard-header-flex {
+        display: flex;
+        flex-direction: column;
+        align-items: flex-start;
+        gap: 1rem;
+        margin-bottom: 1.5rem;
+    }
+    
+    /* Mobile-first grid for the company details (1 column) */
+    .dashboard-details-grid {
+        display: grid;
+        grid-template-columns: 1fr; 
+        gap: 1rem; 
+        background: #1f2937; 
+        padding: 1rem; 
+        border-radius: 8px; 
+        border: 1px solid #374151; 
+        align-items: start;
+    }
+
+    /* Desktop overrides (Screens wider than 768px) */
+    @media (min-width: 768px) {
+        .dashboard-header-flex {
+            flex-direction: row;
+            justify-content: space-between;
+        }
+        .dashboard-details-grid {
+            /* Restores your specific 5-column weighting */
+            grid-template-columns: 1fr 1fr 1.8fr 1fr 1fr; 
+        }
+    }
+</style>
+
 <div class="card" style="margin-bottom: 2rem; border-top: 4px solid #4f46e5; background: #111827; border: 1px solid #374151;">
         
-        <!-- NEW HEADER FLEX CONTAINER -->
-        <div style="display: flex; justify-content: space-between; align-items: flex-start; margin-bottom: 1.5rem;">
-            <div>
-                <h1 style="margin-bottom: 0.5rem; margin-top: 0; color: #ffffff;">Welcome, <?= htmlspecialchars($tenant['company_name'] ?? 'Recruiter') ?></h1>
-                <p class="text-muted" style="margin-bottom: 0; color: #94a3b8;">Your Corporate Profile Dashboard</p>
-            </div>
-            <a href="/dashboard/analytics" class="btn btn-primary">📊 View Analytics</a>
+    <!-- NEW HEADER FLEX CONTAINER -->
+    <div class="dashboard-header-flex">
+        <div>
+            <h1 style="margin-bottom: 0.5rem; margin-top: 0; color: #ffffff;">Welcome, <?= htmlspecialchars($tenant['company_name'] ?? 'Recruiter') ?></h1>
+            <p class="text-muted" style="margin-bottom: 0; color: #94a3b8;">Your Corporate Profile Dashboard</p>
         </div>
-        <!-- END NEW HEADER FLEX CONTAINER -->
-        
-        <!-- ADJUSTED GRID COLUMNS TO GIVE EMAIL MORE ROOM (1.8fr weight) -->
-        <div style="display: grid; grid-template-columns: 1fr 1fr 1.8fr 1fr 1fr; gap: 1rem; background: #1f2937; padding: 1rem; border-radius: 8px; border: 1px solid #374151; align-items: start;">
-            <div style="min-width: 0;">
-                <span style="display: block; font-size: 0.875rem; color: #94a3b8; margin-bottom: 0.25rem;">Industry</span>
-                <strong style="color: #ffffff;"><?= htmlspecialchars($tenant['industry'] ?? 'Not Specified') ?></strong>
-            </div>
-            <div style="min-width: 0;">
-                <span style="display: block; font-size: 0.875rem; color: #94a3b8; margin-bottom: 0.25rem;">Contact Person</span>
-                <strong style="color: #ffffff;"><?= htmlspecialchars($tenant['contact_person'] ?? 'Not Specified') ?></strong>
-            </div>
-            <div style="min-width: 0;">
-                <span style="display: block; font-size: 0.875rem; color: #94a3b8; margin-bottom: 0.25rem;">Email Address</span>
-                <strong style="color: #ffffff; display: block; white-space: nowrap;"><?= htmlspecialchars($tenant['email'] ?? 'Not Specified') ?></strong>
-            </div>
-            <div style="min-width: 0;">
-                <span style="display: block; font-size: 0.875rem; color: #94a3b8; margin-bottom: 0.25rem;">Phone Number</span>
-                <strong style="color: #ffffff;"><?= htmlspecialchars($tenant['phone_number'] ?? 'Not Specified') ?></strong>
-            </div>
-            <div style="min-width: 0;">
-                <span style="display: block; font-size: 0.875rem; color: #94a3b8; margin-bottom: 0.25rem;">Website</span>
-                <?php if (!empty($tenant['website_url'])): ?>
-                    <a href="<?= htmlspecialchars($tenant['website_url']) ?>" target="_blank" style="color: #6366f1; font-weight: 600; text-decoration: none;">Visit Site ↗</a>
-                <?php else: ?>
-                    <strong style="color: #ffffff;">Not Specified</strong>
-                <?php endif; ?>
-            </div>
-        </div>
-        
-        <?php if (!empty($tenant['company_address'])): ?>
-        <div style="margin-top: 1.5rem; padding: 0 0.5rem;">
-            <span style="display: block; font-size: 0.875rem; color: #94a3b8; margin-bottom: 0.25rem;">Headquarters / Address</span>
-            <p style="margin: 0; font-size: 0.95rem; color: #ffffff;"><?= nl2br(htmlspecialchars($tenant['company_address'])) ?></p>
-        </div>
-        <?php endif; ?>
+        <a href="/dashboard/analytics" class="btn btn-primary">📊 View Analytics</a>
     </div>
-
-    <?php if (isset($_SESSION['success_message'])): ?>
-        <div class="alert alert-success">✅ <?= htmlspecialchars($_SESSION['success_message']) ?></div>
-        <?php unset($_SESSION['success_message']); ?>
+    <!-- END NEW HEADER FLEX CONTAINER -->
+    
+    <!-- ADJUSTED GRID COLUMNS -->
+    <div class="dashboard-details-grid">
+        <div style="min-width: 0;">
+            <span style="display: block; font-size: 0.875rem; color: #94a3b8; margin-bottom: 0.25rem;">Industry</span>
+            <strong style="color: #ffffff;"><?= htmlspecialchars($tenant['industry'] ?? 'Not Specified') ?></strong>
+        </div>
+        <div style="min-width: 0;">
+            <span style="display: block; font-size: 0.875rem; color: #94a3b8; margin-bottom: 0.25rem;">Contact Person</span>
+            <strong style="color: #ffffff;"><?= htmlspecialchars($tenant['contact_person'] ?? 'Not Specified') ?></strong>
+        </div>
+        <div style="min-width: 0;">
+            <span style="display: block; font-size: 0.875rem; color: #94a3b8; margin-bottom: 0.25rem;">Email Address</span>
+            <!-- Note: Removed white-space: nowrap so long emails wrap safely on small mobile screens -->
+            <strong style="color: #ffffff; display: block; word-wrap: break-word;"><?= htmlspecialchars($tenant['email'] ?? 'Not Specified') ?></strong>
+        </div>
+        <div style="min-width: 0;">
+            <span style="display: block; font-size: 0.875rem; color: #94a3b8; margin-bottom: 0.25rem;">Phone Number</span>
+            <strong style="color: #ffffff;"><?= htmlspecialchars($tenant['phone_number'] ?? 'Not Specified') ?></strong>
+        </div>
+        <div style="min-width: 0;">
+            <span style="display: block; font-size: 0.875rem; color: #94a3b8; margin-bottom: 0.25rem;">Website</span>
+            <?php if (!empty($tenant['website_url'])): ?>
+                <a href="<?= htmlspecialchars($tenant['website_url']) ?>" target="_blank" style="color: #6366f1; font-weight: 600; text-decoration: none;">Visit Site ↗</a>
+            <?php else: ?>
+                <strong style="color: #ffffff;">Not Specified</strong>
+            <?php endif; ?>
+        </div>
+    </div>
+    
+    <?php if (!empty($tenant['company_address'])): ?>
+    <div style="margin-top: 1.5rem; padding: 0 0.5rem;">
+        <span style="display: block; font-size: 0.875rem; color: #94a3b8; margin-bottom: 0.25rem;">Headquarters / Address</span>
+        <p style="margin: 0; font-size: 0.95rem; color: #ffffff;"><?= nl2br(htmlspecialchars($tenant['company_address'])) ?></p>
+    </div>
     <?php endif; ?>
+</div>
 
-    <?php if (isset($_SESSION['error_message'])): ?>
-        <div class="alert alert-danger">❌ <?= htmlspecialchars($_SESSION['error_message']) ?></div>
-        <?php unset($_SESSION['error_message']); ?>
-    <?php endif; ?>
+<?php if (isset($_SESSION['success_message'])): ?>
+    <div class="alert alert-success">✅ <?= htmlspecialchars($_SESSION['success_message']) ?></div>
+    <?php unset($_SESSION['success_message']); ?>
+<?php endif; ?>
+
+<?php if (isset($_SESSION['error_message'])): ?>
+    <div class="alert alert-danger">❌ <?= htmlspecialchars($_SESSION['error_message']) ?></div>
+    <?php unset($_SESSION['error_message']); ?>
+<?php endif; ?>
+
+
 
     <section class="stats-grid" style="margin-bottom: 2rem !important;">
         <div class="card">
