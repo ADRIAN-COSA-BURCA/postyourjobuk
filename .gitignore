@@ -6,3 +6,4 @@
 # Ignore local CV uploads
 /uploads/*
 !/uploads/.gitkeep
+TechnicalLog.md 
