@@ -105,35 +105,166 @@
         </div>
     </div>
 
-    <div class="card admin-data-card">
-        <div class="card-header" style="padding: 1rem 1.5rem; border-bottom: 1px solid var(--border);">
-            <h2>Manage Tenants</h2>
+    <style>
+/* ---------- Desktop ---------- */
+.admin-filter-bar {
+    display: flex;
+    align-items: center;
+    flex-wrap: wrap;
+    gap: 0.75rem;
+    margin-bottom: 1rem;
+}
+.admin-filter-links {
+    display: flex;
+    flex-wrap: wrap;
+    gap: 0.5rem;
+}
+.admin-sort-mobile { display: none; }
+
+/* ---------- Mobile ---------- */
+@media (max-width: 768px) {
+    /* let the card and wrapper shrink */
+    .admin-data-card,
+    .admin-table-wrap {
+        min-width: 0 !important;
+        max-width: 100% !important;
+        width: 100% !important;
+        overflow: visible !important;
+        box-sizing: border-box;
+    }
+
+    /* filter bar: label on top, buttons wrap underneath */
+    .admin-filter-bar {
+        flex-direction: column;
+        align-items: flex-start;
+        padding: 0 1rem;
+    }
+    .admin-filter-links { width: 100%; }
+    .admin-filter-links .btn {
+        flex: 1 1 auto;
+        text-align: center;
+        min-width: 0 !important;
+    }
+
+    /* sort buttons (replace hidden table header) */
+    .admin-sort-mobile {
+        display: flex;
+        gap: 0.5rem;
+        padding: 0 1rem 1rem;
+    }
+    .admin-sort-mobile .btn {
+        flex: 1;
+        text-align: center;
+        min-width: 0 !important;
+    }
+
+    /* hide desktop header */
+    .admin-table-view thead { display: none; }
+
+    /* table parts become blocks, kill desktop min-widths/nowrap */
+    .admin-table-view,
+    .admin-table-view tbody,
+    .admin-table-view tr,
+    .admin-table-view td,
+    .admin-table-view .td-content,
+    .admin-table-view .btn {
+        display: block;
+        width: 100% !important;
+        min-width: 0 !important;
+        max-width: 100% !important;
+        box-sizing: border-box !important;
+        white-space: normal !important;
+    }
+
+    /* each row = card */
+    .admin-table-view tr {
+        margin: 0 0 1rem;
+        padding: 1rem;
+        border: 1px solid #374151;
+        border-radius: 0.5rem;
+        background: #1e293b;
+    }
+
+    .admin-table-view td {
+        display: flex;
+        flex-direction: column;
+        align-items: flex-start;
+        padding: 0.75rem 0 !important;
+        text-align: left !important;
+        border-bottom: 1px solid #334155;
+        overflow-wrap: anywhere;
+    }
+    .admin-table-view td:last-child {
+        border-bottom: none;
+        padding-bottom: 0 !important;
+    }
+
+    .admin-table-view td::before {
+        content: attr(data-label);
+        font-weight: 700;
+        color: #94a3b8;
+        font-size: 0.75rem;
+        text-transform: uppercase;
+        letter-spacing: 0.05em;
+        margin-bottom: 0.35rem;
+    }
+
+    /* status badge keeps natural size */
+    .admin-table-view .status-badge-flag {
+        display: inline-block;
+        width: auto !important;
+    }
+
+    /* full-width tap target */
+    .admin-table-view .btn {
+        text-align: center;
+        padding: 0.7rem;
+    }
+
+    /* empty-state row has no label */
+    .admin-table-view td[colspan]::before { content: none; }
+}
+</style>
+
+<?php
+    $nextOrder   = ($currentSort === 'company_name' && $currentOrder === 'ASC') ? 'DESC' : 'ASC';
+    $statusOrder = ($currentSort === 'status' && $currentOrder === 'ASC') ? 'DESC' : 'ASC';
+?>
+
+<div class="card admin-data-card">
+    <div class="card-header" style="padding: 1rem 1.5rem; border-bottom: 1px solid var(--border);">
+        <h2>Manage Tenants</h2>
+    </div>
+
+    <div class="admin-filter-bar">
+        <strong>Filter by Status:</strong>
+        <div class="admin-filter-links">
+            <a href="?sort=<?= $currentSort ?>&order=<?= $currentOrder ?>&filter=all" class="btn <?= $currentFilter === 'all' ? 'btn-primary' : 'btn-secondary' ?>">All</a>
+            <a href="?sort=<?= $currentSort ?>&order=<?= $currentOrder ?>&filter=active" class="btn <?= $currentFilter === 'active' ? 'btn-primary' : 'btn-secondary' ?>">Active</a>
+            <a href="?sort=<?= $currentSort ?>&order=<?= $currentOrder ?>&filter=suspended" class="btn <?= $currentFilter === 'suspended' ? 'btn-primary' : 'btn-secondary' ?>">Suspended</a>
         </div>
-        <div style="margin-bottom: 1rem;">
-    <strong>Filter by Status:</strong>
-    <a href="?sort=<?= $currentSort ?>&order=<?= $currentOrder ?>&filter=all" class="btn <?= $currentFilter === 'all' ? 'btn-primary' : 'btn-secondary' ?>">All</a>
-    <a href="?sort=<?= $currentSort ?>&order=<?= $currentOrder ?>&filter=active" class="btn <?= $currentFilter === 'active' ? 'btn-primary' : 'btn-secondary' ?>">Active</a>
-    <a href="?sort=<?= $currentSort ?>&order=<?= $currentOrder ?>&filter=suspended" class="btn <?= $currentFilter === 'suspended' ? 'btn-primary' : 'btn-secondary' ?>">Suspended</a>
-</div>
+    </div>
 
+    <!-- Mobile-only sort buttons -->
+    <div class="admin-sort-mobile">
+        <a href="?sort=company_name&order=<?= $nextOrder ?>&filter=<?= htmlspecialchars($currentFilter) ?>" class="btn btn-secondary">Sort by name</a>
+        <a href="?sort=status&order=<?= $statusOrder ?>&filter=<?= htmlspecialchars($currentFilter) ?>" class="btn btn-secondary">Sort by status</a>
+    </div>
 
+    <div class="admin-table-wrap">
         <table class="admin-table-view">
             <thead>
                 <tr>
-                    <?php 
-                        $nextOrder = ($currentSort === 'company_name' && $currentOrder === 'ASC') ? 'DESC' : 'ASC';
-                    ?>
                     <th>
-    <a href="?sort=company_name&order=<?= $nextOrder ?>&filter=<?= htmlspecialchars($currentFilter) ?>" style="text-decoration:none; color:inherit;">
-        Company Profile Name <?= $currentSort === 'company_name' ? ($currentOrder === 'ASC' ? '▲' : '▼') : '' ?>
-    </a>
-</th>
-<th>
-    <?php $statusOrder = ($currentSort === 'status' && $currentOrder === 'ASC') ? 'DESC' : 'ASC'; ?>
-    <a href="?sort=status&order=<?= $statusOrder ?>&filter=<?= htmlspecialchars($currentFilter) ?>" style="text-decoration:none; color:inherit;">
-        Routing Status <?= $currentSort === 'status' ? ($currentOrder === 'ASC' ? '▲' : '▼') : '' ?>
-    </a>
-</th>
+                        <a href="?sort=company_name&order=<?= $nextOrder ?>&filter=<?= htmlspecialchars($currentFilter) ?>" style="text-decoration:none; color:inherit;">
+                            Company Profile Name <?= $currentSort === 'company_name' ? ($currentOrder === 'ASC' ? '▲' : '▼') : '' ?>
+                        </a>
+                    </th>
+                    <th>
+                        <a href="?sort=status&order=<?= $statusOrder ?>&filter=<?= htmlspecialchars($currentFilter) ?>" style="text-decoration:none; color:inherit;">
+                            Routing Status <?= $currentSort === 'status' ? ($currentOrder === 'ASC' ? '▲' : '▼') : '' ?>
+                        </a>
+                    </th>
                     <th style="text-align: right;">Workspace Operations</th>
                 </tr>
             </thead>
@@ -145,19 +276,25 @@
                         </td>
                     </tr>
                 <?php else: ?>
-                    <?php foreach ($tenants as $tenant): 
+                    <?php foreach ($tenants as $tenant):
                         $status = strtolower($tenant['status'] ?? 'active'); ?>
                     <tr>
-                        <td style="font-weight: 600;"><?= htmlspecialchars($tenant['company_name']); ?></td>
-                        <td>
-                            <span class="status-badge-flag <?= $status; ?>">
-                                <?= htmlspecialchars(ucfirst($status)); ?>
-                            </span>
+                        <td data-label="Company" style="font-weight: 600;">
+                            <div class="td-content"><?= htmlspecialchars($tenant['company_name']); ?></div>
                         </td>
-                        <td style="text-align: right;">
-                            <a href="/admin/view-tenant?id=<?= urlencode($tenant['tenant_id']); ?>" class="btn btn-primary">
-                                Control Console
-                            </a>
+                        <td data-label="Status">
+                            <div class="td-content">
+                                <span class="status-badge-flag <?= $status; ?>">
+                                    <?= htmlspecialchars(ucfirst($status)); ?>
+                                </span>
+                            </div>
+                        </td>
+                        <td data-label="Operations" style="text-align: right;">
+                            <div class="td-content">
+                                <a href="/admin/view-tenant?id=<?= urlencode($tenant['tenant_id']); ?>" class="btn btn-primary">
+                                    Control Console
+                                </a>
+                            </div>
                         </td>
                     </tr>
                     <?php endforeach; ?>
@@ -165,4 +302,5 @@
             </tbody>
         </table>
     </div>
+</div>
 </div>

@@ -30,5 +30,11 @@ RUN sed -i '/<Directory \/var\/www\/>/,/<\/Directory>/ s/AllowOverride None/Allo
 # 7. Set working directory to your project root
 WORKDIR /var/www/html
 
-# 8. Copy all application files into the container
+# 8. Copy ONLY composer files first (this caches dependencies so builds are faster)
+COPY composer.json composer.lock* ./
+
+# 9. Run Composer to install dependencies internally (ignores dev packages for production)
+RUN composer install --no-dev --optimize-autoloader --no-interaction
+
+# 10. Copy the rest of the application files into the container
 COPY . /var/www/html/
