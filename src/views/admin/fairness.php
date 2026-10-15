@@ -72,8 +72,8 @@ $stats = $stats ?? ['total_pairs' => 0, 'mean_delta' => 0, 'max_skew' => 0, 'max
                         $absDelta = abs($delta);
                         $isAlert = $absDelta > 5;
                         
-                        $summaryA = !empty($pair['summary_a']) ? json_decode($pair['summary_a'], true) : ['raw' => 'Pending AI Analysis...'];
-                        $summaryB = !empty($pair['summary_b']) ? json_decode($pair['summary_b'], true) : ['raw' => 'Pending AI Analysis...'];
+                        $summaryA = !empty($pair['summary_a']) ? (json_decode($pair['summary_a'], true) ?? ['raw' => $pair['summary_a']]) : ['raw' => 'Pending AI Analysis...'];
+                        $summaryB = !empty($pair['summary_b']) ? (json_decode($pair['summary_b'], true) ?? ['raw' => $pair['summary_b']]) : ['raw' => 'Pending AI Analysis...'];
                     ?>
                         <tr style="border-bottom: 1px solid var(--border);">
                             <td style="padding-left: 1.5rem; font-weight: bold; color: var(--muted);">
