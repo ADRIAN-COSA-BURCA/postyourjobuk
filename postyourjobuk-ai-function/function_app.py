@@ -290,7 +290,10 @@ def _regex_years_from_cv(clean_cv):
 MIN_EVIDENCE_WORDS = 4
 MAX_EVIDENCE_CHARS = 400
 COPY_SIMILARITY_THRESHOLD = 0.85
-ALLOWED_EVIDENCE_SECTIONS = {"experience", "project"}
+ALLOWED_EVIDENCE_SECTIONS = {
+    "experience", "project", "certifications", "qualifications", 
+    "education", "licensing", "registrations"
+}
 
 def _job_fragments(job_text):
     """Normalised sentence/line fragments of the job posting (4+ words) for copy detection."""
@@ -306,11 +309,19 @@ def _is_copied_from_job(quote, fragments):
     q = _norm_for_match(re.sub(r"[^\w\s/+#.]", " ", quote))
     if not q:
         return False
+    q_words = q.split()
+
     for frag in fragments:
-        if q in frag or frag in q:
+        frag_words = frag.split()
+        # Plagiarism case 1: Candidate quote is entirely contained inside a job fragment (literal copy-paste from job spec)
+        if len(q_words) >= MIN_EVIDENCE_WORDS and q in frag:
             return True
-        if difflib.SequenceMatcher(None, q, frag).ratio() >= COPY_SIMILARITY_THRESHOLD:
-            return True
+        # Plagiarism case 2: Near-duplicate sentence similarity (>0.85) between comparable-length phrases
+        if len(q_words) >= 5 and len(frag_words) >= 5:
+            len_ratio = min(len(q), len(frag)) / max(len(q), len(frag))
+            if len_ratio > 0.6:
+                if difflib.SequenceMatcher(None, q, frag).ratio() >= COPY_SIMILARITY_THRESHOLD:
+                    return True
     return False
 
 def _norm_for_match(text):
@@ -324,18 +335,22 @@ You are a strict evidence-extraction engine for recruitment. You do NOT score, r
 TARGET JOB TITLE:
 {job_title}
 
-TASK 1: SKILL EVIDENCE EXTRACTION
-For each REQUIRED SKILL below, decide whether the CV text shows the candidate has actually USED or practised it
-(work, project or achievement context). Synonyms and equivalent technologies in the same domain count
-(e.g. "Postgres" for "PostgreSQL"). Do NOT count: skills merely listed in isolation without context, wishes or intent
-to learn ("interested in", "currently learning"), or text that just repeats the job requirements.
+TASK 1: SKILL & CREDENTIAL EVIDENCE EXTRACTION
+For each REQUIRED SKILL or QUALIFICATION below:
+1. Decide whether the CV text shows the candidate actually possesses, has practised, or currently holds it.
+2. For employment skills & competencies: look for evidence in work experience, employment duties, or named projects. ALWAYS prefer quotes from actual job duties/achievements over standalone skills lists.
+3. For professional licenses, statutory certifications, and credentials (e.g. CSCS cards, NMC PIN, ACCA, driving licence, life support):
+   - Verify that the credential is ACTIVE and CURRENT. If the CV states it is "expired", "lapsed", or "pending examination", do NOT verify it unless a valid, active alternative specified in the job requirement is present in the CV.
+   - Set section to "certifications", "qualifications", "education", or "licensing".
+   - Set role_context to the certifying body or institution (e.g. "NMC", "CITB", "Resuscitation Council UK", "University").
+4. Do NOT count: skills merely listed in isolation without context, wishes or intent to learn ("interested in", "currently studying for"), or expired credentials.
 
 For every skill you verify, return:
 - skill: the exact required skill name.
 - evidence_quote: a full phrase or sentence copied EXACTLY, character for character, from the CV text (at least {MIN_EVIDENCE_WORDS} words, max {MAX_EVIDENCE_CHARS} characters) showing the skill in use.
-- section: where the quote sits in the CV: "experience" (paid employment), "project" (a named project), "profile", "skills_list", "education", or "other".
-- role_context: the role/job title and employer (or project name) the quote belongs to.
-- is_role_relevant: boolean. True ONLY if the role or project belongs to the professional domain of the target job ("{job_title}"). False if it is an unrelated domain (e.g. warehouse worker, driver, barista, waiter, retail cashier when applying for Data Analyst / Developer).
+- section: where the quote sits in the CV: "experience" (paid employment), "project" (a named project), "certifications", "qualifications", "education", "profile", "skills_list", or "other".
+- role_context: the role/job title and employer (or certifying body / institution) the quote belongs to.
+- is_role_relevant: boolean. True if the role, project, or credential belongs to the professional domain of the target job ("{job_title}"). False if it is an unrelated domain (e.g. warehouse worker, driver, barista, waiter, retail cashier when applying for Data Analyst / Developer / Healthcare).
 
 TASK 2: CAREER TIMELINE EXTRACTION
 Extract ALL of the candidate's employment roles, job positions, and career breaks found anywhere in the CV with calendar years:
@@ -428,17 +443,20 @@ def extract_cv_data(redacted_cv, required_skills, job_title="", job_text="", cle
             elif _is_copied_from_job(quote, fragments):
                 rejected.append({"skill": skill_key, "reason": "quote copied from job posting", "quote": quote[:200]})
             elif section not in ALLOWED_EVIDENCE_SECTIONS:
-                rejected.append({"skill": skill_key, "reason": f"quote not in experience/project section ({section or 'unknown'})", "quote": quote[:200]})
-            elif not role:
+                rejected.append({"skill": skill_key, "reason": f"quote not in allowed section ({section or 'unknown'})", "quote": quote[:200]})
+            elif not role and section not in {"certifications", "qualifications", "education", "licensing", "registrations"}:
                 rejected.append({"skill": skill_key, "reason": "no role/project context", "quote": quote[:200]})
             else:
-                # Award 1.0 credit for relevant roles or named projects; 0.5 credit for non-relevant roles
-                credit = 1.0 if (is_relevant_role or section == "project") else 0.5
+                is_cert_or_edu = section in {"certifications", "qualifications", "education", "licensing", "registrations"}
+                if not role and is_cert_or_edu:
+                    role = "Professional Credentials & Qualifications"
+                # Award 1.0 credit for relevant roles, named projects, or verified credentials/education; 0.5 credit for non-relevant roles
+                credit = 1.0 if (is_relevant_role or section == "project" or is_cert_or_edu) else 0.5
                 if skill_key not in skill_credits or credit > skill_credits[skill_key]:
                     skill_credits[skill_key] = credit
                     evidence[skill_key] = quote
                     evidence_roles[skill_key] = role
-                    evidence_relevance[skill_key] = (is_relevant_role or section == "project")
+                    evidence_relevance[skill_key] = (is_relevant_role or section == "project" or is_cert_or_edu)
 
     # Python Grounding Gate for Career Timeline / Relevant Years
     current_year = datetime.now().year
