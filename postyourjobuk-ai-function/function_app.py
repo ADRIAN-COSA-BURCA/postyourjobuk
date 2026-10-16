@@ -338,8 +338,8 @@ For every skill you verify, return:
 - is_role_relevant: boolean. True ONLY if the role or project belongs to the professional domain of the target job ("{job_title}"). False if it is an unrelated domain (e.g. warehouse worker, driver, barista, waiter, retail cashier when applying for Data Analyst / Developer).
 
 TASK 2: CAREER TIMELINE EXTRACTION
-Extract the candidate's career positions and career breaks with calendar years:
-- role_title: job title or period label (e.g. "Data Analyst", "Barista", "Career Break").
+Extract ALL of the candidate's employment roles, job positions, and career breaks found anywhere in the CV with calendar years:
+- role_title: job title or period label (e.g. "Data Analyst", "Barista", "Financial Accountant", "Career Break").
 - start_year: 4-digit start year (integer).
 - end_year: 4-digit end year (integer, use {current_year} if present / current).
 - is_relevant_to_target_job: boolean. True ONLY if the role is in the same professional field as "{job_title}".
@@ -478,6 +478,9 @@ def extract_cv_data(redacted_cv, required_skills, job_title="", job_text="", cle
             relevant_roles_list.append(r_title)
             relevant_intervals.append((s_yr, max(float(s_yr + 0.5), float(e_yr))))
 
+    skills_found = [normalized_required[k] for k in normalized_required if k in evidence]
+    has_non_domain_evidence = any(not is_rel for is_rel in evidence_relevance.values())
+
     total_relevant_years = 0.0
     if relevant_intervals:
         relevant_intervals.sort(key=lambda x: x[0])
@@ -488,9 +491,11 @@ def extract_cv_data(redacted_cv, required_skills, job_title="", job_text="", cle
             else:
                 merged[-1][1] = max(merged[-1][1], end)
         total_relevant_years = round(sum(end - start for start, end in merged), 1)
-    elif not raw_work and clean_cv:
-        # Fallback to pure regex interval search only if Gemini returned zero structured work entries
+    elif not raw_work and clean_cv and skills_found:
+        # Fallback to pure regex interval search only if candidate has verified skills and Gemini returned no work history
         total_relevant_years = _regex_years_from_cv(clean_cv)
+    else:
+        total_relevant_years = 0.0
 
     work_summary_parts = []
     if relevant_roles_list:
@@ -498,9 +503,6 @@ def extract_cv_data(redacted_cv, required_skills, job_title="", job_text="", cle
     if excluded_roles_list:
         work_summary_parts.append(f"Excluded: {', '.join(sorted(set(excluded_roles_list)))}")
     work_history_summary = f"({'; '.join(work_summary_parts)})" if work_summary_parts else ""
-
-    skills_found = [normalized_required[k] for k in normalized_required if k in evidence]
-    has_non_domain_evidence = any(not is_rel for is_rel in evidence_relevance.values())
 
     return {
         "skills_found": skills_found,
