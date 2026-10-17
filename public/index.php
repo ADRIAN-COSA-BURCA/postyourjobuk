@@ -77,7 +77,11 @@ $router->add('GET',  '/admin/logs',          [\App\Controllers\AuditController::
 $router->add('GET',  '/admin/login',         [\App\Controllers\AdminController::class, 'login']);
 $router->add('POST', '/admin/login',         [\App\Controllers\AdminController::class, 'authenticateAdmin']);
 $router->add('GET',  '/admin/logout',        [\App\Controllers\AdminController::class, 'logout']);
-$router->add('GET',  '/admin/fairness',  [\App\Controllers\AdminController::class, 'fairness']);
+$router->add('GET',  '/admin/fairness',              [\App\Controllers\AdminController::class, 'fairness']);
+$router->add('POST', '/admin/fairness/run',          [\App\Controllers\AdminController::class, 'runFairnessAudit']);
+$router->add('GET',  '/admin/fairness/status',       [\App\Controllers\AdminController::class, 'fairnessStatus']);
+$router->add('GET',  '/admin/fairness/detail',       [\App\Controllers\AdminController::class, 'fairnessDetail']);
+$router->add('GET',  '/admin/fairness/certificate',  [\App\Controllers\AdminController::class, 'fairnessCertificate']);
 
 // --- Admin Tenant Management Operations ---
 $router->add('GET',  '/admin/view-tenant',      [\App\Controllers\AdminController::class, 'viewTenant']);

@@ -72,12 +72,15 @@ abstract class BaseController {
         }
     }
 
-    protected function render(string $view, array $data = []) {
+    protected function render(string $view, array $data = [], bool $standalone = false) {
         extract($data);
         
-        $containerRoot = '/var/www/html'; 
+        $root = (defined('ROOT_PATH') && file_exists(ROOT_PATH . '/src/views/' . ltrim($view, '/') . '.php')) 
+            ? ROOT_PATH 
+            : '/var/www/html';
+            
         $view = ltrim($view, '/');
-        $contentFile = $containerRoot . '/src/views/' . $view . '.php';
+        $contentFile = $root . '/src/views/' . $view . '.php';
 
         if (!file_exists($contentFile)) {
             die("DOCKER PATH ERROR: The system cannot find the view file. <br>" .
@@ -89,7 +92,12 @@ abstract class BaseController {
         require $contentFile;
         $content = ob_get_clean();
 
-        $layoutPath = $containerRoot . '/src/views/layouts/main.php';
+        if ($standalone) {
+            echo $content;
+            return;
+        }
+
+        $layoutPath = $root . '/src/views/layouts/main.php';
         
         if (file_exists($layoutPath)) {
             $view_content = $content; 
