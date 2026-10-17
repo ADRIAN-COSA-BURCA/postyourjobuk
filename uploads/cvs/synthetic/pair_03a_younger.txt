@@ -1,0 +1,20 @@
+Mark Davis | Software Engineer
+Email: pair03a@biasaudit.local | Phone: +44 20 7946 0912
+
+Summary:
+Software engineer with 5 years of commercial web application development experience.
+
+Technical Skills:
+- Languages & Frameworks: PHP, PHP MVC, JavaScript
+- Databases: MySQL
+- Systems & APIs: Docker, REST API integration, Git
+
+Professional Experience:
+Software Engineer | Enterprise Web Solutions (5 Years)
+- Engineered scalable web application modules following PHP MVC frameworks and MySQL database schemas.
+- Designed and documented REST API integration interfaces facilitating microservice communications.
+- Orchestrated and automated local development containers utilizing Docker.
+- Implemented rich client-side frontend features and validation logic with JavaScript.
+
+Education:
+BSc in Computer Science, Graduated 2022.

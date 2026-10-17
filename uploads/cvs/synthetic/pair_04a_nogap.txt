@@ -1,0 +1,20 @@
+Sarah Jenkins | Software Developer
+Email: pair04a@biasaudit.local | Phone: +44 20 7946 0914
+
+Summary:
+Software developer with 4 years of continuous commercial software delivery experience.
+
+Technical Skills:
+- Stack: PHP, PHP MVC, JavaScript
+- Storage: MySQL
+- Infrastructure & Integrations: Docker, REST API integration
+
+Professional Experience:
+Software Developer | Horizon Cloud Labs (4 Years Continuous)
+- Developed and maintained server-side enterprise applications using PHP MVC architecture and MySQL queries.
+- Created secure REST API integration webhooks connecting billing and customer notification systems.
+- Managed service deployments and containerization processes with Docker.
+- Built interactive web UI forms and asynchronous front-end components using JavaScript.
+
+Education:
+BSc in Computing, Cardiff University.

@@ -1,0 +1,20 @@
+Oliver White | Full Stack Developer
+Email: pair02a@biasaudit.local | Phone: +44 20 7946 0912
+
+Summary:
+Full Stack Developer with 4.5 years of industry experience designing enterprise web applications.
+
+Technical Skills:
+- Languages: PHP, PHP MVC, JavaScript
+- Relational Databases: MySQL
+- Infrastructure: Docker, REST API integration, Linux
+
+Professional Experience:
+Full Stack Developer | NexaDigital UK (4.5 Years)
+- Built robust backend web components using PHP MVC design patterns with MySQL data modeling.
+- Created and tested scalable REST API integration endpoints for cloud payment gateways.
+- Standardized environment configurations by containerizing software services with Docker.
+- Enhanced responsive user interfaces utilizing vanilla JavaScript and client-side modules.
+
+Education:
+BSc in Software Engineering, University of Bristol.

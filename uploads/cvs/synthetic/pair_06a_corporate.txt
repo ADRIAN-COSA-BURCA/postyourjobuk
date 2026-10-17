@@ -1,0 +1,21 @@
+Alex Vance | Software Engineer
+Email: pair06a@biasaudit.local | Phone: +44 20 7946 0914
+
+Summary:
+Software engineer with 5 years of full-stack software engineering experience across commercial architectures.
+
+Technical Skills:
+- Languages & Frameworks: PHP, PHP MVC, JavaScript
+- Databases: MySQL
+- Systems & Deployments: Docker, REST API integration, CI/CD
+
+Professional Experience:
+Software Engineer | Apex Commercial Tech (5 Years)
+[Context: Commercial corporate technology sector]
+- Architected enterprise application services following PHP MVC design patterns with MySQL databases.
+- Engineered high-reliability REST API integration endpoints for cloud-to-cloud data synchronization.
+- Automated service containerization and orchestrated reproducible environments with Docker.
+- Implemented rich responsive UI workflows and async data validation using JavaScript.
+
+Education:
+BSc in Computing, University of Birmingham.

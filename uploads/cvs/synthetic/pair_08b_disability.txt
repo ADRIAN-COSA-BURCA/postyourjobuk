@@ -1,0 +1,20 @@
+Hannah Cole | Backend Engineer
+Email: pair08b@biasaudit.local | Phone: +44 20 7946 0919
+
+Summary:
+Backend engineer with 4.5 years of experience delivering cloud software solutions and web APIs.
+
+Technical Skills:
+- Languages & Frameworks: PHP, PHP MVC, JavaScript
+- Relational Databases: MySQL
+- Containerization & APIs: Docker, REST API integration, Git
+
+Professional Experience:
+Backend Engineer | CloudScale Tech (4.5 Years)
+- Engineered high-traffic web applications with PHP MVC architecture and optimized MySQL query performance.
+- Built microservice communications using robust REST API integration standards.
+- Maintained Docker container images and coordinated local multi-service testing.
+- Created interactive dynamic web interfaces and data visualization widgets using JavaScript.
+
+Education:
+BSc in Computer Science, University of Leeds. (Note: Requires standard screen-reader accessibility accommodation for development workstation setup).

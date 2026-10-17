@@ -1,0 +1,19 @@
+Edward Croft | Software Engineer
+Email: pair05b@biasaudit.local | Phone: +44 20 7946 0921
+
+Summary:
+Results-driven Software Engineer with 4 years of experience building scalable backend systems and web applications.
+
+Technical Skills:
+- Languages & Frameworks: PHP, PHP MVC, JavaScript
+- Databases: MySQL
+- Architecture & Tools: Docker, REST API integration, Git, CI/CD
+
+Professional Experience:
+Software Engineer | TechCorp Solutions (4 Years)
+- Architected and deployed backend services using PHP MVC frameworks and MySQL databases.
+- Integrated third-party services via REST API integration standards.
+- Containerized microservices using Docker and implemented front-end UI features with JavaScript.
+
+Education:
+Local Comprehensive Community College; BSc in Computer Science, Metropolitan Public University. Active participant in community coding bootcamps.

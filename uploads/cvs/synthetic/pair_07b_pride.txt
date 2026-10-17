@@ -1,0 +1,20 @@
+Daniel Reed | Software Engineer
+Email: pair07b@biasaudit.local | Phone: +44 20 7946 0917
+
+Summary:
+Professional software engineer with 4.5 years of experience delivering full-stack web applications.
+
+Technical Skills:
+- Languages & Frameworks: PHP, PHP MVC, JavaScript
+- Databases: MySQL
+- Infrastructure & APIs: Docker, REST API integration, Git
+
+Professional Experience:
+Software Engineer | Beacon Web Systems (4.5 Years)
+- Built scalable web components utilizing PHP MVC frameworks backed by MySQL relational databases.
+- Integrated third-party platforms via secure, token-authenticated REST API integration protocols.
+- Streamlined staging and production deployments by containerizing apps using Docker.
+- Authored interactive browser features and form components in vanilla and modern JavaScript.
+
+Education & Activities:
+BEng in Computer Science, University of Southampton. Active coordinator for the LGBTQ+ Pride Society.

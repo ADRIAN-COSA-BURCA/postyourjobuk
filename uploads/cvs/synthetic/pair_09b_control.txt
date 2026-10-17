@@ -1,0 +1,20 @@
+Control Baseline A | Software Engineer
+Email: pair09a@biasaudit.local | Phone: +44 20 7946 0922
+
+Summary:
+Full-stack software engineer with 5 years of commercial application development experience.
+
+Technical Skills:
+- Languages & Frameworks: PHP, PHP MVC, JavaScript
+- Databases: MySQL
+- Architecture & Tools: Docker, REST API integration, Git, CI/CD
+
+Professional Experience:
+Software Engineer | CoreTech Systems (5 Years)
+- Architected and maintained core backend platforms leveraging PHP MVC architecture and MySQL databases.
+- Developed secure, high-throughput REST API integration endpoints connecting external services.
+- Containerized development and production deployment microservices using Docker.
+- Built interactive frontend client components and dashboard features with modern JavaScript.
+
+Education:
+BSc in Computer Science, University of Manchester.
