@@ -209,22 +209,22 @@ $stats = $stats ?? ['total_pairs' => 0, 'mean_delta' => 0, 'max_skew' => 0, 'max
         </div>
 
         <!-- Modal Parity Status Strip -->
-        <div id="modalParityStrip" style="background: #f8fafc; border-bottom: 1px solid var(--border); padding: 1rem 1.75rem; display: flex; justify-content: space-between; align-items: center; flex-wrap: wrap; gap: 1rem;">
+        <div id="modalParityStrip" style="background: #f8fafc; border-bottom: 1px solid #e2e8f0; padding: 1rem 1.75rem; display: flex; justify-content: space-between; align-items: center; flex-wrap: wrap; gap: 1rem;">
             <div style="display: flex; align-items: center; gap: 2rem;">
                 <div>
-                    <div style="font-size: 0.75rem; color: var(--muted); text-transform: uppercase;">Profile A (Baseline)</div>
-                    <div id="modalNameA" style="font-weight: 700; color: #1e293b; font-size: 0.95rem;">-</div>
-                    <div id="modalScoreA" style="font-size: 1.3rem; font-weight: 800; color: #3b82f6;">-</div>
+                    <div style="font-size: 0.75rem; color: #64748b; text-transform: uppercase; font-weight: 600;">Profile A (Baseline)</div>
+                    <div id="modalNameA" style="font-weight: 700; color: #0f172a; font-size: 0.95rem;">-</div>
+                    <div id="modalScoreA" style="font-size: 1.3rem; font-weight: 800; color: #2563eb;">-</div>
                 </div>
-                <div style="font-size: 1.5rem; font-weight: 800; color: var(--muted);">=</div>
+                <div style="font-size: 1.5rem; font-weight: 800; color: #94a3b8;">=</div>
                 <div>
-                    <div style="font-size: 0.75rem; color: var(--muted); text-transform: uppercase;">Profile B (Variant)</div>
-                    <div id="modalNameB" style="font-weight: 700; color: #1e293b; font-size: 0.95rem;">-</div>
-                    <div id="modalScoreB" style="font-size: 1.3rem; font-weight: 800; color: #8b5cf6;">-</div>
+                    <div style="font-size: 0.75rem; color: #64748b; text-transform: uppercase; font-weight: 600;">Profile B (Variant)</div>
+                    <div id="modalNameB" style="font-weight: 700; color: #0f172a; font-size: 0.95rem;">-</div>
+                    <div id="modalScoreB" style="font-size: 1.3rem; font-weight: 800; color: #7c3aed;">-</div>
                 </div>
                 <div>
-                    <div style="font-size: 0.75rem; color: var(--muted); text-transform: uppercase;">Algorithmic Delta</div>
-                    <div id="modalDeltaBadge" style="font-size: 1.1rem; font-weight: 800; color: #10b981;">0 pts (100% Parity)</div>
+                    <div style="font-size: 0.75rem; color: #64748b; text-transform: uppercase; font-weight: 600;">Algorithmic Delta</div>
+                    <div id="modalDeltaBadge" style="font-size: 1.1rem; font-weight: 800; color: #059669;">0 pts (100% Parity)</div>
                 </div>
             </div>
             <div id="modalStatusBadge">
@@ -260,9 +260,9 @@ $stats = $stats ?? ['total_pairs' => 0, 'mean_delta' => 0, 'max_skew' => 0, 'max
             
             <!-- Tab 1: Verbatim Evidence & Grounding -->
             <div id="tab-evidence" class="modal-tab-pane">
-                <div style="background: rgba(37, 99, 235, 0.05); border: 1px solid rgba(37, 99, 235, 0.2); border-radius: 8px; padding: 1rem 1.25rem; margin-bottom: 1.25rem;">
-                    <h4 style="margin: 0 0 5px 0; color: #1e40af; font-size: 0.95rem;">Why is score parity mathematically guaranteed?</h4>
-                    <p style="margin: 0; font-size: 0.85rem; color: #334155; line-height: 1.5;">
+                <div style="background: rgba(37, 99, 235, 0.08); border: 1px solid rgba(37, 99, 235, 0.25); border-radius: 8px; padding: 1rem 1.25rem; margin-bottom: 1.25rem;">
+                    <h4 style="margin: 0 0 5px 0; color: #1e40af !important; font-size: 0.95rem; font-weight: 700;">Why is score parity mathematically guaranteed?</h4>
+                    <p style="margin: 0; font-size: 0.85rem; color: #1e293b !important; line-height: 1.5;">
                         The scoring formula strictly counts verified job-required skills verified with verbatim CV quotes. 
                         Because Profile A and Profile B have identical technical competence statements, Gemini extracted the exact same 
                         evidence quotes, guaranteeing an identical score (e.g. 64 = 64) regardless of demographic markers.
@@ -271,18 +271,18 @@ $stats = $stats ?? ['total_pairs' => 0, 'mean_delta' => 0, 'max_skew' => 0, 'max
 
                 <div style="display: grid; grid-template-columns: 1fr 1fr; gap: 1.5rem;">
                     <div>
-                        <div style="font-weight: 700; color: #1e293b; padding-bottom: 8px; border-bottom: 2px solid #3b82f6; margin-bottom: 12px; font-size: 0.9rem;">
+                        <div style="font-weight: 700; color: #0f172a; padding-bottom: 8px; border-bottom: 2px solid #3b82f6; margin-bottom: 12px; font-size: 0.9rem;">
                             Profile A Verbatim Grounding Quotes
                         </div>
-                        <div id="evidenceQuotesA" style="font-size: 0.85rem; background: #f8fafc; border: 1px solid var(--border); border-radius: 8px; padding: 1rem;">
+                        <div id="evidenceQuotesA">
                             <!-- Injected by JS -->
                         </div>
                     </div>
                     <div>
-                        <div style="font-weight: 700; color: #1e293b; padding-bottom: 8px; border-bottom: 2px solid #8b5cf6; margin-bottom: 12px; font-size: 0.9rem;">
+                        <div style="font-weight: 700; color: #0f172a; padding-bottom: 8px; border-bottom: 2px solid #8b5cf6; margin-bottom: 12px; font-size: 0.9rem;">
                             Profile B Verbatim Grounding Quotes
                         </div>
-                        <div id="evidenceQuotesB" style="font-size: 0.85rem; background: #f8fafc; border: 1px solid var(--border); border-radius: 8px; padding: 1rem;">
+                        <div id="evidenceQuotesB">
                             <!-- Injected by JS -->
                         </div>
                     </div>
@@ -291,24 +291,24 @@ $stats = $stats ?? ['total_pairs' => 0, 'mean_delta' => 0, 'max_skew' => 0, 'max
 
             <!-- Tab 2: Side-by-Side CV & PII Redaction -->
             <div id="tab-cv-diff" class="modal-tab-pane" style="display: none;">
-                <div style="background: rgba(16, 185, 129, 0.05); border: 1px solid rgba(16, 185, 129, 0.2); border-radius: 8px; padding: 1rem 1.25rem; margin-bottom: 1.25rem;">
-                    <h4 style="margin: 0 0 5px 0; color: #065f46; font-size: 0.95rem;">Stage 0 PII & Demographic Stripping</h4>
-                    <p style="margin: 0; font-size: 0.85rem; color: #334155; line-height: 1.5;">
-                        Before text reaches Gemini AI, Stage 0 regex filters redact names, email handles, phone numbers, postal codes, and gendered pronouns into neutral tokens (`[CANDIDATE_NAME]`, `[CONTACT_REDACTED]`).
+                <div style="background: rgba(16, 185, 129, 0.08); border: 1px solid rgba(16, 185, 129, 0.25); border-radius: 8px; padding: 1rem 1.25rem; margin-bottom: 1.25rem;">
+                    <h4 style="margin: 0 0 5px 0; color: #065f46 !important; font-size: 0.95rem; font-weight: 700;">Stage 0 PII & Demographic Stripping</h4>
+                    <p style="margin: 0; font-size: 0.85rem; color: #1e293b !important; line-height: 1.5;">
+                        Before text reaches Gemini AI, Stage 0 regex filters redact names, email handles, phone numbers, postal codes, and gendered pronouns into neutral tokens (<code>[CANDIDATE_NAME]</code>, <code>[CONTACT_REDACTED]</code>).
                     </p>
                 </div>
                 <div style="display: grid; grid-template-columns: 1fr 1fr; gap: 1.5rem;">
                     <div>
-                        <div style="font-weight: 700; color: #1e293b; padding-bottom: 6px; border-bottom: 1px solid var(--border); margin-bottom: 8px; font-size: 0.88rem;">
+                        <div style="font-weight: 700; color: #0f172a; padding-bottom: 6px; border-bottom: 1px solid var(--border); margin-bottom: 8px; font-size: 0.88rem;">
                             Profile A Original CV Text
                         </div>
-                        <pre id="rawCvA" style="background: #0f172a; color: #e2e8f0; padding: 1rem; border-radius: 8px; font-size: 0.8rem; white-space: pre-wrap; font-family: monospace; max-height: 380px; overflow-y: auto;"></pre>
+                        <pre id="rawCvA" style="background: #0f172a; color: #e2e8f0; padding: 1rem; border-radius: 8px; font-size: 0.8rem; white-space: pre-wrap; font-family: monospace; max-height: 380px; overflow-y: auto; border: 1px solid rgba(255,255,255,0.12);"></pre>
                     </div>
                     <div>
-                        <div style="font-weight: 700; color: #1e293b; padding-bottom: 6px; border-bottom: 1px solid var(--border); margin-bottom: 8px; font-size: 0.88rem;">
+                        <div style="font-weight: 700; color: #0f172a; padding-bottom: 6px; border-bottom: 1px solid var(--border); margin-bottom: 8px; font-size: 0.88rem;">
                             Profile B Original CV Text (Demographic Variant)
                         </div>
-                        <pre id="rawCvB" style="background: #0f172a; color: #e2e8f0; padding: 1rem; border-radius: 8px; font-size: 0.8rem; white-space: pre-wrap; font-family: monospace; max-height: 380px; overflow-y: auto;"></pre>
+                        <pre id="rawCvB" style="background: #0f172a; color: #e2e8f0; padding: 1rem; border-radius: 8px; font-size: 0.8rem; white-space: pre-wrap; font-family: monospace; max-height: 380px; overflow-y: auto; border: 1px solid rgba(255,255,255,0.12);"></pre>
                     </div>
                 </div>
             </div>
@@ -317,35 +317,35 @@ $stats = $stats ?? ['total_pairs' => 0, 'mean_delta' => 0, 'max_skew' => 0, 'max
             <div id="tab-summary" class="modal-tab-pane" style="display: none;">
                 <div style="display: grid; grid-template-columns: 1fr 1fr; gap: 1.5rem;">
                     <div>
-                        <div style="font-weight: 700; color: #1e293b; padding-bottom: 6px; border-bottom: 2px solid #3b82f6; margin-bottom: 10px; font-size: 0.88rem;">
+                        <div style="font-weight: 700; color: #0f172a; padding-bottom: 6px; border-bottom: 2px solid #3b82f6; margin-bottom: 10px; font-size: 0.88rem;">
                             Profile A AI Executive Summary
                         </div>
-                        <div id="summaryHtmlA" style="font-size: 0.85rem; background: #ffffff; border: 1px solid var(--border); border-radius: 8px; padding: 1rem; max-height: 400px; overflow-y: auto;"></div>
+                        <div id="summaryHtmlA"></div>
                     </div>
                     <div>
-                        <div style="font-weight: 700; color: #1e293b; padding-bottom: 6px; border-bottom: 2px solid #8b5cf6; margin-bottom: 10px; font-size: 0.88rem;">
+                        <div style="font-weight: 700; color: #0f172a; padding-bottom: 6px; border-bottom: 2px solid #8b5cf6; margin-bottom: 10px; font-size: 0.88rem;">
                             Profile B AI Executive Summary
                         </div>
-                        <div id="summaryHtmlB" style="font-size: 0.85rem; background: #ffffff; border: 1px solid var(--border); border-radius: 8px; padding: 1rem; max-height: 400px; overflow-y: auto;"></div>
+                        <div id="summaryHtmlB"></div>
                     </div>
                 </div>
             </div>
 
             <!-- Tab 4: Cryptographic Audit Fingerprint -->
             <div id="tab-audit" class="modal-tab-pane" style="display: none;">
-                <div style="background: #f8fafc; border: 1px solid var(--border); border-radius: 8px; padding: 1.25rem; font-family: monospace; font-size: 0.85rem;">
-                    <h4 style="margin: 0 0 1rem 0; font-family: sans-serif; color: #0f172a;">Cryptographic Audit Metadata</h4>
+                <div style="background: #0f172a; border: 1px solid rgba(255,255,255,0.12); border-radius: 8px; padding: 1.25rem; font-family: monospace; font-size: 0.85rem;">
+                    <h4 style="margin: 0 0 1rem 0; font-family: sans-serif; color: #ffffff !important;">Cryptographic Audit Metadata</h4>
                     <div style="display: grid; grid-template-columns: 1fr 1fr; gap: 1rem;">
                         <div>
-                            <strong>Profile A Audit Record:</strong>
-                            <pre id="fingerprintA" style="background: #0f172a; color: #38bdf8; padding: 10px; border-radius: 6px; margin-top: 5px; white-space: pre-wrap; font-size: 0.78rem;"></pre>
+                            <strong style="color: #94a3b8;">Profile A Audit Record:</strong>
+                            <pre id="fingerprintA" style="background: rgba(0,0,0,0.4); color: #38bdf8; padding: 10px; border-radius: 6px; margin-top: 5px; white-space: pre-wrap; font-size: 0.78rem; border: 1px solid rgba(255,255,255,0.1);"></pre>
                         </div>
                         <div>
-                            <strong>Profile B Audit Record:</strong>
-                            <pre id="fingerprintB" style="background: #0f172a; color: #c084fc; padding: 10px; border-radius: 6px; margin-top: 5px; white-space: pre-wrap; font-size: 0.78rem;"></pre>
+                            <strong style="color: #94a3b8;">Profile B Audit Record:</strong>
+                            <pre id="fingerprintB" style="background: rgba(0,0,0,0.4); color: #c084fc; padding: 10px; border-radius: 6px; margin-top: 5px; white-space: pre-wrap; font-size: 0.78rem; border: 1px solid rgba(255,255,255,0.1);"></pre>
                         </div>
                     </div>
-                    <div style="margin-top: 1rem; padding-top: 1rem; border-top: 1px solid var(--border); font-family: sans-serif; font-size: 0.82rem; color: var(--muted);">
+                    <div style="margin-top: 1rem; padding-top: 1rem; border-top: 1px solid rgba(255,255,255,0.1); font-family: sans-serif; font-size: 0.82rem; color: #94a3b8;">
                         Audited under ISO 42001 (Artificial Intelligence Management System) and EU AI Act (Annex III High-Risk Employment AI) standards.
                     </div>
                 </div>
@@ -354,8 +354,8 @@ $stats = $stats ?? ['total_pairs' => 0, 'mean_delta' => 0, 'max_skew' => 0, 'max
         </div>
 
         <!-- Modal Footer -->
-        <div style="padding: 1rem 1.75rem; background: #f8fafc; border-top: 1px solid var(--border); display: flex; justify-content: flex-end;">
-            <button onclick="closeEvidenceModal()" class="btn btn-secondary" style="font-size: 0.88rem;">Close Inspector</button>
+        <div style="padding: 1rem 1.75rem; background: #f8fafc; border-top: 1px solid #e2e8f0; display: flex; justify-content: flex-end;">
+            <button onclick="closeEvidenceModal()" class="btn btn-secondary" style="font-size: 0.88rem; color: #334155; border: 1px solid #cbd5e1; background: #ffffff;">Close Inspector</button>
         </div>
 
     </div>
@@ -378,6 +378,78 @@ $stats = $stats ?? ['total_pairs' => 0, 'mean_delta' => 0, 'max_skew' => 0, 'max
 .modal-tab-btn.active {
     color: #2563eb !important;
     border-bottom: 2px solid #2563eb !important;
+}
+
+/* =========================================================================
+   INSPECTOR MODAL HIGH-CONTRAST DARK PANELS (Tabs 1 & 3)
+   ========================================================================= */
+#evidenceQuotesA, #evidenceQuotesB {
+    background: #0f172a !important;
+    border: 1px solid rgba(255, 255, 255, 0.12) !important;
+    border-radius: 8px !important;
+    padding: 1rem !important;
+    max-height: 380px !important;
+    overflow-y: auto !important;
+    color: #e2e8f0 !important;
+}
+#evidenceQuotesA *, #evidenceQuotesB * {
+    color: #e2e8f0 !important;
+}
+#evidenceQuotesA strong, #evidenceQuotesB strong {
+    color: #60a5fa !important;
+    font-weight: 700 !important;
+}
+.evidence-quote-card {
+    background: rgba(255, 255, 255, 0.05) !important;
+    border: 1px solid rgba(255, 255, 255, 0.08) !important;
+    border-left: 3px solid #3b82f6 !important;
+    border-radius: 6px !important;
+    padding: 10px 12px !important;
+    margin-bottom: 10px !important;
+    color: #f1f5f9 !important;
+    font-size: 0.85rem !important;
+    line-height: 1.6 !important;
+}
+.evidence-quote-card * {
+    color: #e2e8f0 !important;
+}
+.evidence-quote-card strong {
+    color: #60a5fa !important;
+    font-weight: 700 !important;
+}
+
+#summaryHtmlA, #summaryHtmlB {
+    background: #0f172a !important;
+    border: 1px solid rgba(255, 255, 255, 0.12) !important;
+    border-radius: 8px !important;
+    padding: 1.25rem !important;
+    max-height: 400px !important;
+    overflow-y: auto !important;
+    color: #cbd5e1 !important;
+}
+#summaryHtmlA h4, #summaryHtmlB h4 {
+    color: #ffffff !important;
+    font-size: 0.95rem !important;
+    font-weight: 700 !important;
+    margin-top: 14px !important;
+    margin-bottom: 6px !important;
+    padding-bottom: 4px !important;
+    border-bottom: 1px solid rgba(255, 255, 255, 0.15) !important;
+}
+#summaryHtmlA h4:first-child, #summaryHtmlB h4:first-child {
+    margin-top: 0 !important;
+}
+#summaryHtmlA p, #summaryHtmlB p,
+#summaryHtmlA li, #summaryHtmlB li,
+#summaryHtmlA div, #summaryHtmlB div,
+#summaryHtmlA span, #summaryHtmlB span {
+    color: #e2e8f0 !important;
+    font-size: 0.85rem !important;
+    line-height: 1.6 !important;
+}
+#summaryHtmlA strong, #summaryHtmlB strong {
+    color: #93c5fd !important;
+    font-weight: 700 !important;
 }
 </style>
 
@@ -643,7 +715,7 @@ function renderPairDetails(d) {
 }
 
 function extractQuotesFromSummary(summaryHtml) {
-    if (!summaryHtml) return '<p style="color:var(--muted)">Pending evidence extraction from CV...</p>';
+    if (!summaryHtml) return '<p style="color:#94a3b8; padding:10px;">Pending evidence extraction from CV...</p>';
     
     // Create temporary parser
     const div = document.createElement('div');
@@ -654,15 +726,15 @@ function extractQuotesFromSummary(summaryHtml) {
     let quotes = [];
     lis.forEach(el => {
         const text = el.innerText;
-        if (text.includes('“') || text.includes('"') || text.includes('Evidence') || text.includes('experience')) {
-            quotes.push('<div style="margin-bottom:8px; padding:6px; background:#ffffff; border-radius:4px; border-left:3px solid #3b82f6;">' + el.innerHTML + '</div>');
+        if (text.includes('“') || text.includes('"') || text.includes('Evidence') || text.includes('experience') || text.includes('deduction')) {
+            quotes.push('<div class="evidence-quote-card">' + el.innerHTML + '</div>');
         }
     });
 
     if (quotes.length > 0) {
         return quotes.join('');
     }
-    return '<div style="font-size:0.85rem; line-height:1.5;">' + summaryHtml + '</div>';
+    return '<div style="font-size:0.85rem; line-height:1.6; color:#e2e8f0; padding:10px;">' + summaryHtml + '</div>';
 }
 
 function closeEvidenceModal() {
