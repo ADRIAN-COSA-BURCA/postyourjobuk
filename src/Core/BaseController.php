@@ -72,7 +72,7 @@ abstract class BaseController {
         }
     }
 
-    protected function render(string $view, array $data = [], bool $standalone = false) {
+    protected function render(string $view, array $data = [], $layoutOrStandalone = false) {
         extract($data);
         
         $root = (defined('ROOT_PATH') && file_exists(ROOT_PATH . '/src/views/' . ltrim($view, '/') . '.php')) 
@@ -92,12 +92,16 @@ abstract class BaseController {
         require $contentFile;
         $content = ob_get_clean();
 
-        if ($standalone) {
+        if ($layoutOrStandalone === true) {
             echo $content;
             return;
         }
 
-        $layoutPath = $root . '/src/views/layouts/main.php';
+        $layout = (is_string($layoutOrStandalone) && !empty($layoutOrStandalone))
+            ? $layoutOrStandalone 
+            : 'layouts/main';
+
+        $layoutPath = $root . '/src/views/' . ltrim($layout, '/') . '.php';
         
         if (file_exists($layoutPath)) {
             $view_content = $content; 
