@@ -20,9 +20,11 @@ class AdminController extends BaseController {
             Helpers::redirect('/admin');
             return;
         }
+        // Use the default main layout (header + footer) so the admin login
+        // page matches the recruiter login page.
         $this->render('admin/login', [
             'pageTitle' => 'Admin Login'
-        ], 'layouts/login_layout');
+        ]);
     }
 
     public function authenticateAdmin() {
