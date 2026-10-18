@@ -62,6 +62,32 @@
         border-radius: 4px;
         font-size: 0.88em;
     }
+    .cv-document-card {
+        background: rgba(255, 255, 255, 0.02);
+        border: 1px solid var(--glass-border);
+        padding: 1.25rem;
+        border-radius: var(--radius-md);
+        display: flex;
+        justify-content: space-between;
+        align-items: center;
+        gap: 1rem;
+        margin-top: 1.5rem;
+        width: 100%;
+        box-sizing: border-box;
+    }
+    @media (max-width: 640px) {
+        .cv-document-card {
+            flex-direction: column;
+            align-items: stretch;
+            text-align: left;
+        }
+        .cv-document-card .btn {
+            width: 100%;
+            text-align: center;
+            justify-content: center;
+            margin-top: 0.5rem;
+        }
+    }
 </style>
 
 <div class="page-wrapper" style="margin-top: 2rem;">
@@ -163,12 +189,12 @@
                 </div>
             </div>
 
-            <div style="background: rgba(255,255,255,0.02); border: 1px solid var(--glass-border); padding: 1.25rem; border-radius: var(--radius-md); display: flex; justify-content: space-between; align-items: center; margin-top: auto;">
+            <div class="cv-document-card">
                 <div>
-                    <h4 style="margin: 0;">Curriculum Vitae Document</h4>
-                    <p class="text-muted" style="font-size: 0.8rem; margin: 0;">Click to securely stream file directly from corporate repository storage.</p>
+                    <h4 style="margin: 0; color: var(--text);">Curriculum Vitae Document</h4>
+                    <p class="text-muted" style="font-size: 0.85rem; margin: 0.25rem 0 0 0;">Click to securely stream file directly from corporate repository storage.</p>
                 </div>
-                <a href="/applicant/download?id=<?= (int)$applicant['applicant_id'] ?>" class="btn btn-primary btn-sm">
+                <a href="/applicant/download?id=<?= (int)$applicant['applicant_id'] ?>" class="btn btn-primary btn-sm" style="white-space: nowrap;">
                     📥 Download CV File
                 </a>
             </div>

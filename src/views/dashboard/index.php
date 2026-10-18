@@ -108,6 +108,50 @@
         padding: 0.6rem;
     }
 }
+
+.job-filter-toolbar {
+    display: flex;
+    flex-wrap: wrap;
+    gap: 0.75rem;
+    align-items: center;
+    justify-content: space-between;
+    margin-bottom: 1.5rem;
+    background: #1f2937;
+    border: 1px solid #374151;
+    padding: 0.85rem 1.25rem;
+    border-radius: 8px;
+}
+.job-filter-group {
+    display: flex;
+    flex-wrap: wrap;
+    gap: 0.5rem;
+    align-items: center;
+}
+.job-filter-input {
+    padding: 0.5rem 0.75rem;
+    background: #111827;
+    border: 1px solid #374151;
+    border-radius: 6px;
+    color: #fff;
+    font-size: 0.875rem;
+    outline: none;
+}
+.job-filter-input:focus {
+    border-color: #6366f1;
+}
+.job-filter-select {
+    padding: 0.5rem 0.75rem;
+    background: #111827;
+    border: 1px solid #374151;
+    border-radius: 6px;
+    color: #fff;
+    font-size: 0.875rem;
+    outline: none;
+    cursor: pointer;
+}
+.job-filter-select:focus {
+    border-color: #6366f1;
+}
 </style>
 
 <div class="card" style="margin-bottom: 2rem; border-top: 4px solid #4f46e5; background: #111827; border: 1px solid #374151;">
@@ -191,6 +235,31 @@
         <h2 style="margin: 0;">Your Current Postings</h2>
         <a href="/jobs/create" class="btn btn-primary">+ Create New Job</a>
     </div>
+
+    <!-- JOB POSTINGS FILTER & SORT TOOLBAR -->
+    <div class="job-filter-toolbar">
+        <div style="flex: 1 1 240px; min-width: 200px;">
+            <input type="text" id="jobSearchInput" placeholder="🔍 Search by job title..." class="job-filter-input" style="width: 100%; box-sizing: border-box;">
+        </div>
+        <div class="job-filter-group">
+            <select id="jobStatusFilter" class="job-filter-select">
+                <option value="all">All Statuses</option>
+                <option value="active">Active Only</option>
+                <option value="inactive">Inactive Only</option>
+            </select>
+            <select id="jobSortSelect" class="job-filter-select">
+                <option value="date_desc">Posted (Newest First)</option>
+                <option value="date_asc">Posted (Oldest First)</option>
+                <option value="title_asc">Title (A - Z)</option>
+                <option value="title_desc">Title (Z - A)</option>
+                <option value="applicants_desc">Applicants (Most First)</option>
+                <option value="applicants_asc">Applicants (Least First)</option>
+            </select>
+            <span id="jobCountBadge" style="font-size: 0.8rem; color: #94a3b8; white-space: nowrap; padding-left: 0.25rem;">
+                Showing <?= count($jobs) ?> postings
+            </span>
+        </div>
+    </div>
     
     <div class="table-responsive">
         <table class="responsive-job-table" style="width: 100%; border-collapse: collapse;">
@@ -203,7 +272,7 @@
                     <th style="text-align: left; padding: 1rem; color: #94a3b8;">Actions</th>
                 </tr>
             </thead>
-            <tbody>
+            <tbody id="jobTableBody">
                 <?php if (empty($jobs)): ?>
                     <tr>
                         <td colspan="5" style="text-align: center; color: #6b7280; padding: 1rem;">
@@ -215,8 +284,13 @@
                         <?php 
                             $statusStr = strtolower($job['status']);
                             $statusClass = ($statusStr === 'active') ? 'badge-success' : 'badge-muted';
+                            $createdTimestamp = strtotime($job['created_at'] ?? 'now');
                         ?>
-                        <tr>
+                        <tr class="job-posting-row"
+                            data-title="<?= htmlspecialchars(strtolower($job['title'] ?? '')) ?>"
+                            data-status="<?= $statusStr ?>"
+                            data-applicants="<?= (int)$job['applicant_count'] ?>"
+                            data-date="<?= $createdTimestamp ?>">
                             <td data-label="Title" style="font-weight: 500; color: #4f46e5; padding: 1rem;">
                                 <div class="td-content">
                                     <?= htmlspecialchars($job['title']) ?>
@@ -250,9 +324,90 @@
                             </td>
                         </tr>
                     <?php endforeach; ?>
+                    <tr id="jobNoResultsRow" style="display: none;">
+                        <td colspan="5" style="text-align: center; color: #94a3b8; padding: 2rem;">
+                            No job postings match your search or filter criteria.
+                        </td>
+                    </tr>
                 <?php endif; ?>
             </tbody>
         </table>
     </div>
+
+    <script>
+    document.addEventListener('DOMContentLoaded', function () {
+        const searchInput = document.getElementById('jobSearchInput');
+        const statusFilter = document.getElementById('jobStatusFilter');
+        const sortSelect = document.getElementById('jobSortSelect');
+        const countBadge = document.getElementById('jobCountBadge');
+        const tableBody = document.getElementById('jobTableBody');
+        const noResultsRow = document.getElementById('jobNoResultsRow');
+
+        if (!tableBody) return;
+        const allRows = Array.from(tableBody.querySelectorAll('tr.job-posting-row'));
+        if (allRows.length === 0) return;
+
+        function applyJobFilters() {
+            const query = (searchInput ? searchInput.value : '').trim().toLowerCase();
+            const statusVal = statusFilter ? statusFilter.value : 'all';
+            const sortVal = sortSelect ? sortSelect.value : 'date_desc';
+
+            // 1. Filter
+            let visibleRows = allRows.filter(row => {
+                const title = row.getAttribute('data-title') || '';
+                const status = row.getAttribute('data-status') || '';
+
+                if (query && !title.includes(query)) return false;
+                if (statusVal !== 'all' && status !== statusVal) return false;
+
+                return true;
+            });
+
+            // 2. Sort
+            visibleRows.sort((a, b) => {
+                const dateA = parseInt(a.getAttribute('data-date') || '0', 10);
+                const dateB = parseInt(b.getAttribute('data-date') || '0', 10);
+                const appA = parseInt(a.getAttribute('data-applicants') || '0', 10);
+                const appB = parseInt(b.getAttribute('data-applicants') || '0', 10);
+                const titleA = a.getAttribute('data-title') || '';
+                const titleB = b.getAttribute('data-title') || '';
+
+                switch (sortVal) {
+                    case 'date_desc': return dateB - dateA;
+                    case 'date_asc': return dateA - dateB;
+                    case 'title_asc': return titleA.localeCompare(titleB);
+                    case 'title_desc': return titleB.localeCompare(titleA);
+                    case 'applicants_desc': return appB - appA;
+                    case 'applicants_asc': return appA - appB;
+                    default: return dateB - dateA;
+                }
+            });
+
+            // 3. Hide all rows
+            allRows.forEach(r => r.style.display = 'none');
+
+            // 4. Re-append sorted rows and show
+            visibleRows.forEach(row => {
+                row.style.display = '';
+                tableBody.appendChild(row);
+            });
+
+            // Keep no results row at bottom
+            if (noResultsRow) {
+                tableBody.appendChild(noResultsRow);
+                noResultsRow.style.display = (visibleRows.length === 0) ? '' : 'none';
+            }
+
+            // Update counter badge
+            if (countBadge) {
+                countBadge.textContent = `Showing ${visibleRows.length} of ${allRows.length} postings`;
+            }
+        }
+
+        if (searchInput) searchInput.addEventListener('input', applyJobFilters);
+        if (statusFilter) statusFilter.addEventListener('change', applyJobFilters);
+        if (sortSelect) sortSelect.addEventListener('change', applyJobFilters);
+    });
+    </script>
 </section>
 </div>
