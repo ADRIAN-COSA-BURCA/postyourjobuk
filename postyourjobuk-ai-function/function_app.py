@@ -728,7 +728,10 @@ def ai_queue_processor(azmsg: func.QueueMessage):
             payload_str = base64.b64decode(raw_payload).decode('utf-8')
 
         print(f"[*] Decoded Payload: {payload_str}")
-        payload = json.loads(payload_str)
+        try:
+            payload = json.loads(payload_str)
+        except Exception:
+            payload = json.loads(base64.b64decode(payload_str).decode('utf-8'))
         applicant_id = int(payload.get("applicant_id", 0))
     except Exception as e:
         print(f"[x] Invalid payload or encoding: {e}")
