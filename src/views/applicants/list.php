@@ -6,10 +6,10 @@
         align-items: center;
         justify-content: space-between;
         margin-bottom: 1.5rem;
-        background: rgba(255, 255, 255, 0.02);
-        border: 1px solid var(--glass-border);
+        background: #1f2937;
+        border: 1px solid #374151;
         padding: 0.85rem 1.25rem;
-        border-radius: var(--radius-md);
+        border-radius: 8px;
     }
     .filter-toolbar-group {
         display: flex;
@@ -19,7 +19,7 @@
     }
     .filter-input {
         padding: 0.5rem 0.75rem;
-        background: #1e293b;
+        background: #111827;
         border: 1px solid #374151;
         border-radius: 6px;
         color: #fff;
@@ -31,7 +31,7 @@
     }
     .filter-select {
         padding: 0.5rem 0.75rem;
-        background: #1e293b;
+        background: #111827;
         border: 1px solid #374151;
         border-radius: 6px;
         color: #fff;
@@ -42,24 +42,19 @@
     .filter-select:focus {
         border-color: #6366f1;
     }
-    .applicant-actions {
+
+    .dashboard-action-links {
         display: flex;
         gap: 0.5rem;
         align-items: center;
         flex-wrap: wrap;
     }
-    .applicant-actions a,
-    .applicant-actions button {
+    .dashboard-action-links form {
         display: inline-flex;
-        align-items: center;
-        gap: 0.25rem;
-        padding: 0.4rem 0.75rem;
-        border-radius: 4px;
-        font-size: 0.85rem;
-        font-weight: 500;
-        text-decoration: none;
-        cursor: pointer;
-        transition: all 0.2s ease;
+        margin: 0;
+    }
+    .dashboard-action-links .btn {
+        border-radius: var(--radius-pill) !important;
     }
 
     /* Mobile Responsive Cards (Screens under 768px) */
@@ -90,11 +85,14 @@
             display: none;
         }
 
+        /* kill any desktop min-width / nowrap */
         .responsive-applicant-table,
         .responsive-applicant-table tbody,
         .responsive-applicant-table tr,
         .responsive-applicant-table td,
-        .responsive-applicant-table .td-content {
+        .responsive-applicant-table .td-content,
+        .responsive-applicant-table .dashboard-action-links,
+        .responsive-applicant-table .btn {
             display: block;
             width: 100% !important;
             min-width: 0 !important;
@@ -104,18 +102,18 @@
         }
 
         .responsive-applicant-table tr {
-            margin-bottom: 1.25rem;
+            margin-bottom: 1.5rem;
             border: 1px solid #374151;
             border-radius: 0.5rem;
             background: #1e293b;
-            padding: 1.25rem;
+            padding: 1rem;
         }
 
         .responsive-applicant-table td {
             display: flex;
             flex-direction: column;
             align-items: flex-start;
-            padding: 0.75rem 0 !important;
+            padding: 0.75rem 0 !important;   /* beats inline padding */
             margin: 0 !important;
             text-align: left !important;
             border-bottom: 1px solid #334155;
@@ -135,21 +133,27 @@
             margin-bottom: 0.35rem;
         }
 
-        .responsive-applicant-table .applicant-actions {
+        .responsive-applicant-table .dashboard-action-links {
             display: flex;
             flex-direction: column;
-            width: 100%;
             gap: 0.5rem;
-            margin-top: 0.5rem;
-        }
-        .responsive-applicant-table .applicant-actions a,
-        .responsive-applicant-table .applicant-actions form,
-        .responsive-applicant-table .applicant-actions button {
-            display: block;
             width: 100%;
+        }
+        .responsive-applicant-table .dashboard-action-links a,
+        .responsive-applicant-table .dashboard-action-links form,
+        .responsive-applicant-table .dashboard-action-links button {
+            display: block;
+            width: 100% !important;
             text-align: center;
-            justify-content: center;
-            box-sizing: border-box;
+            padding: 0.6rem;
+            border-radius: var(--radius-pill) !important;
+            box-sizing: border-box !important;
+        }
+        .responsive-applicant-table .dashboard-action-links form {
+            padding: 0 !important;
+            margin: 0 !important;
+            border: none !important;
+            background: transparent !important;
         }
     }
 </style>
@@ -328,16 +332,16 @@
                                 </td>
                                 <td data-label="Actions" style="padding: 1rem;">
                                     <div class="td-content">
-                                        <div class="applicant-actions">
+                                        <div class="dashboard-action-links">
                                             <a href="/applicant/view?id=<?= (int)$applicant['applicant_id'] ?>" 
                                                class="btn btn-sm btn-ghost" 
-                                               style="color: #a78bfa; border: 1px solid #a78bfa;">
+                                               style="color: #3b82f6; border: 1px solid #3b82f6;">
                                                 👁️ Application Overview
                                             </a>
                                             
                                             <a href="/applicant/download?id=<?= (int)$applicant['applicant_id'] ?>" 
                                                class="btn btn-sm btn-ghost" 
-                                               style="color: #38bdf8; border: 1px solid #38bdf8;">
+                                               style="color: #10b981; border: 1px solid #10b981;">
                                                 📥 Download CV
                                             </a>
                                             
@@ -345,7 +349,7 @@
                                                 <input type="hidden" name="csrf_token" value="<?= \App\Core\Helpers::csrf_token() ?>">
                                                 <input type="hidden" name="applicant_id" value="<?= (int)$applicant['applicant_id'] ?>">
                                                 <input type="hidden" name="job_id" value="<?= (int)$job['job_id'] ?>">
-                                                <button type="submit" class="btn btn-sm btn-ghost" style="color: #ef4444; border: 1px solid #ef4444; background: transparent;">
+                                                <button type="submit" class="btn btn-sm btn-ghost" style="color: #ef4444; border: 1px solid #ef4444; background: transparent; cursor: pointer;">
                                                     🗑️ Delete Candidate
                                                 </button>
                                             </form>
