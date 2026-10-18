@@ -18,10 +18,18 @@
         padding: 0;
         list-style-type: disc;
     }
+    .ai-summary-content ol {
+        margin: 0 0 1.25rem 1.25rem;
+        padding: 0;
+    }
     .ai-summary-content li {
-        margin-bottom: 0.4rem;
+        margin-bottom: 0.5rem;
         color: rgba(255, 255, 255, 0.85);
         line-height: 1.5;
+    }
+    .ai-summary-content ol li {
+        margin-bottom: 0.85rem;
+        line-height: 1.55;
     }
     .ai-summary-content li:last-child {
         margin-bottom: 0;
@@ -84,7 +92,11 @@
                     <div class="form-group mt-2 mb-4">
                         <label class="form-label" style="text-transform: uppercase; letter-spacing: 0.05em; font-size: 0.75rem; color: var(--text-muted);">AI Executive Summary</label>
                         <div class="ai-summary-content" style="background: rgba(255, 255, 255, 0.01); border: 1px solid var(--glass-border); padding: 1.5rem; border-radius: var(--radius-md); color: var(--text); line-height: 1.6; font-size: 0.95rem;">
-                            <?= nl2br(strip_tags($applicant['ai_summary'], '<h3><ul><li><strong><b><p><br>')) ?>
+                            <?php
+                                $allowedTags = '<h3><h4><ul><ol><li><strong><b><p><br><span><em><div><code><small>';
+                                $cleanSummary = strip_tags($applicant['ai_summary'], $allowedTags);
+                                echo (strpos($cleanSummary, '<') !== false) ? $cleanSummary : nl2br(htmlspecialchars($applicant['ai_summary']));
+                            ?>
                         </div>
                     </div>
                 <?php endif; ?>
