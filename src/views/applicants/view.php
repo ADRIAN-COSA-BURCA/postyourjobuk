@@ -1,42 +1,66 @@
 <style>
-    .ai-summary-content h3 {
-        color: #a78bfa; /* Soft purple variant to pop in dark mode layout themes */
+    .ai-summary-card {
+        background: rgba(255, 255, 255, 0.015);
+        border: 1px solid var(--glass-border);
+        padding: 1.25rem 1.5rem;
+        border-radius: var(--radius-md);
+        color: var(--text);
+        line-height: 1.6;
+        font-size: 0.95rem;
+        margin-bottom: 1rem;
+        width: 100%;
+        box-sizing: border-box;
+        transition: border-color 0.2s ease, background 0.2s ease;
+    }
+    .ai-summary-card:last-child {
+        margin-bottom: 0;
+    }
+    .ai-summary-card:hover {
+        background: rgba(255, 255, 255, 0.025);
+        border-color: rgba(255, 255, 255, 0.15);
+    }
+    .ai-summary-card h3 {
+        color: #a78bfa;
         font-size: 1.05rem;
         font-weight: 600;
-        margin-top: 1.5rem;
-        margin-bottom: 0.5rem;
+        margin: 0 0 0.85rem 0;
         display: flex;
         align-items: center;
         gap: 0.5rem;
         letter-spacing: 0.02em;
     }
-    .ai-summary-content h3:first-of-type {
-        margin-top: 0;
+    .ai-summary-card .ai-card-body {
+        color: rgba(255, 255, 255, 0.88);
     }
-    .ai-summary-content ul {
-        margin: 0 0 1.25rem 1.25rem;
+    .ai-summary-card ul {
+        margin: 0 0 0 1.25rem;
         padding: 0;
         list-style-type: disc;
     }
-    .ai-summary-content ol {
-        margin: 0 0 1.25rem 1.25rem;
+    .ai-summary-card ol {
+        margin: 0 0 0 1.25rem;
         padding: 0;
     }
-    .ai-summary-content li {
-        margin-bottom: 0.5rem;
-        color: rgba(255, 255, 255, 0.85);
-        line-height: 1.5;
-    }
-    .ai-summary-content ol li {
-        margin-bottom: 0.85rem;
+    .ai-summary-card li {
+        margin-bottom: 0.45rem;
+        color: rgba(255, 255, 255, 0.88);
         line-height: 1.55;
     }
-    .ai-summary-content li:last-child {
+    .ai-summary-card ol li {
+        margin-bottom: 0.85rem;
+    }
+    .ai-summary-card li:last-child {
         margin-bottom: 0;
     }
-    .ai-summary-content p {
+    .ai-summary-card p {
         color: rgba(255, 255, 255, 0.85);
-        margin-bottom: 1rem;
+        margin: 0;
+    }
+    .ai-summary-card code {
+        background: rgba(255, 255, 255, 0.08);
+        padding: 2px 6px;
+        border-radius: 4px;
+        font-size: 0.88em;
     }
 </style>
 
@@ -83,21 +107,51 @@
                 <p class="text-muted mb-3">Review candidate professional information and documentation references below.</p>
                 
                 <?php if (isset($applicant['ai_score'])): ?>
-                    <div class="alert alert-success" style="display: inline-flex; align-items: center; margin-bottom: 1.5rem; background: rgba(16, 185, 129, 0.1); border: 1px solid rgba(16, 185, 129, 0.2); color: #10b981; padding: 0.75rem 1rem; border-radius: var(--radius-md); font-weight: 500;">
+                    <div class="alert alert-success" style="display: flex; align-items: center; margin-bottom: 1.5rem; background: rgba(16, 185, 129, 0.1); border: 1px solid rgba(16, 185, 129, 0.2); color: #10b981; padding: 0.85rem 1.25rem; border-radius: var(--radius-md); font-weight: 500; width: 100%; box-sizing: border-box;">
                         ⚡ <strong style="margin-right: 0.5rem; margin-left: 0.25rem;">Match Score:</strong> This candidate has been evaluated with a <?= (int)$applicant['ai_score'] ?>% matching compatibility index.
                     </div>
                 <?php endif; ?>
 
                 <?php if (!empty($applicant['ai_summary'])): ?>
                     <div class="form-group mt-2 mb-4">
-                        <label class="form-label" style="text-transform: uppercase; letter-spacing: 0.05em; font-size: 0.75rem; color: var(--text-muted);">AI Executive Summary</label>
-                        <div class="ai-summary-content" style="background: rgba(255, 255, 255, 0.01); border: 1px solid var(--glass-border); padding: 1.5rem; border-radius: var(--radius-md); color: var(--text); line-height: 1.6; font-size: 0.95rem;">
-                            <?php
-                                $allowedTags = '<h3><h4><ul><ol><li><strong><b><p><br><span><em><div><code><small>';
-                                $cleanSummary = strip_tags($applicant['ai_summary'], $allowedTags);
-                                echo (strpos($cleanSummary, '<') !== false) ? $cleanSummary : nl2br(htmlspecialchars($applicant['ai_summary']));
-                            ?>
-                        </div>
+                        <label class="form-label" style="text-transform: uppercase; letter-spacing: 0.05em; font-size: 0.75rem; color: var(--text-muted); margin-bottom: 0.75rem; display: block;">AI Executive Summary</label>
+                        <?php
+                            $allowedTags = '<h3><h4><ul><ol><li><strong><b><p><br><span><em><div><code><small>';
+                            $cleanSummary = strip_tags($applicant['ai_summary'], $allowedTags);
+                            
+                            // Check for review notice before the first <h3>
+                            $firstH3Pos = stripos($cleanSummary, '<h3>');
+                            if ($firstH3Pos !== false && $firstH3Pos > 0) {
+                                $prefixNotice = trim(substr($cleanSummary, 0, $firstH3Pos));
+                                if (!empty($prefixNotice)) {
+                                    echo '<div style="margin-bottom: 1rem;">' . $prefixNotice . '</div>';
+                                }
+                            }
+                            
+                            // Split into distinct cards by <h3>
+                            preg_match_all('/(<h3>.*?<\/h3>)(.*?)(?=(?:<h3>|$))/is', $cleanSummary, $matches, PREG_SET_ORDER);
+                            
+                            if (!empty($matches)) {
+                                foreach ($matches as $match) {
+                                    $heading = trim($match[1]);
+                                    $body = trim($match[2]);
+                                    ?>
+                                    <div class="ai-summary-card">
+                                        <?= $heading ?>
+                                        <div class="ai-card-body">
+                                            <?= $body ?>
+                                        </div>
+                                    </div>
+                                    <?php
+                                }
+                            } else {
+                                ?>
+                                <div class="ai-summary-card">
+                                    <?= (strpos($cleanSummary, '<') !== false) ? $cleanSummary : nl2br(htmlspecialchars($applicant['ai_summary'])) ?>
+                                </div>
+                                <?php
+                            }
+                        ?>
                     </div>
                 <?php endif; ?>
 

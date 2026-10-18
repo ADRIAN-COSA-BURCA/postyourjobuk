@@ -361,13 +361,15 @@ Extract ALL of the candidate's employment roles, job positions, and career break
 - is_career_break_or_leave: boolean. True if this is a career break, parental leave, or sabbatical.
 
 TASK 3: TARGETED RECRUITER TECHNICAL INTERVIEW PROBES
-Generate 2 to 4 structured, high-value technical screening questions for the recruiter / hiring manager based strictly on the candidate's CV and the target role "{job_title}".
-- If the candidate lacks direct evidence for certain required skills, generate scenario-based questions assessing how they would apply their existing background to bridge those specific missing areas.
-- If the candidate has verified skills, generate targeted questions probing technical depth, edge cases, scalability, or trade-offs in those areas.
+Generate 1 to 2 concise, high-impact technical screening questions for the hiring team based strictly on candidate evidence and target role "{job_title}".
+- If the candidate has 0 verified required skills or is in an entirely unrelated domain, return an empty array [] for interview_probes.
+- When generating questions:
+  * Keep each question short, direct, and practical (1 to 2 sentences maximum).
+  * Keep why_ask to exactly 1 short sentence (maximum 25 words).
 - For each probe, return:
-  * topic: the technical skill or domain being tested (e.g. "RAG & Vector Retrieval", "SQL Query Optimization", "API Idempotency & Rate Limiting").
-  * question: a specific, scenario-based technical question suitable for an interview.
-  * why_ask: the concrete technical rationale explaining what gap or competency in the CV this question validates.
+  * topic: short topic label (e.g. "RAG Optimization", "API Rate Limiting").
+  * question: crisp, scenario-based interview question (1-2 sentences).
+  * why_ask: 1 short sentence explaining why to ask.
 
 ANTI-BIAS & PRIVACY RULES:
 - Questions must be 100% technical, objective, and role-focused.
@@ -486,11 +488,11 @@ def extract_cv_data(redacted_cv, required_skills, job_title="", job_text="", cle
 
         raw_probes = proposed.get("interview_probes", []) if isinstance(proposed, dict) else []
         if isinstance(raw_probes, list):
-            for p in raw_probes[:4]:
+            for p in raw_probes[:2]:
                 if isinstance(p, dict):
-                    t = str(p.get("topic", "")).strip()[:100]
-                    q = str(p.get("question", "")).strip()[:500]
-                    w = str(p.get("why_ask", "")).strip()[:300]
+                    t = str(p.get("topic", "")).strip()[:80]
+                    q = str(p.get("question", "")).strip()[:400]
+                    w = str(p.get("why_ask", "")).strip()[:400]
                     if t and q:
                         cleaned_probes.append({"topic": t, "question": q, "why_ask": w})
 
@@ -585,22 +587,27 @@ def compute_score(extracted, required_skills, required_years):
     skill_credits = extracted.get("skill_credits", {})
     verified_weight = sum(skill_credits.get(skill, 0.0) for skill in normalized_required_skills)
     
-    total_req = len(normalized_required_skills)
-    skill_gap_ratio = (total_req - verified_weight) / total_req if total_req > 0 else 0.0
-    skill_deduction = round(skill_gap_ratio * 60)
-    
-    missing_skills = [skill for skill in normalized_required_skills if skill_credits.get(skill, 0.0) == 0.0]
-    partial_skills = [skill for skill in normalized_required_skills if 0.0 < skill_credits.get(skill, 0.0) < 1.0]
-
     required_years = float(required_years or 0)
     candidate_years = float(extracted["total_relevant_years"] or 0)
-    experience_deduction = 0
+
     if required_years > 0:
+        skill_deduction = round(skill_gap_ratio * 60)
         years_gap = max(0.0, required_years - candidate_years)
         years_gap_ratio = min(1.0, years_gap / required_years)
         experience_deduction = round(years_gap_ratio * 40)
-        
-    score = max(0, 100 - skill_deduction - experience_deduction)
+    else:
+        # If no explicit years required, skill coverage scales across the full 100 points
+        skill_deduction = round(skill_gap_ratio * 100)
+        experience_deduction = 0
+
+    missing_skills = [skill for skill in normalized_required_skills if skill_credits.get(skill, 0.0) == 0.0]
+    partial_skills = [skill for skill in normalized_required_skills if 0.0 < skill_credits.get(skill, 0.0) < 1.0]
+
+    # Absolute non-fit gate: zero verified skills and zero relevant domain experience
+    if verified_weight == 0.0 and candidate_years == 0.0:
+        score = 0
+    else:
+        score = max(0, 100 - skill_deduction - experience_deduction)
     fit_status = "Excellent" if score >= 80 else "Good" if score >= 60 else "Not a fit"
     if missing_skills and score >= 60:
         fit_status += f" ({len(missing_skills)} required skill(s) missing)"
@@ -676,14 +683,21 @@ def build_summary_html(candidate_data, result):
             topic = esc(p.get("topic", "").strip())
             q = esc(p.get("question", "").strip())
             why = esc(p.get("why_ask", "").strip())
-            why_html = f'<br><span style="color:#94a3b8; font-size:0.85em; display:inline-block; margin-top:4px;">💡 <em>Why ask this:</em> {why}</span>' if why else ""
-            probes_items += f'<li style="margin-bottom: 12px;"><strong>{topic}:</strong> &ldquo;{q}&rdquo;{why_html}</li>'
+            why_html = f'<br><span style="color:#94a3b8; font-size:0.85em; display:inline-block; margin-top:3px;">💡 <em>Why ask this:</em> {why}</span>' if why else ""
+            probes_items += f'<li style="margin-bottom: 10px;"><strong>{topic}:</strong> &ldquo;{q}&rdquo;{why_html}</li>'
         
         probes_html = f"""
 <h3>🎯 Recommended Technical Interview Questions</h3>
-<ol style="padding-left: 20px; margin-top: 8px;">
+<ol style="padding-left: 20px; margin-top: 6px;">
     {probes_items}
 </ol>
+"""
+    else:
+        probes_html = """
+<h3>🎯 Recommended Technical Interview Questions</h3>
+<p style="color: #94a3b8; font-size: 0.9rem; margin: 0.25rem 0 0 0;">
+    Candidate lacks foundational technical prerequisites for this role; technical interview screening is not recommended.
+</p>
 """
 
     return f"""
