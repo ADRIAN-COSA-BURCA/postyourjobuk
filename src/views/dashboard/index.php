@@ -264,12 +264,12 @@
     <div class="table-responsive">
         <table class="responsive-job-table" style="width: 100%; border-collapse: collapse;">
             <thead>
-                <tr>
-                    <th style="text-align: left; padding: 1rem; color: #94a3b8;">Title</th>
-                    <th style="text-align: left; padding: 1rem; color: #94a3b8;">Status</th>
-                    <th style="text-align: left; padding: 1rem; color: #94a3b8;">Applicants</th>
-                    <th style="text-align: left; padding: 1rem; color: #94a3b8;">Posted</th>
-                    <th style="text-align: left; padding: 1rem; color: #94a3b8;">Actions</th>
+                <tr style="text-align: left; border-bottom: 2px solid var(--border);">
+                    <th style="padding: 1rem; color: #94a3b8;">Title</th>
+                    <th style="padding: 1rem; color: #94a3b8;">Status</th>
+                    <th style="padding: 1rem; color: #94a3b8;">Applicants</th>
+                    <th style="padding: 1rem; color: #94a3b8;">Posted</th>
+                    <th style="padding: 1rem; color: #94a3b8;">Actions</th>
                 </tr>
             </thead>
             <tbody id="jobTableBody">
@@ -280,19 +280,34 @@
                         </td>
                     </tr>
                 <?php else: ?>
+                    <?php 
+                        $vibrantColors = [
+                            '#38bdf8', // Vibrant Sky Cyan
+                            '#34d399', // Vibrant Mint Emerald
+                            '#a78bfa', // Vibrant Lavender Violet
+                            '#fbbf24', // Vibrant Amber Gold
+                            '#f472b6', // Vibrant Neon Rose
+                            '#fb923c', // Vibrant Tangerine Orange
+                            '#2dd4bf', // Vibrant Electric Teal
+                        ];
+                        $colorIndex = 0;
+                    ?>
                     <?php foreach ($jobs as $job): ?>
                         <?php 
                             $statusStr = strtolower($job['status']);
                             $statusClass = ($statusStr === 'active') ? 'badge-success' : 'badge-muted';
                             $createdTimestamp = strtotime($job['created_at'] ?? 'now');
+                            $titleColor = $vibrantColors[$colorIndex % count($vibrantColors)];
+                            $colorIndex++;
                         ?>
                         <tr class="job-posting-row"
                             data-title="<?= htmlspecialchars(strtolower($job['title'] ?? '')) ?>"
                             data-status="<?= $statusStr ?>"
                             data-applicants="<?= (int)$job['applicant_count'] ?>"
-                            data-date="<?= $createdTimestamp ?>">
-                            <td data-label="Title" style="font-weight: 500; color: #4f46e5; padding: 1rem;">
-                                <div class="td-content">
+                            data-date="<?= $createdTimestamp ?>"
+                            style="border-bottom: 1px solid var(--border);">
+                            <td data-label="Title" style="font-weight: 600; color: <?= $titleColor ?>; padding: 1rem;">
+                                <div class="td-content" style="color: <?= $titleColor ?>; font-weight: 600; font-size: 1rem;">
                                     <?= htmlspecialchars($job['title']) ?>
                                 </div>
                             </td>
@@ -305,7 +320,7 @@
                             </td>
                             <td data-label="Applicants" style="padding: 1rem;">
                                 <div class="td-content">
-                                    <strong style="color: #4f46e5;"><?= (int)$job['applicant_count'] ?></strong> applicants
+                                    <strong style="color: #818cf8;"><?= (int)$job['applicant_count'] ?></strong> applicants
                                 </div>
                             </td>
                             <td data-label="Posted" class="col-posted" style="color: #9ca3af; font-size: 0.875rem; padding: 1rem;">
