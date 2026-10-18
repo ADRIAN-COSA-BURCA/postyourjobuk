@@ -586,7 +586,9 @@ def compute_score(extracted, required_skills, required_years):
     # Each verified skill has a credit: 1.0 if fully verified in relevant role/project, 0.5 if only in non-relevant role
     skill_credits = extracted.get("skill_credits", {})
     verified_weight = sum(skill_credits.get(skill, 0.0) for skill in normalized_required_skills)
-    
+    total_req = len(normalized_required_skills)
+    skill_gap_ratio = (total_req - verified_weight) / total_req if total_req > 0 else 0.0
+
     required_years = float(required_years or 0)
     candidate_years = float(extracted["total_relevant_years"] or 0)
 
