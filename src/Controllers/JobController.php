@@ -53,7 +53,7 @@ class JobController extends BaseController {
 
         if ($jobModel->getPostCountLastHour($tenantId) >= 15) {
             SecurityLogger::logAlert("RESOURCE_FLOODING_ATTEMPT", $tenantId, "Rate-limit threshold reached.");
-            $_SESSION['error_message'] = 'System velocity threshold exceeded.';
+            $_SESSION['error_message'] = 'You have created multiple job postings recently. Please wait a few moments before posting another role.';
             Helpers::redirect('/jobs/create');
             return;
         }
@@ -69,8 +69,21 @@ class JobController extends BaseController {
             'status'          => $_POST['status'] ?? 'active'
         ];
 
-        if (strlen($data['title']) < 5 || strlen($data['description']) < 50 || empty($data['requirements'])) {
-            $_SESSION['error_message'] = 'Validation failed: Please ensure all fields meet the criteria.';
+        // Specific, helpful validation messages
+        if (mb_strlen($data['title']) < 5) {
+            $_SESSION['error_message'] = 'Job title must be at least 5 characters long.';
+            Helpers::redirect('/jobs/create');
+            return;
+        }
+
+        if (mb_strlen($data['description']) < 50) {
+            $_SESSION['error_message'] = 'Job description must be at least 50 characters long to provide adequate detail for candidates.';
+            Helpers::redirect('/jobs/create');
+            return;
+        }
+
+        if (empty($data['requirements'])) {
+            $_SESSION['error_message'] = 'Please specify the key requirements and qualifications for this role.';
             Helpers::redirect('/jobs/create');
             return;
         }
@@ -82,7 +95,7 @@ class JobController extends BaseController {
             Helpers::redirect('/dashboard');
         } catch (\Exception $e) {
             error_log('Job creation error: ' . $e->getMessage());
-            $_SESSION['error_message'] = 'Internal architecture error during record creation.';
+            $_SESSION['error_message'] = 'An unexpected error occurred while saving your job posting. Please try again or contact support.';
             Helpers::redirect('/jobs/create');
         }
     }
@@ -115,14 +128,17 @@ class JobController extends BaseController {
      * Process the secure update data payload.
      */
     public function update() {
+        $jobId = isset($_POST['job_id']) ? (int)$_POST['job_id'] : 0;
+        $tenantId = (int)$_SESSION['tenant_id'];
+
         if (!isset($_POST['csrf_token']) || !Helpers::csrf_verify($_POST['csrf_token'])) {
-            SecurityLogger::logAlert("CSRF_UPDATE_VIOLATION", $_SESSION['tenant_id'] ?? 0, "Unauthorized update attempt.");
-            die("Security Token Mismatch.");
+            SecurityLogger::logAlert("CSRF_UPDATE_VIOLATION", $tenantId, "Unauthorized update attempt.");
+            $_SESSION['error_message'] = 'Your session has expired. Please refresh the page and try again.';
+            Helpers::redirect("/jobs/edit?id=" . $jobId);
+            return;
         }
 
         $jobModel = new Job();
-        $jobId = isset($_POST['job_id']) ? (int)$_POST['job_id'] : 0;
-        $tenantId = (int)$_SESSION['tenant_id'];
 
         $data = [
             'title'           => trim((string)($_POST['title'] ?? '')),
@@ -134,8 +150,21 @@ class JobController extends BaseController {
             'status'          => $_POST['status'] ?? 'active'
         ];
 
-        if (strlen($data['title']) < 5 || strlen($data['description']) < 50 || empty($data['requirements'])) {
-            $_SESSION['error_message'] = 'Validation failed: Please ensure fields meet minimum structural length.';
+        // Specific, helpful validation messages
+        if (mb_strlen($data['title']) < 5) {
+            $_SESSION['error_message'] = 'Job title must be at least 5 characters long.';
+            Helpers::redirect("/jobs/edit?id=" . $jobId);
+            return;
+        }
+
+        if (mb_strlen($data['description']) < 50) {
+            $_SESSION['error_message'] = 'Job description must be at least 50 characters long to provide adequate detail for candidates.';
+            Helpers::redirect("/jobs/edit?id=" . $jobId);
+            return;
+        }
+
+        if (empty($data['requirements'])) {
+            $_SESSION['error_message'] = 'Please specify the key requirements and qualifications for this role.';
             Helpers::redirect("/jobs/edit?id=" . $jobId);
             return;
         }
@@ -149,7 +178,7 @@ class JobController extends BaseController {
             Helpers::redirect('/dashboard');
         } else {
             SecurityLogger::logAlert("UNAUTHORIZED_UPDATE_ATTEMPT", $tenantId, "Attempted modification on unauthorized job ID: $jobId");
-            $_SESSION['error_message'] = 'Modification failed: Resource unavailable or access denied.';
+            $_SESSION['error_message'] = 'Unable to update job posting: Record not found or access denied.';
             Helpers::redirect('/dashboard');
         }
     }
@@ -170,7 +199,7 @@ class JobController extends BaseController {
             $_SESSION['success_message'] = 'Job posting has been removed successfully.';
         } else {
             SecurityLogger::logAlert("UNAUTHORIZED_DELETE_ATTEMPT", $tenantId, "Attempted deletion on unauthorized job ID: $jobId");
-            $_SESSION['error_message'] = 'Deletion failed: Resource unavailable or access denied.';
+            $_SESSION['error_message'] = 'Unable to delete job posting: Record not found or access denied.';
         }
 
         Helpers::redirect('/dashboard');

@@ -41,13 +41,19 @@ class Router {
                 [$controller, $action] = $route['callback'];
 
                 if (!class_exists($controller)) {
-                    die("Controller $controller not found.");
+                    error_log("Router Error: Controller $controller not found.");
+                    http_response_code(500);
+                    $this->renderErrorPage(500, 'System Controller Unavailable');
+                    return;
                 }
 
                 $instance = new $controller();
                 
                 if (!method_exists($instance, $action)) {
-                    die("Action $action not found in $controller.");
+                    error_log("Router Error: Action $action not found in $controller.");
+                    http_response_code(500);
+                    $this->renderErrorPage(500, 'System Action Unavailable');
+                    return;
                 }
 
                 // Call the action without forcing a global ID parameter
@@ -56,7 +62,31 @@ class Router {
         }
 
         http_response_code(404);
-        echo "<h2>404 Not Found</h2>";
-        echo "The framework router could not find a registered match for path: <code>" . htmlspecialchars($cleanUri) . "</code> [" . htmlspecialchars($method) . "]";
+        $this->renderErrorPage(404, '404 - Page Not Found');
+    }
+
+    /**
+     * Render a branded error page within the application layout
+     */
+    protected function renderErrorPage(int $statusCode, string $title) {
+        $pageTitle = $title;
+        $root = defined('ROOT_PATH') ? ROOT_PATH : (dirname(__DIR__, 2));
+        $viewFile = $root . '/src/views/errors/' . $statusCode . '.php';
+
+        if (file_exists($viewFile)) {
+            ob_start();
+            include $viewFile;
+            $view_content = ob_get_clean();
+
+            $layoutFile = $root . '/src/views/layouts/main.php';
+            if (file_exists($layoutFile)) {
+                include $layoutFile;
+                return;
+            }
+            echo $view_content;
+            return;
+        }
+
+        echo "<h2>Error {$statusCode}</h2><p>" . htmlspecialchars($title) . "</p>";
     }
 }

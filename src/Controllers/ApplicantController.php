@@ -327,14 +327,18 @@ class ApplicantController extends BaseController {
 
         if (!$applicant || (int)$applicant['tenant_id'] !== $tenantId) {
             SecurityLogger::logAlert('BOLA_DATA_EXFIL_ATTEMPT', $tenantId, 'Unauthorized CV download attempt for Applicant ID: ' . $applicantId);
-            die('Access denied.');
+            $_SESSION['error_message'] = 'Access denied. You do not have permission to download this document.';
+            Helpers::redirect('/dashboard');
+            return;
         }
 
         $storagePath = $applicant['cv_storage_path'] ?? '';
         $downloadFilename = $applicant['cv_filename'] ?? 'resume.pdf';
 
         if (empty($storagePath)) {
-            die('CV file reference missing.');
+            $_SESSION['error_message'] = 'No CV file reference was found for this candidate.';
+            Helpers::redirect('/applicant/view?id=' . $applicantId);
+            return;
         }
 
         // Handle Azure Blob Download
@@ -344,7 +348,9 @@ class ApplicantController extends BaseController {
                 $blob = $azureBlob->downloadBlob($storagePath);
                 
                 if (empty($blob)) {
-                    die('Azure file not found.');
+                    $_SESSION['error_message'] = 'The requested CV document is currently unavailable from cloud storage.';
+                    Helpers::redirect('/applicant/view?id=' . $applicantId);
+                    return;
                 }
 
                 $this->streamFileHeaders($downloadFilename, $blob['content_type'], $blob['content_length']);
@@ -353,7 +359,9 @@ class ApplicantController extends BaseController {
 
             } catch (\Exception $e) {
                 error_log("Blob download error: " . $e->getMessage());
-                die('Failed to retrieve file from cloud storage.');
+                $_SESSION['error_message'] = 'Unable to download CV from cloud storage at this time. Please try again.';
+                Helpers::redirect('/applicant/view?id=' . $applicantId);
+                return;
             }
         } 
         // Handle Local Docker Volume Fallback Download
@@ -365,10 +373,14 @@ class ApplicantController extends BaseController {
                 readfile($realPath);
                 exit;
             }
-            die('Local file not found.');
+            $_SESSION['error_message'] = 'The requested CV file could not be found on the server.';
+            Helpers::redirect('/applicant/view?id=' . $applicantId);
+            return;
         }
 
-        die('Invalid storage path format.');
+        $_SESSION['error_message'] = 'Invalid file storage format.';
+        Helpers::redirect('/applicant/view?id=' . $applicantId);
+        return;
     }
 	
 	
@@ -377,14 +389,16 @@ class ApplicantController extends BaseController {
      * Route: /applicant/delete (POST)
      */
     public function delete() {
-        if (!isset($_POST['csrf_token']) || !Helpers::csrf_verify($_POST['csrf_token'])) {
-            SecurityLogger::logAlert("CSRF_DELETE_VIOLATION", $_SESSION['tenant_id'] ?? 0, "Unauthorized applicant deletion attempt.");
-            die("Security Token Mismatch.");
-        }
-
         $applicantId = isset($_POST['applicant_id']) ? (int)$_POST['applicant_id'] : 0;
         $jobId = isset($_POST['job_id']) ? (int)$_POST['job_id'] : 0; // Used to redirect back to the correct job list
         $tenantId = (int)$_SESSION['tenant_id'];
+
+        if (!isset($_POST['csrf_token']) || !Helpers::csrf_verify($_POST['csrf_token'])) {
+            SecurityLogger::logAlert("CSRF_DELETE_VIOLATION", $tenantId, "Unauthorized applicant deletion attempt.");
+            $_SESSION['error_message'] = 'Your session has expired. Please refresh the page and try again.';
+            Helpers::redirect('/applicants?job_id=' . $jobId);
+            return;
+        }
 
         $applicantModel = new Applicant();
         
@@ -406,7 +420,7 @@ class ApplicantController extends BaseController {
             $_SESSION['success_message'] = 'Candidate and associated CV have been permanently deleted.';
         } else {
             SecurityLogger::logAlert("UNAUTHORIZED_DELETE_ATTEMPT", $tenantId, "Attempted deletion on unauthorized applicant ID: $applicantId");
-            $_SESSION['error_message'] = 'Deletion failed: Access denied or applicant missing.';
+            $_SESSION['error_message'] = 'Unable to delete candidate: Record not found or access denied.';
         }
 
         Helpers::redirect('/applicants?job_id=' . $jobId);
@@ -418,13 +432,15 @@ class ApplicantController extends BaseController {
      * Route: /applicant/delete-all (POST)
      */
     public function deleteAll() {
-        if (!isset($_POST['csrf_token']) || !Helpers::csrf_verify($_POST['csrf_token'])) {
-            SecurityLogger::logAlert("CSRF_MASS_DELETE_VIOLATION", $_SESSION['tenant_id'] ?? 0, "Unauthorized mass deletion attempt.");
-            die("Security Token Mismatch.");
-        }
-
         $jobId = isset($_POST['job_id']) ? (int)$_POST['job_id'] : 0;
         $tenantId = (int)$_SESSION['tenant_id'];
+
+        if (!isset($_POST['csrf_token']) || !Helpers::csrf_verify($_POST['csrf_token'])) {
+            SecurityLogger::logAlert("CSRF_MASS_DELETE_VIOLATION", $tenantId, "Unauthorized mass deletion attempt.");
+            $_SESSION['error_message'] = 'Your session has expired. Please refresh the page and try again.';
+            Helpers::redirect('/applicants?job_id=' . $jobId);
+            return;
+        }
 
         $jobModel = new Job();
         $applicantModel = new Applicant();
@@ -432,7 +448,7 @@ class ApplicantController extends BaseController {
         // 1. Verify the tenant actually owns this job before doing a mass wipe
         if (!$jobModel->belongsToTenant($jobId, $tenantId)) {
             SecurityLogger::logAlert("UNAUTHORIZED_MASS_DELETE", $tenantId, "Attempted mass delete on unowned job ID: $jobId");
-            $_SESSION['error_message'] = 'Unauthorized action.';
+            $_SESSION['error_message'] = 'Unauthorized action: You do not own this job posting.';
             Helpers::redirect('/dashboard');
             return;
         }

@@ -25,6 +25,29 @@ header("Pragma: no-cache");
 // 3. CORE BOOTSTRAP & AUTOLOADER
 require_once __DIR__ . '/../bootstrap.php';
 
+// Global Uncaught Exception Handler
+set_exception_handler(function (\Throwable $e) {
+    error_log("UNCAUGHT EXCEPTION: " . $e->getMessage() . " in " . $e->getFile() . ":" . $e->getLine());
+    http_response_code(500);
+    $pageTitle = '500 - Server Error';
+    $root = defined('ROOT_PATH') ? ROOT_PATH : (dirname(__DIR__));
+    $viewFile = $root . '/src/views/errors/500.php';
+    if (file_exists($viewFile)) {
+        ob_start();
+        include $viewFile;
+        $view_content = ob_get_clean();
+        $layoutFile = $root . '/src/views/layouts/main.php';
+        if (file_exists($layoutFile)) {
+            include $layoutFile;
+            exit;
+        }
+        echo $view_content;
+        exit;
+    }
+    echo "<h2>Service Notice</h2><p>An unexpected condition occurred. Please return to the homepage.</p>";
+    exit;
+});
+
 spl_autoload_register(function ($class) {
     $prefix = 'App\\';
     $base_dir = __DIR__ . '/../src/';

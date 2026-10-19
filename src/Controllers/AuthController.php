@@ -36,14 +36,14 @@ class AuthController extends BaseController {
         if ($user) {
             if (($user['deleted_at'] ?? null) !== null || ($user['status'] ?? '') === 'suspended') {
                 AuditLogger::log('TENANT_LOGIN_FAILED', $user['company_name'], 'WARNING', $user['tenant_id'], 'tenant', $user['tenant_id'], ['email' => $email, 'reason' => 'account_suspended']);
-                $_SESSION['error_message'] = "Access Denied: Account state invalid.";
+                $_SESSION['error_message'] = "Your company account is currently suspended or inactive. Please contact support.";
                 Helpers::redirect('/login');
                 return;
             }
         } else {
             // No user found, use 'Guest' as label with WARNING severity
             AuditLogger::log('TENANT_LOGIN_FAILED', 'Guest', 'WARNING', 0, 'tenant', 0, ['email' => $email, 'reason' => 'user_not_found']);
-            $_SESSION['error_message'] = "Invalid credentials.";
+            $_SESSION['error_message'] = "Incorrect email address or password. Please verify your credentials and try again.";
             Helpers::redirect('/login');
             return;
         }
@@ -70,7 +70,7 @@ class AuthController extends BaseController {
         } else {
             // Invalid password logged as WARNING
             AuditLogger::log('TENANT_LOGIN_FAILED', $user['company_name'], 'WARNING', $user['tenant_id'], 'tenant', $user['tenant_id'], ['email' => $email, 'reason' => 'invalid_password']);
-            $_SESSION['error_message'] = "Invalid credentials.";
+            $_SESSION['error_message'] = "Incorrect email address or password. Please verify your credentials and try again.";
             Helpers::redirect('/login');
         }
     }

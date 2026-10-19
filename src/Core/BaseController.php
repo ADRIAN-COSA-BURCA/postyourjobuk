@@ -51,6 +51,7 @@ abstract class BaseController {
         $this->db = \App\Core\Database::getInstance();
         
         if (!$this->isLoggedIn()) {
+            $_SESSION['error_message'] = 'Please log in to access your recruiter workspace.';
             Helpers::redirect('/login');
             return;
         }
@@ -59,6 +60,7 @@ abstract class BaseController {
         if (!$this->isSessionValid()) { 
             error_log("Security: Session fingerprint mismatch or missing. Destroying session.");
             $this->logout(); 
+            $_SESSION['error_message'] = 'Your session has expired for security reasons. Please log in again.';
             Helpers::redirect('/login'); 
             return;
         }
@@ -67,6 +69,7 @@ abstract class BaseController {
         if (!$this->isTenantActive()) { 
             error_log("Security: Inactive tenant attempted access. Destroying session.");
             $this->logout(); 
+            $_SESSION['error_message'] = 'Your company workspace is currently inactive or suspended. Please contact support.';
             Helpers::redirect('/login'); 
             return;
         }
