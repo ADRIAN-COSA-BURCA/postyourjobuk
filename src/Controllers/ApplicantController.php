@@ -114,10 +114,65 @@ class ApplicantController extends BaseController {
 
         $tenantId = (int)$job['tenant_id']; // Extract tenant from the active job
 
+        // Anti-Spam Protection 1: Honeypot trap (reject automated bot submissions)
+        if (!empty($_POST['candidate_website_url'])) {
+            SecurityLogger::logAlert(
+                'SPAM_BOT_BLOCKED', 
+                $tenantId, 
+                "Automated honeypot bot trap triggered for Job ID: $jobId from IP: " . ($_SERVER['REMOTE_ADDR'] ?? 'unknown'),
+                'MEDIUM'
+            );
+            $_SESSION['error_message'] = 'Submission flagged as automated request.';
+            Helpers::redirect('/job?id=' . $jobId);
+            return;
+        }
+
+        // Anti-Spam Protection 2: Submission speed verification (Reject sub-2 second automated POSTs)
+        $renderedAt = isset($_POST['form_rendered_at']) ? (int)$_POST['form_rendered_at'] : 0;
+        if ($renderedAt > 0 && (time() - $renderedAt) < 2) {
+            $_SESSION['error_message'] = 'Application submitted unusually fast. Please try again.';
+            Helpers::redirect('/job?id=' . $jobId);
+            return;
+        }
+
+        // Anti-Spam Protection 3: Session/IP Rate Limiting (Max 5 submissions per 10 minutes)
+        $now = time();
+        if (!isset($_SESSION['application_timestamps']) || !is_array($_SESSION['application_timestamps'])) {
+            $_SESSION['application_timestamps'] = [];
+        }
+        $_SESSION['application_timestamps'] = array_filter(
+            $_SESSION['application_timestamps'],
+            function($timestamp) use ($now) { return ($now - $timestamp) < 600; }
+        );
+        if (count($_SESSION['application_timestamps']) >= 5) {
+            $_SESSION['error_message'] = 'You have submitted multiple applications recently. Please wait a few minutes before submitting another application.';
+            Helpers::redirect('/job?id=' . $jobId);
+            return;
+        }
+
         $applicantModel = new Applicant();
         $name = trim($_POST['name'] ?? '');
         $email = trim($_POST['email'] ?? '');
         $phone = trim($_POST['phone'] ?? '');
+
+        // Anti-Spam Protection 4: Input Validation & Sanitization
+        if (empty($name) || mb_strlen($name) < 2 || mb_strlen($name) > 100) {
+            $_SESSION['error_message'] = 'Please enter a valid full name (between 2 and 100 characters).';
+            Helpers::redirect('/job?id=' . $jobId);
+            return;
+        }
+
+        if (empty($email) || !filter_var($email, FILTER_VALIDATE_EMAIL) || mb_strlen($email) > 150) {
+            $_SESSION['error_message'] = 'Please enter a valid email address.';
+            Helpers::redirect('/job?id=' . $jobId);
+            return;
+        }
+
+        if (!empty($phone) && mb_strlen($phone) > 30) {
+            $_SESSION['error_message'] = 'Phone number is too long (maximum 30 characters).';
+            Helpers::redirect('/job?id=' . $jobId);
+            return;
+        }
 
         // Pre-check: Prevent duplicate application for the same job and email
         if (!empty($email)) {
@@ -133,32 +188,74 @@ class ApplicantController extends BaseController {
             }
         }
 
-        // 2. Handle File Upload using our StorageService
+        // Anti-Spam Protection 5: Handle File Upload with Size & MIME Type Verification
         $cvFile = $_FILES['cv_document'] ?? null;
         $storagePath = '';
         $originalFilename = '';
 
-        if ($cvFile && $cvFile['error'] === UPLOAD_ERR_OK) {
-            // Validate Extension
-            $ext = strtolower(pathinfo($cvFile['name'], PATHINFO_EXTENSION));
-            if (!in_array($ext, ['pdf', 'doc', 'docx'])) {
-                $_SESSION['error_message'] = 'Invalid CV format. Only PDF and DOCX are allowed.';
-                Helpers::redirect('/job?id=' . $jobId);
-                return;
-            }
-
-            try {
-                $storageService = new StorageService();
-                $storagePath = $storageService->store($cvFile, $tenantId, $jobId);
-                $originalFilename = $cvFile['name'];
-            } catch (\Exception $e) {
-                error_log("CV Storage Failed: " . $e->getMessage());
-                $_SESSION['error_message'] = 'Failed to upload CV. Please try again.';
-                Helpers::redirect('/job?id=' . $jobId);
-                return;
-            }
-        } else {
+        if (!$cvFile || !isset($cvFile['error'])) {
             $_SESSION['error_message'] = 'Please upload a CV document.';
+            Helpers::redirect('/job?id=' . $jobId);
+            return;
+        }
+
+        // Check specific PHP upload errors
+        if ($cvFile['error'] === UPLOAD_ERR_INI_SIZE || $cvFile['error'] === UPLOAD_ERR_FORM_SIZE) {
+            $_SESSION['error_message'] = 'The uploaded CV exceeds the maximum allowed file size (5 MB).';
+            Helpers::redirect('/job?id=' . $jobId);
+            return;
+        }
+
+        if ($cvFile['error'] !== UPLOAD_ERR_OK) {
+            $_SESSION['error_message'] = 'File upload error occurred. Please select your CV file and try again.';
+            Helpers::redirect('/job?id=' . $jobId);
+            return;
+        }
+
+        // Validate Extension
+        $ext = strtolower(pathinfo($cvFile['name'], PATHINFO_EXTENSION));
+        if (!in_array($ext, ['pdf', 'doc', 'docx'])) {
+            $_SESSION['error_message'] = 'Invalid CV format. Only PDF and DOCX files are allowed.';
+            Helpers::redirect('/job?id=' . $jobId);
+            return;
+        }
+
+        // Validate File Size (Strict 5 MB cap)
+        $maxBytes = 5 * 1024 * 1024; // 5 MB
+        if ($cvFile['size'] > $maxBytes) {
+            $_SESSION['error_message'] = 'Your CV file is too large (maximum allowed size is 5 MB).';
+            Helpers::redirect('/job?id=' . $jobId);
+            return;
+        }
+
+        // Validate MIME type via finfo
+        if (function_exists('finfo_open') && !empty($cvFile['tmp_name']) && file_exists($cvFile['tmp_name'])) {
+            $finfo = finfo_open(FILEINFO_MIME_TYPE);
+            $detectedMime = finfo_file($finfo, $cvFile['tmp_name']);
+            finfo_close($finfo);
+
+            $allowedMimes = [
+                'application/pdf',
+                'application/msword',
+                'application/vnd.openxmlformats-officedocument.wordprocessingml.document',
+                'application/octet-stream',
+                'text/plain'
+            ];
+
+            if (!in_array($detectedMime, $allowedMimes)) {
+                $_SESSION['error_message'] = 'Invalid file format. Please upload a genuine PDF or DOCX file.';
+                Helpers::redirect('/job?id=' . $jobId);
+                return;
+            }
+        }
+
+        try {
+            $storageService = new StorageService();
+            $storagePath = $storageService->store($cvFile, $tenantId, $jobId);
+            $originalFilename = $cvFile['name'];
+        } catch (\Exception $e) {
+            error_log("CV Storage Failed: " . $e->getMessage());
+            $_SESSION['error_message'] = 'Failed to upload CV. Please try again.';
             Helpers::redirect('/job?id=' . $jobId);
             return;
         }
@@ -192,6 +289,7 @@ class ApplicantController extends BaseController {
                 $queueService->dispatchJob($newApplicantId);
             }
             
+            $_SESSION['application_timestamps'][] = time();
             $_SESSION['success_message'] = 'Your application has been submitted successfully!';
             Helpers::redirect('/job?id=' . $jobId);
         } catch (\Throwable $e) {

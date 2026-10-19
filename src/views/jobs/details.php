@@ -130,6 +130,13 @@
             <input type="hidden" name="csrf_token" value="<?= $_SESSION['csrf_token'] ?? '' ?>">
             <input type="hidden" name="job_id" value="<?= (int)$job['job_id'] ?>">
             <input type="hidden" name="tenant_id" value="<?= (int)$job['tenant_id'] ?>">
+            <input type="hidden" name="form_rendered_at" value="<?= time() ?>">
+
+            <!-- Anti-Spam Honeypot Field (Hidden from humans, traps automated bot submission) -->
+            <div style="display:none !important; visibility:hidden !important; opacity:0; position:absolute; left:-9999px; pointer-events:none;" aria-hidden="true">
+                <label for="candidate_website_url">Website</label>
+                <input type="text" name="candidate_website_url" id="candidate_website_url" value="" tabindex="-1" autocomplete="off">
+            </div>
 
             <div style="display: grid; grid-template-columns: repeat(auto-fit, minmax(250px, 1fr)); gap: 1.5rem; margin-bottom: 1.5rem;">
                 <div class="form-group">
@@ -155,6 +162,9 @@
             <div id="upload-option" class="form-group" style="margin-bottom: 2rem;">
                 <label class="form-label">Upload CV (PDF or DOCX format)</label>
                 <input type="file" id="cv" name="cv_document" class="form-control" accept=".pdf,.docx,.doc">
+                <small style="display: block; color: var(--text-muted); font-size: 0.82rem; margin-top: 0.4rem;">
+                    Accepted formats: PDF, DOCX (Maximum file size: 5 MB)
+                </small>
             </div>
 
             <div id="text-option" class="form-group" style="display: none; margin-bottom: 2rem;">
