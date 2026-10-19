@@ -148,6 +148,16 @@
     font-size: 0.875rem;
     outline: none;
     cursor: pointer;
+    color-scheme: dark;
+}
+.job-filter-select option {
+    background-color: #111827 !important;
+    color: #ffffff !important;
+}
+.job-filter-select option:checked,
+.job-filter-select option:hover {
+    background-color: #4f46e5 !important;
+    color: #ffffff !important;
 }
 .job-filter-select:focus {
     border-color: #6366f1;

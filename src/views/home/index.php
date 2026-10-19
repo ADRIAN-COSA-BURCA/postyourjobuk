@@ -106,6 +106,16 @@
         font-size: 0.875rem;
         outline: none;
         cursor: pointer;
+        color-scheme: dark;
+    }
+    .opp-filter-select option {
+        background-color: #111827 !important;
+        color: #ffffff !important;
+    }
+    .opp-filter-select option:checked,
+    .opp-filter-select option:hover {
+        background-color: #4f46e5 !important;
+        color: #ffffff !important;
     }
     .opp-filter-select:focus {
         border-color: #6366f1;
@@ -211,15 +221,10 @@
                          data-date="<?= $createdTimestamp ?>">
                         <a href="/job?id=<?= (int)$job['job_id'] ?>" class="card job-card-link">
                             <div>
-                                <!-- Header: Company Initials Badge + FULL Company Name + Employment Badge -->
+                                <!-- Header: FULL Company Name + Employment Badge -->
                                 <div class="flex-between" style="margin-bottom: 1rem; align-items: center; gap: 0.75rem;">
-                                    <div style="display: flex; align-items: center; gap: 0.65rem; min-width: 0; flex: 1;">
-                                        <div style="font-weight: 800; padding: 0.4rem 0.55rem; background: var(--bg); border: 1px solid var(--border); border-radius: 8px; font-size: 0.82rem; color: #a78bfa; flex-shrink: 0;">
-                                            <?= strtoupper(substr($job['company_name'] ?? 'CO', 0, 2)) ?>
-                                        </div>
-                                        <div style="font-weight: 700; color: var(--text); font-size: 0.95rem; white-space: nowrap; overflow: hidden; text-overflow: ellipsis;" title="<?= e($job['company_name'] ?? 'Company') ?>">
-                                            <?= e($job['company_name'] ?? 'Hiring Company') ?>
-                                        </div>
+                                    <div style="font-weight: 700; color: #f3f4f6; font-size: 1.05rem; white-space: nowrap; overflow: hidden; text-overflow: ellipsis; min-width: 0; flex: 1;" title="<?= e($job['company_name'] ?? 'Company') ?>">
+                                        <?= e($job['company_name'] ?? 'Hiring Company') ?>
                                     </div>
                                     <span class="badge" style="background: rgba(139, 92, 246, 0.15); color: #a78bfa; border: 1px solid rgba(139, 92, 246, 0.3); font-size: 0.75rem; white-space: nowrap; flex-shrink: 0;">
                                         <?= ucfirst(str_replace('-', ' ', e($job['employment_type'] ?? 'Full time'))) ?>
@@ -245,7 +250,7 @@
                             <div class="text-muted" style="font-size: 0.8rem; border-top: 1px solid var(--border); padding-top: 0.85rem; display: flex; justify-content: space-between; align-items: center;">
                                 <span>🕒 Posted <?= time_ago($job['created_at']) ?></span>
                                 <span style="font-family: monospace; font-size: 0.78rem; font-weight: 600; color: #94a3b8; background: rgba(255, 255, 255, 0.04); border: 1px solid var(--border); padding: 0.2rem 0.5rem; border-radius: 4px;">
-                                    ID: #<?= (int)$job['job_id'] ?>
+                                    Job ID: <?= (int)$job['job_id'] ?>
                                 </span>
                             </div>
                         </a>

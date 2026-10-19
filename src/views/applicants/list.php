@@ -38,6 +38,16 @@
         font-size: 0.875rem;
         outline: none;
         cursor: pointer;
+        color-scheme: dark;
+    }
+    .filter-select option {
+        background-color: #111827 !important;
+        color: #ffffff !important;
+    }
+    .filter-select option:checked,
+    .filter-select option:hover {
+        background-color: #4f46e5 !important;
+        color: #ffffff !important;
     }
     .filter-select:focus {
         border-color: #6366f1;
