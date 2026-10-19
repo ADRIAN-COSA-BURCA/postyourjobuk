@@ -94,4 +94,14 @@ class Applicant extends BaseModel {
             'moderate_matches' => 0
         ];
     }
+
+    /**
+     * Check if a candidate email has already applied to a specific job
+     */
+    public function findByEmailAndJob(string $email, int $jobId) {
+        $sql = "SELECT * FROM {$this->table} WHERE LOWER(email) = LOWER(?) AND job_id = ? LIMIT 1";
+        $stmt = $this->db->prepare($sql);
+        $stmt->execute([trim($email), $jobId]);
+        return $stmt->fetch();
+    }
 }

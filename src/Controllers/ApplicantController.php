@@ -114,7 +114,26 @@ class ApplicantController extends BaseController {
 
         $tenantId = (int)$job['tenant_id']; // Extract tenant from the active job
 
-        // 2. Handle File Upload using our new StorageService
+        $applicantModel = new Applicant();
+        $name = trim($_POST['name'] ?? '');
+        $email = trim($_POST['email'] ?? '');
+        $phone = trim($_POST['phone'] ?? '');
+
+        // Pre-check: Prevent duplicate application for the same job and email
+        if (!empty($email)) {
+            $existing = $applicantModel->findByEmailAndJob($email, $jobId);
+            if ($existing) {
+                $_SESSION['duplicate_application_error'] = [
+                    'email' => $email,
+                    'job_title' => $job['title'],
+                    'applied_at' => $existing['applied_at'] ?? date('Y-m-d H:i:s')
+                ];
+                Helpers::redirect('/job?id=' . $jobId);
+                return;
+            }
+        }
+
+        // 2. Handle File Upload using our StorageService
         $cvFile = $_FILES['cv_document'] ?? null;
         $storagePath = '';
         $originalFilename = '';
@@ -148,9 +167,9 @@ class ApplicantController extends BaseController {
         $data = [
             'tenant_id'       => $tenantId,
             'job_id'          => $jobId,
-            'name'            => trim($_POST['name'] ?? ''),
-            'email'           => trim($_POST['email'] ?? ''),
-            'phone'           => trim($_POST['phone'] ?? ''),
+            'name'            => $name,
+            'email'           => $email,
+            'phone'           => $phone,
             'cv_storage_path' => $storagePath,
             'cv_filename'     => $originalFilename,
             'status'          => 'new'
@@ -158,8 +177,6 @@ class ApplicantController extends BaseController {
 
         // 4. Save to Model and Dispatch to Asynchronous AI Queue
         try {
-            $applicantModel = new Applicant();
-            
             // Perform record creation
             $newApplicantId = $applicantModel->create($data); 
 
@@ -177,11 +194,22 @@ class ApplicantController extends BaseController {
             
             $_SESSION['success_message'] = 'Your application has been submitted successfully!';
             Helpers::redirect('/job?id=' . $jobId);
-        } catch (\Exception $e) {
-            echo "<h1>CRITICAL ERROR:</h1>";
-            echo "<pre>" . htmlspecialchars($e->getMessage()) . "</pre>";
-            echo "<p>File: " . $e->getFile() . " on line " . $e->getLine() . "</p>";
-            exit;
+        } catch (\Throwable $e) {
+            // Handle duplicate entry gracefully (SQLSTATE 23000, error 1062, unique_email_job)
+            if ($e instanceof \PDOException && ($e->getCode() == 23000 || str_contains($e->getMessage(), '1062') || str_contains($e->getMessage(), 'unique_email_job'))) {
+                $_SESSION['duplicate_application_error'] = [
+                    'email' => $data['email'],
+                    'job_title' => $job['title'],
+                    'applied_at' => date('Y-m-d H:i:s')
+                ];
+                Helpers::redirect('/job?id=' . $jobId);
+                return;
+            }
+
+            error_log("Application submission failed: " . $e->getMessage());
+            $_SESSION['error_message'] = 'An unexpected error occurred while processing your application. Please try again or contact support.';
+            Helpers::redirect('/job?id=' . $jobId);
+            return;
         }
     }
 

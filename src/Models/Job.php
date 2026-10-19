@@ -14,7 +14,7 @@ class Job extends BaseModel {
      */
     public function getActiveJobs(?int $limit = null): array {
         $sql = "
-            SELECT j.*, t.company_name, t.logo_url,
+            SELECT j.*, t.company_name, t.logo_url, t.industry,
                    (SELECT COUNT(*) FROM applicants WHERE job_id = j.job_id) as applicant_count
             FROM {$this->table} j
             INNER JOIN tenants t ON j.tenant_id = t.tenant_id
@@ -108,7 +108,8 @@ class Job extends BaseModel {
             SELECT 
                 j.*,
                 t.company_name,
-                t.logo_url
+                t.logo_url,
+                t.industry
             FROM {$this->table} j
             INNER JOIN tenants t ON j.tenant_id = t.tenant_id
             WHERE j.status = 'active'
@@ -119,6 +120,8 @@ class Job extends BaseModel {
                 OR j.description LIKE ?
                 OR j.requirements LIKE ?
                 OR j.location LIKE ?
+                OR t.company_name LIKE ?
+                OR t.industry LIKE ?
             )
             ORDER BY j.created_at DESC
             LIMIT {$cleanLimit}
@@ -126,7 +129,7 @@ class Job extends BaseModel {
         
         $searchTerm = '%' . $trimmed . '%';
         $stmt = $this->db->prepare($sql);
-        $stmt->execute([$searchTerm, $searchTerm, $searchTerm, $searchTerm]);
+        $stmt->execute([$searchTerm, $searchTerm, $searchTerm, $searchTerm, $searchTerm, $searchTerm]);
         return $stmt->fetchAll();
     }
     

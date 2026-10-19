@@ -1,3 +1,40 @@
+<?php if (isset($_SESSION['duplicate_application_error'])): 
+    $dup = $_SESSION['duplicate_application_error'];
+    unset($_SESSION['duplicate_application_error']);
+?>
+<div id="duplicateAppModal" style="position: fixed; inset: 0; background: rgba(7, 10, 18, 0.88); backdrop-filter: blur(8px); -webkit-backdrop-filter: blur(8px); display: flex; align-items: center; justify-content: center; z-index: 99999; padding: 1rem;">
+    <div class="card" style="background: #111827; border: 1px solid rgba(239, 68, 68, 0.45); border-radius: 14px; max-width: 500px; width: 100%; padding: 2.25rem; box-shadow: 0 25px 60px rgba(0, 0, 0, 0.8); text-align: center;">
+        <div style="width: 68px; height: 68px; border-radius: 50%; background: rgba(239, 68, 68, 0.12); border: 2px solid #ef4444; display: flex; align-items: center; justify-content: center; margin: 0 auto 1.25rem; font-size: 2rem;">
+            ⚠️
+        </div>
+        <h2 style="margin: 0 0 0.5rem 0; font-family: 'Outfit', sans-serif; font-size: 1.5rem; color: #ffffff;">Application Already Submitted</h2>
+        <p style="color: #94a3b8; font-size: 0.95rem; line-height: 1.6; margin-bottom: 1.5rem;">
+            You have already applied for <strong style="color: #ffffff;"><?= e($dup['job_title'] ?? $job['title'] ?? 'this role') ?></strong> with the email address <strong style="color: #38bdf8;"><?= e($dup['email'] ?? '') ?></strong>.
+        </p>
+
+        <div style="background: #1e293b; border: 1px solid #374151; border-radius: 8px; padding: 1rem 1.25rem; margin-bottom: 1.5rem; text-align: left; font-size: 0.88rem; line-height: 1.5;">
+            <div style="display: flex; gap: 0.6rem; align-items: flex-start; margin-bottom: 0.5rem;">
+                <span>ℹ️</span>
+                <span style="color: #cbd5e1;"><strong>Status:</strong> Your profile and CV are already registered in the applicant pool and queued for review.</span>
+            </div>
+            <div style="display: flex; gap: 0.6rem; align-items: flex-start;">
+                <span>🔒</span>
+                <span style="color: #94a3b8;">Multiple submissions for the same position with identical email are restricted to protect fair evaluation and data integrity.</span>
+            </div>
+        </div>
+
+        <div style="display: flex; gap: 0.75rem; justify-content: center; flex-wrap: wrap;">
+            <button type="button" class="btn btn-secondary" style="flex: 1 1 140px; padding: 0.75rem 1rem;" onclick="document.getElementById('duplicateAppModal').style.display='none';">
+                Close Window
+            </button>
+            <a href="/" class="btn btn-primary" style="flex: 1 1 160px; padding: 0.75rem 1rem; text-decoration: none;">
+                Explore Other Jobs
+            </a>
+        </div>
+    </div>
+</div>
+<?php endif; ?>
+
 <?php if (isset($_SESSION['success_message'])): ?>
     <div style="background-color: #d1fae5; border: 1px solid #10b981; color: #065f46; padding: 1rem; border-radius: var(--radius-sm); margin-bottom: 1.5rem; font-weight: 600;">
         ✓ <?= e($_SESSION['success_message']) ?>
