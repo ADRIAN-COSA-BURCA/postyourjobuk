@@ -30,7 +30,9 @@ abstract class BaseController {
             '/api/fetch-news',
             '/api/refresh-news',
             '/auth/google',            // ADDED for Google OAuth
-            '/auth/google/callback'    // ADDED for Google OAuth
+            '/auth/google/callback',   // ADDED for Google OAuth
+            '/resume-builder',
+            '/resume-builder/editor'
         ];
         
         $isPublic = false;

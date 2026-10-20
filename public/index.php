@@ -75,7 +75,8 @@ $allowedPublicPaths = [
     '/', '/index.php', '/about', '/contact', '/vision', '/terms', 
     '/login', '/login/authenticate', '/admin/login', '/apply', '/job',
     '/reset-password', '/reset-password/submit', '/api/fetch-news', '/api/refresh-news',
-    '/auth/google', '/auth/google/callback' // ADDED for Google OAuth
+    '/auth/google', '/auth/google/callback', // ADDED for Google OAuth
+    '/resume-builder', '/resume-builder/editor' // Public Resume Builder
 ];
 
 $isPublic = in_array($cleanPath, $allowedPublicPaths);
@@ -132,6 +133,10 @@ $router->add('GET',  '/about',                  [\App\Controllers\HomeController
 $router->add('GET',  '/contact',                [\App\Controllers\HomeController::class, 'contact']);
 $router->add('GET',  '/vision',                 [\App\Controllers\HomeController::class, 'vision']);
 $router->add('GET',  '/terms',                  [\App\Controllers\HomeController::class, 'terms']);
+
+// --- Public Resume Builder Routes ---
+$router->add('GET',  '/resume-builder',         [\App\Controllers\ResumeController::class, 'index']);
+$router->add('GET',  '/resume-builder/editor',  [\App\Controllers\ResumeController::class, 'editor']);
 
 // --- Background Task Routes ---
 $router->add('GET', '/api/fetch-news', [\App\Controllers\NewsController::class, 'fetchFeeds']);

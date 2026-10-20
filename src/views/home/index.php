@@ -59,6 +59,27 @@
         <?php endif; ?>
     </div>
 
+    <!-- Free ATS Resume Builder Hook Card -->
+    <div class="card" style="background: linear-gradient(135deg, rgba(139, 92, 246, 0.14), rgba(16, 185, 129, 0.08)); border: 1px solid rgba(139, 92, 246, 0.4); padding: 2rem; margin-bottom: 2.5rem; display: flex; flex-wrap: wrap; align-items: center; justify-content: space-between; gap: 1.5rem;">
+        <div style="flex: 1 1 480px;">
+            <div style="display: inline-flex; align-items: center; gap: 0.4rem; background: rgba(16, 185, 129, 0.15); color: #34d399; border: 1px solid rgba(16, 185, 129, 0.35); border-radius: 999px; padding: 0.25rem 0.75rem; font-size: 0.75rem; font-weight: 700; text-transform: uppercase; letter-spacing: 0.05em; margin-bottom: 0.75rem;">
+                ✨ 100% Free • Private Client-Side Builder • ATS Optimized
+            </div>
+            <h3 style="color: #ffffff; font-size: 1.4rem; margin-bottom: 0.5rem;">
+                📄 Need a CV to Apply? Build Your Own Professional Resume in Minutes
+            </h3>
+            <p style="color: var(--text-muted); font-size: 0.92rem; line-height: 1.6; margin: 0;">
+                Choose from 4 modern, recruiter-approved CV templates designed for instant compatibility with our evidence-based AI evaluation engine. Fill in your details with live A4 preview and save directly to your device — zero account or cloud storage required.
+            </p>
+        </div>
+        <div style="flex: 0 0 auto; display: flex; flex-direction: column; align-items: center; gap: 0.5rem;">
+            <a href="/resume-builder" class="btn btn-primary" style="padding: 0.85rem 1.85rem; font-size: 0.95rem; font-weight: 700; box-shadow: 0 8px 25px rgba(139, 92, 246, 0.4);">
+                🛠️ Build Your Free CV Now →
+            </a>
+            <span style="font-size: 0.75rem; color: var(--text-muted);">Instant PDF Download • 4 Modern Templates</span>
+        </div>
+    </div>
+
     <?php
     $uniqueLocations = [];
     $uniqueIndustries = [];
