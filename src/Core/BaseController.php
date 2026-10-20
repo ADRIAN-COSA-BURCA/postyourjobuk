@@ -27,6 +27,7 @@ abstract class BaseController {
             '/terms',
             '/reset-password',
             '/reset-password/submit',
+            '/api/fetch-news',
             '/api/refresh-news',
             '/auth/google',            // ADDED for Google OAuth
             '/auth/google/callback'    // ADDED for Google OAuth
