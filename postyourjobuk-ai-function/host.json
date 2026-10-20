@@ -14,7 +14,9 @@
   },
   "extensions": {
     "queues": {
-      "messageEncoding": "none"
+      "messageEncoding": "none",
+      "maxDequeueCount": 5,
+      "visibilityTimeout": "00:02:00"
     }
   }
 }

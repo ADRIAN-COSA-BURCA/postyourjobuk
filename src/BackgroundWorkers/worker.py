@@ -1,4 +1,5 @@
 import os
+import sys
 import json
 import time
 import re
@@ -7,6 +8,21 @@ import threading
 import statistics
 from datetime import datetime
 from pathlib import Path
+
+# ==============================================================================
+# DEPRECATED / ARCHIVED REFERENCE WORKER (v3 Deterministic Prototype)
+# ==============================================================================
+# NOTE: This script is preserved for historical reference and documentation only.
+# Production candidate scoring is handled exclusively by the cloud Azure Function:
+#   postyourjobuk-ai-function/function_app.py (Semantic-Grounded-v5 Pipeline)
+#
+# To prevent competing with production queue messages and writing stale v3 scores,
+# this legacy worker exits immediately unless explicitly enabled for sandbox tests.
+# ==============================================================================
+if os.getenv("ALLOW_LEGACY_LOCAL_WORKER") != "1":
+    print("[!] Legacy worker.py is inactive. Production candidate scoring is handled by Azure Function.")
+    print("[!] Set ALLOW_LEGACY_LOCAL_WORKER=1 to run this legacy prototype in an isolated test environment.")
+    sys.exit(0)
 
 from dotenv import load_dotenv
 import mysql.connector

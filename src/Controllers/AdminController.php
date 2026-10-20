@@ -434,15 +434,52 @@ class AdminController extends BaseController {
             exit;
         }
 
-        $rawA = '';
-        $rawB = '';
         $synthDir = realpath(__DIR__ . '/../../uploads/cvs/synthetic');
-        if ($synthDir && !empty($candA['cv_filename']) && file_exists($synthDir . '/' . $candA['cv_filename'])) {
-            $rawA = file_get_contents($synthDir . '/' . $candA['cv_filename']);
-        }
-        if ($synthDir && !empty($candB['cv_filename']) && file_exists($synthDir . '/' . $candB['cv_filename'])) {
-            $rawB = file_get_contents($synthDir . '/' . $candB['cv_filename']);
-        }
+        
+        $fetchRawCv = function(array $cand) use ($synthDir): string {
+            $filename = $cand['cv_filename'] ?? '';
+            $storagePath = $cand['cv_storage_path'] ?? '';
+
+            // 1. Try local synthetic directory if present (.txt or .pdf)
+            if ($synthDir && !empty($filename)) {
+                $candidates = [
+                    $synthDir . '/' . $filename,
+                    $synthDir . '/' . preg_replace('/\.pdf$/i', '.txt', $filename),
+                    $synthDir . '/' . preg_replace('/\.txt$/i', '.pdf', $filename),
+                ];
+                foreach ($candidates as $filePath) {
+                    if (file_exists($filePath) && is_readable($filePath)) {
+                        return file_get_contents($filePath);
+                    }
+                }
+            }
+
+            // 2. Try direct local storage path if on disk
+            if (!empty($storagePath) && strpos($storagePath, 'blob://') === false) {
+                $localPath = str_replace('local://', '', $storagePath);
+                if (file_exists($localPath) && is_readable($localPath)) {
+                    return file_get_contents($localPath);
+                }
+            }
+
+            // 3. Try Azure Blob Storage download if blob:// or Azure is configured
+            if (!empty($storagePath)) {
+                try {
+                    $blobService = new \App\Services\AzureBlobStorage();
+                    $result = $blobService->downloadBlob($storagePath);
+                    if (!empty($result['content'])) {
+                        return $result['content'];
+                    }
+                } catch (\Throwable $t) {
+                    // Blob fallback unavailable, return empty
+                }
+            }
+
+            return '';
+        };
+
+        $rawA = $fetchRawCv($candA);
+        $rawB = $fetchRawCv($candB);
 
         $fpA = !empty($candA['ai_audit_fingerprint']) ? json_decode($candA['ai_audit_fingerprint'], true) : null;
         $fpB = !empty($candB['ai_audit_fingerprint']) ? json_decode($candB['ai_audit_fingerprint'], true) : null;

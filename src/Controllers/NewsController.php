@@ -14,10 +14,13 @@ class NewsController extends BaseController {
     ];
 
     public function fetchFeeds() {
+        $expectedSecret = $_ENV['CRON_SECRET'] ?? getenv('CRON_SECRET') ?: self::CRON_SECRET;
         $token = $_GET['token'] ?? '';
-        if ($token !== self::CRON_SECRET) {
+        if (empty($token) || !hash_equals($expectedSecret, $token)) {
             http_response_code(403);
-            die("Forbidden: Invalid security token.");
+            header('Content-Type: application/json');
+            echo json_encode(['success' => false, 'error' => 'Forbidden: Invalid security token.']);
+            return;
         }
 
         $feeds = [

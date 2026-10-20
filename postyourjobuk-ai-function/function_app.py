@@ -4,6 +4,7 @@ import time
 import re
 import hashlib
 import statistics
+import uuid
 from datetime import datetime
 import logging
 import base64
@@ -230,23 +231,45 @@ def _decode_cached_skills(value):
     return json.loads(value)
 
 def get_or_compute_job_requirements(cursor, conn, job):
-    cached_skills = job.get("ai_required_skills")
-    cached_years = job.get("ai_required_years")
+    job_id = job["job_id"]
+
+    # Re-check database directly in case another concurrent instance already populated it
+    cursor.execute("SELECT ai_required_skills, ai_required_years, ai_job_years_variance FROM jobs WHERE job_id = %s", (job_id,))
+    latest = cursor.fetchone() or {}
+    cached_skills = latest.get("ai_required_skills") if latest.get("ai_required_skills") is not None else job.get("ai_required_skills")
+    cached_years = latest.get("ai_required_years") if latest.get("ai_required_years") is not None else job.get("ai_required_years")
     if cached_skills is not None and cached_years is not None:
         return {
             "required_skills": _decode_cached_skills(cached_skills),
             "required_years": float(cached_years),
-            "years_variance": float(job.get("ai_job_years_variance") or 0)
+            "years_variance": float(latest.get("ai_job_years_variance") or job.get("ai_job_years_variance") or 0)
         }
     
-    print(f"[*] Computing job criteria for Job ID {job['job_id']}")
+    print(f"[*] Computing job criteria for Job ID {job_id}")
     criteria = compute_job_requirements(job["title"], job["description"], job["requirements"])
     
+    # Fix 9: Guard against zero-skill extraction
+    if not criteria.get("required_skills"):
+        raise ValueError(f"Criteria extraction for Job ID {job_id} yielded 0 skills. Aborting criteria cache to prevent invalid zero-scoring.")
+
+    # Fix 8: Atomic update - only write if still NULL, preventing race condition overwrite
     cursor.execute(
-        "UPDATE jobs SET ai_required_skills = %s, ai_required_years = %s, ai_job_years_variance = %s, ai_criteria_computed_at = NOW() WHERE job_id = %s",
-        (json.dumps(criteria["required_skills"]), criteria["required_years"], criteria["years_variance"], job["job_id"])
+        "UPDATE jobs SET ai_required_skills = %s, ai_required_years = %s, ai_job_years_variance = %s, ai_criteria_computed_at = NOW() WHERE job_id = %s AND ai_required_skills IS NULL",
+        (json.dumps(criteria["required_skills"]), criteria["required_years"], criteria["years_variance"], job_id)
     )
     conn.commit()
+
+    # If another concurrent worker won the race, re-fetch and use its canonical criteria
+    if cursor.rowcount == 0:
+        cursor.execute("SELECT ai_required_skills, ai_required_years, ai_job_years_variance FROM jobs WHERE job_id = %s", (job_id,))
+        winner = cursor.fetchone()
+        if winner and winner.get("ai_required_skills") is not None:
+            return {
+                "required_skills": _decode_cached_skills(winner["ai_required_skills"]),
+                "required_years": float(winner.get("ai_required_years") or 0),
+                "years_variance": float(winner.get("ai_job_years_variance") or 0)
+            }
+
     return criteria
 
 
@@ -780,8 +803,13 @@ def ai_queue_processor(azmsg: func.QueueMessage):
 
         raw_path = applicant.get("cv_storage_path") or ""
         cv_filename = applicant.get("cv_filename") or f"applicant_{applicant_id}.pdf"
+        sanitized_ext = os.path.splitext(cv_filename)[1].lower()
+        if sanitized_ext not in [".pdf", ".docx", ".txt"]:
+            sanitized_ext = ".pdf"
         temp_dir = os.environ.get("TEMP") or os.environ.get("TMP") or "/tmp"
-        local_file_path = os.path.join(temp_dir, cv_filename)
+        # Fix 1 & 2: Isolated, collision-free filename preventing path traversal
+        unique_local_name = f"cv_{applicant_id}_{uuid.uuid4().hex[:8]}{sanitized_ext}"
+        local_file_path = os.path.join(temp_dir, unique_local_name)
 
         print(f"[*] Locating CV File: {raw_path}")
         if raw_path.startswith("blob://") or "cv-storage" in raw_path:
@@ -795,7 +823,12 @@ def ai_queue_processor(azmsg: func.QueueMessage):
             with open(local_file_path, "wb") as download_file:
                 download_file.write(blob_client.download_blob().readall())
         else:
-            local_file_path = raw_path.replace("local://", "")
+            local_candidate = raw_path.replace("local://", "")
+            if not os.path.exists(local_candidate) and local_candidate.endswith(".pdf"):
+                txt_cand = local_candidate[:-4] + ".txt"
+                if os.path.exists(txt_cand):
+                    local_candidate = txt_cand
+            local_file_path = local_candidate
 
         raw_text = extract_text_from_file(local_file_path)
         clean_cv = sanitize_text(raw_text)
@@ -849,8 +882,11 @@ def ai_queue_processor(azmsg: func.QueueMessage):
                 attempts = int(row["processing_attempts"]) if row else MAX_PROCESSING_ATTEMPTS
                 if attempts >= MAX_PROCESSING_ATTEMPTS:
                     _mark_failed(cursor, conn, applicant_id, f"Processing failed after {MAX_PROCESSING_ATTEMPTS} attempts. Last error: {error_message}")
+                    # Fix 3: Terminal failure reached. Do not re-raise or runtime retries will overwrite failure state.
+                    return
             except Exception as db_error:
                 print(f"[!] Could not persist retry/failure state for Applicant ID {applicant_id}: {str(db_error)}")
+        # Only re-raise for transient retries below the attempt cap
         raise
 
     finally:

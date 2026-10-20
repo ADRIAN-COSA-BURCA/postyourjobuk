@@ -343,7 +343,13 @@
                                     <div class="dashboard-action-links">
                                         <a href="/applicants?job_id=<?= (int)$job['job_id'] ?>" class="btn btn-sm btn-ghost" style="color: #3b82f6; border: 1px solid #3b82f6;">👥 Applicants</a>
                                         <a href="/jobs/edit?id=<?= (int)$job['job_id'] ?>" class="btn btn-sm btn-ghost" style="color: #10b981; border: 1px solid #10b981;">✏️ Edit</a>
-                                        <a href="/jobs/delete?id=<?= (int)$job['job_id'] ?>" class="btn btn-sm btn-ghost" style="color: #ef4444; border: 1px solid #ef4444;" onclick="return confirm('Are you sure you want to delete this job posting?');">🗑️ Delete</a>
+                                        <form action="/jobs/delete" method="POST" style="display: inline-flex; margin: 0; padding: 0;" onsubmit="return confirm('Are you sure you want to delete this job posting?');">
+                                            <input type="hidden" name="csrf_token" value="<?= $_SESSION['csrf_token'] ?? '' ?>">
+                                            <input type="hidden" name="id" value="<?= (int)$job['job_id'] ?>">
+                                            <button type="submit" class="btn btn-sm btn-ghost" style="color: #ef4444; border: 1px solid #ef4444; cursor: pointer;">
+                                                🗑️ Delete
+                                            </button>
+                                        </form>
                                     </div>
                                 </div>
                             </td>

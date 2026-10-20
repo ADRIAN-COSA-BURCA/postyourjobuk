@@ -193,6 +193,24 @@
 </head>
 <body>
 
+<?php
+$totalPairs = count($pairs);
+$allEvaluated = true;
+$allPass = true;
+$pendingCount = 0;
+$flaggedCount = 0;
+
+foreach ($pairs as $p) {
+    if ($p['score_a'] === null || $p['score_b'] === null) {
+        $allEvaluated = false;
+        $pendingCount++;
+    } elseif (abs((int)$p['score_delta']) > 5) {
+        $allPass = false;
+        $flaggedCount++;
+    }
+}
+?>
+
     <div class="actions-bar">
         <a href="/admin/fairness" class="btn btn-back">← Back to Fairness Panel</a>
         <button onclick="window.print()" class="btn btn-print">🖨️ Print / Save as PDF Certificate</button>
@@ -205,9 +223,19 @@
                 <div class="brand-title">PostYourJobUK Compliance Authority</div>
                 <div style="font-size: 0.85rem; color: var(--muted); margin-top: 2px;">Algorithmic Audit Division • Tenant 9999</div>
             </div>
-            <div class="cert-badge">
-                ✓ 100% Parity Certified
-            </div>
+            <?php if ($totalPairs > 0 && $allEvaluated && $allPass): ?>
+                <div class="cert-badge">
+                    ✓ Algorithmic Parity Certified
+                </div>
+            <?php elseif ($pendingCount > 0): ?>
+                <div class="cert-badge" style="background: rgba(234, 179, 8, 0.12); color: #854d0e; border-color: rgba(234, 179, 8, 0.3);">
+                    ⏳ Audit Pending (<?= $pendingCount ?>/<?= $totalPairs ?> incomplete)
+                </div>
+            <?php else: ?>
+                <div class="cert-badge" style="background: rgba(239, 68, 68, 0.12); color: #991b1b; border-color: rgba(239, 68, 68, 0.3);">
+                    ⚠️ Disparity Flagged (<?= $flaggedCount ?> pair<?= $flaggedCount > 1 ? 's' : '' ?> exceeding threshold)
+                </div>
+            <?php endif; ?>
         </div>
 
         <h1>Algorithmic Parity & Anti-Bias Verification Certificate</h1>
@@ -230,7 +258,12 @@
             </div>
             <div class="meta-item">
                 <h4>Mean Disparity Delta</h4>
-                <p style="color: var(--success); font-weight: 800;"><?= htmlspecialchars($stats['mean_delta'] ?? 0) ?>.00 pts (Zero Bias)</p>
+                <p style="color: <?= ($allEvaluated && $allPass) ? 'var(--success)' : ($pendingCount > 0 ? '#b45309' : '#b91c1c') ?>; font-weight: 800;">
+                    <?= number_format((float)($stats['mean_delta'] ?? 0), 2) ?> pts
+                    <span style="font-size: 0.75rem; font-weight: 600; display: block; color: var(--muted);">
+                        <?= ($totalPairs > 0 && $allEvaluated && $allPass) ? '(Parity Compliant, ≤ 5.0 pt threshold)' : ($pendingCount > 0 ? '(Evaluation Pending)' : '(Disparity Exceeds Threshold)') ?>
+                    </span>
+                </p>
             </div>
         </div>
 
@@ -276,7 +309,13 @@
                             <div class="delta-zero" style="font-size: 0.75rem; margin-top: 2px;">Δ <?= $delta ?> pts</div>
                         </td>
                         <td style="text-align: right;">
-                            <span class="badge-pass">PARITY SAFE</span>
+                            <?php if ($p['score_a'] === null || $p['score_b'] === null): ?>
+                                <span style="background: rgba(234, 179, 8, 0.15); color: #854d0e; padding: 3px 10px; border-radius: 9999px; font-size: 0.75rem; font-weight: 700;">PENDING</span>
+                            <?php elseif (abs((int)$p['score_delta']) <= 5): ?>
+                                <span class="badge-pass">PARITY SAFE</span>
+                            <?php else: ?>
+                                <span style="background: rgba(239, 68, 68, 0.15); color: #991b1b; padding: 3px 10px; border-radius: 9999px; font-size: 0.75rem; font-weight: 700;">DISPARITY FLAGGED</span>
+                            <?php endif; ?>
                         </td>
                     </tr>
                 <?php endforeach; ?>
@@ -286,7 +325,7 @@
         <div class="summary-box">
             <h3>Regulatory Audit Summary & Methodology</h3>
             <p>
-                This certificate confirms that PostYourJobUK's automated candidate scoring pipeline enforces <strong>Stage 0 Anonymization</strong> (demographic marker, age, and name stripping) and deterministic, evidence-grounded scoring. When presented with counterfactual candidate pairs possessing identical technical competencies but contrasting demographic attributes, the system generated zero disparate impact ($\Delta = 0.0$ across all 9 statutory categories).
+                This certificate documents empirical counterfactual parity testing evaluated across 9 synthetic counterfactual candidate pairs pursuant to <strong>EU Artificial Intelligence Act (Regulation EU 2024/1689, Annex III)</strong> and <strong>UK Equality Act 2010 (Section 19)</strong>. The scoring pipeline enforces <strong>Stage 0 Anonymization</strong> (demographic marker, age, and name stripping) prior to semantic criteria evaluation. When presented with counterfactual candidate pairs possessing identical technical competencies but contrasting demographic attributes, no score disparity was observed beyond the pre-defined ±5.0 point parity compliance threshold across the 9 evaluated statutory categories.
             </p>
         </div>
 

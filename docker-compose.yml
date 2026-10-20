@@ -8,14 +8,3 @@ services:
       - .:/var/www/html
     env_file:
       - .env
-
-  ai-worker:
-    build:
-      context: .
-      dockerfile: Dockerfile.worker
-    container_name: postyourjobuk-ai-worker-1
-    restart: always
-    volumes:
-      - .:/var/www/html
-    env_file:
-      - .env

@@ -6,15 +6,24 @@ error_reporting(E_ALL);
 
 // 2. SESSION & SECURITY HEADERS (Moved to the very top)
 if (session_status() === PHP_SESSION_NONE) {
+    $isHttps = (!empty($_SERVER['HTTPS']) && $_SERVER['HTTPS'] !== 'off') 
+        || (isset($_SERVER['HTTP_X_FORWARDED_PROTO']) && $_SERVER['HTTP_X_FORWARDED_PROTO'] === 'https')
+        || (isset($_SERVER['SERVER_PORT']) && $_SERVER['SERVER_PORT'] == 443);
+
     session_set_cookie_params([
         'lifetime' => 0,
         'path' => '/',
         'domain' => '',
-        'secure' => false, // Set to true if using HTTPS
+        'secure' => $isHttps, // Enforced on HTTPS / Azure
         'httponly' => true,
         'samesite' => 'Lax'
     ]);
     session_start();
+}
+
+// Auto-seed CSRF token for all sessions (including public applicants)
+if (empty($_SESSION['csrf_token'])) {
+    $_SESSION['csrf_token'] = bin2hex(random_bytes(32));
 }
 
 // Prevent browser caching immediately
@@ -151,6 +160,7 @@ $router->add('GET',  '/jobs/create',            [\App\Controllers\JobController:
 $router->add('POST', '/jobs/store',             [\App\Controllers\JobController::class, 'store']);
 $router->add('GET',  '/jobs/edit',              [\App\Controllers\JobController::class, 'edit']);
 $router->add('POST', '/jobs/update',            [\App\Controllers\JobController::class, 'update']);
+$router->add('POST', '/jobs/delete',            [\App\Controllers\JobController::class, 'delete']);
 $router->add('GET',  '/jobs/delete',            [\App\Controllers\JobController::class, 'delete']);
 
 // --- Applicant Tracking System (ATS) Routes ---

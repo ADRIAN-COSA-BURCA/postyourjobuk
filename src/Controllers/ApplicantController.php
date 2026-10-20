@@ -114,6 +114,13 @@ class ApplicantController extends BaseController {
 
         $tenantId = (int)$job['tenant_id']; // Extract tenant from the active job
 
+        // CSRF Protection: Validate token from application form
+        if (!isset($_POST['csrf_token']) || !Helpers::csrf_verify($_POST['csrf_token'])) {
+            $_SESSION['error_message'] = 'Your session has expired. Please refresh the page and try again.';
+            Helpers::redirect('/job?id=' . $jobId);
+            return;
+        }
+
         // Anti-Spam Protection 1: Honeypot trap (reject automated bot submissions)
         if (!empty($_POST['candidate_website_url'])) {
             SecurityLogger::logAlert(
@@ -212,9 +219,9 @@ class ApplicantController extends BaseController {
             return;
         }
 
-        // Validate Extension
+        // Validate Extension (Strictly PDF and DOCX - legacy DOC is unparseable)
         $ext = strtolower(pathinfo($cvFile['name'], PATHINFO_EXTENSION));
-        if (!in_array($ext, ['pdf', 'doc', 'docx'])) {
+        if (!in_array($ext, ['pdf', 'docx'])) {
             $_SESSION['error_message'] = 'Invalid CV format. Only PDF and DOCX files are allowed.';
             Helpers::redirect('/job?id=' . $jobId);
             return;
@@ -236,10 +243,8 @@ class ApplicantController extends BaseController {
 
             $allowedMimes = [
                 'application/pdf',
-                'application/msword',
                 'application/vnd.openxmlformats-officedocument.wordprocessingml.document',
-                'application/octet-stream',
-                'text/plain'
+                'application/octet-stream' // Standard binary fallback for docx
             ];
 
             if (!in_array($detectedMime, $allowedMimes)) {
@@ -252,7 +257,12 @@ class ApplicantController extends BaseController {
         try {
             $storageService = new StorageService();
             $storagePath = $storageService->store($cvFile, $tenantId, $jobId);
-            $originalFilename = $cvFile['name'];
+            
+            // Filename sanitization against path traversal (Issue 1)
+            $rawBasename = basename($cvFile['name']);
+            $cleanBase = preg_replace('/[^A-Za-z0-9._-]/', '_', pathinfo($rawBasename, PATHINFO_FILENAME));
+            $cleanFilename = substr($cleanBase, 0, 80) . '.' . $ext;
+            $originalFilename = $cleanFilename;
         } catch (\Exception $e) {
             error_log("CV Storage Failed: " . $e->getMessage());
             $_SESSION['error_message'] = 'Failed to upload CV. Please try again.';

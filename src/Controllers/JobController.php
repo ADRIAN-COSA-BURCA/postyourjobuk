@@ -169,6 +169,21 @@ class JobController extends BaseController {
             return;
         }
 
+        // Fix 4: If core job text changed, invalidate cached AI criteria so future candidates score against new rubric
+        $currentJob = $jobModel->find($jobId);
+        if ($currentJob) {
+            $textChanged = ($currentJob['title'] !== $data['title']) 
+                || ($currentJob['description'] !== $data['description'])
+                || ($currentJob['requirements'] !== $data['requirements']);
+            
+            if ($textChanged) {
+                $data['ai_required_skills'] = null;
+                $data['ai_required_years'] = null;
+                $data['ai_job_years_variance'] = null;
+                $data['ai_criteria_computed_at'] = null;
+            }
+        }
+
         // Run Tenant-Scoped Update via the updated Model method
         $updated = $jobModel->updateJobSecure($tenantId, $jobId, $data);
 
@@ -184,11 +199,17 @@ class JobController extends BaseController {
     }
 
     /**
-     * Securely remove a job posting.
+     * Securely remove a job posting (Strictly POST with CSRF verification - Fix 19).
      */
     public function delete() {
-        // Can read from POST (form submit) or GET (link click with validation tokens depending on routing setup)
-        $jobId = isset($_REQUEST['id']) ? (int)$_REQUEST['id'] : 0;
+        if ($_SERVER['REQUEST_METHOD'] !== 'POST' || !isset($_POST['csrf_token']) || !Helpers::csrf_verify($_POST['csrf_token'])) {
+            SecurityLogger::logAlert("CSRF_DELETE_VIOLATION", $_SESSION['tenant_id'] ?? 0, "Unauthorized job deletion attempt.");
+            $_SESSION['error_message'] = 'Your session has expired. Please try deleting the job again from the dashboard.';
+            Helpers::redirect('/dashboard');
+            return;
+        }
+
+        $jobId = isset($_POST['id']) ? (int)$_POST['id'] : 0;
         $tenantId = (int)$_SESSION['tenant_id'];
         $jobModel = new Job();
 

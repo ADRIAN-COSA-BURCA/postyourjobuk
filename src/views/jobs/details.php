@@ -154,53 +154,13 @@
                 <input type="tel" name="phone" class="form-control" placeholder="+44 7123 456789" value="<?= e($oldInput['phone'] ?? '') ?>">
             </div>
 
-            <div style="display: flex; gap: 0.5rem; margin-bottom: 1rem; border-bottom: 1px solid var(--border); padding-bottom: 0.5rem;">
-                <button type="button" id="upload-tab" class="btn" style="background: var(--bg); border: 1px solid var(--border); padding: 0.5rem 1rem; font-size: 0.9rem;" onclick="showUploadOption()">📁 Upload CV Document</button>
-                <button type="button" id="text-tab" class="btn" style="background: transparent; border: 1px solid transparent; padding: 0.5rem 1rem; font-size: 0.9rem; color: var(--text-muted);" onclick="showTextOption()">📝 Paste Plaintext CV</button>
-            </div>
-
-            <div id="upload-option" class="form-group" style="margin-bottom: 2rem;">
-                <label class="form-label">Upload CV (PDF or DOCX format)</label>
-                <input type="file" id="cv" name="cv_document" class="form-control" accept=".pdf,.docx,.doc">
+            <div class="form-group" style="margin-bottom: 2rem;">
+                <label class="form-label" for="cv">Upload CV Document (PDF or DOCX format) <span style="color: #ef4444;">*</span></label>
+                <input type="file" id="cv" name="cv_document" class="form-control" accept=".pdf,.docx" required>
                 <small style="display: block; color: var(--text-muted); font-size: 0.82rem; margin-top: 0.4rem;">
                     Accepted formats: PDF, DOCX (Maximum file size: 5 MB)
                 </small>
             </div>
-
-            <div id="text-option" class="form-group" style="display: none; margin-bottom: 2rem;">
-                <label class="form-label">Paste CV Text Contents Here</label>
-                <textarea id="cv_text" name="cv_text" class="form-control" rows="10" placeholder="Paste full content history..." style="font-family: monospace; font-size: 0.9rem; resize: vertical;"><?= e($oldInput['cv_text'] ?? '') ?></textarea>
-            </div>
-
-            <script>
-                function showUploadOption() {
-                    document.getElementById('upload-option').style.display = 'block';
-                    document.getElementById('text-option').style.display = 'none';
-                    document.getElementById('upload-tab').style.background = 'var(--bg)';
-                    document.getElementById('upload-tab').style.borderColor = 'var(--border)';
-                    document.getElementById('text-tab').style.background = 'transparent';
-                    document.getElementById('text-tab').style.borderColor = 'transparent';
-                    document.getElementById('text-tab').style.color = 'var(--text-muted)';
-                    document.getElementById('cv_text').value = '';
-                }
-
-                function showTextOption() {
-                    document.getElementById('upload-option').style.display = 'none';
-                    document.getElementById('text-option').style.display = 'block';
-                    document.getElementById('upload-tab').style.background = 'transparent';
-                    document.getElementById('upload-tab').style.borderColor = 'transparent';
-                    document.getElementById('text-tab').style.background = 'var(--bg)';
-                    document.getElementById('text-tab').style.borderColor = 'var(--border)';
-                    document.getElementById('text-tab').style.color = 'var(--text)';
-                    document.getElementById('cv').value = '';
-                }
-
-                window.addEventListener('DOMContentLoaded', () => {
-                    if (document.getElementById('cv_text').value.trim().length > 0) {
-                        showTextOption();
-                    }
-                });
-            </script>
 
             <button type="submit" class="btn btn-primary" 
         style="width: 100%; padding: 1rem; font-weight: 600;" 
