@@ -48,6 +48,7 @@ class MailerService {
         // Recruiter / Employer Business Card Details
         $companyName    = trim((string)($job['company_name'] ?? 'Hiring Organisation'));
         $contactPerson  = trim((string)($job['contact_person'] ?? 'Recruitment Team'));
+        $companyEmail   = trim((string)($job['company_email'] ?? ''));
         $industry       = trim((string)($job['industry'] ?? 'Professional Services'));
         $websiteUrl     = trim((string)($job['website_url'] ?? ''));
         $companyAddress = trim((string)($job['company_address'] ?? ''));
@@ -67,16 +68,23 @@ class MailerService {
             // Fail-safe: Strict 5-second timeout prevents frontend hanging
             $mail->Timeout    = 5;
 
-            // Sender and Recipient
-            $fromEmail = $this->env('SMTP_FROM_EMAIL', 'no-reply@postyourjobuk.co.uk');
-            $fromName  = $this->env('SMTP_FROM_NAME', 'PostYourJobUK Team');
+            // Sender, Reply-To (Anti-Spam Compliance), and Recipient
+            $fromEmail = $this->env('SMTP_FROM_EMAIL', 'careers@postyourjobuk.co.uk');
+            $fromName  = $this->env('SMTP_FROM_NAME', 'PostYourJobUK Careers');
             $mail->setFrom($fromEmail, $fromName);
+
+            if ($companyEmail !== '' && filter_var($companyEmail, FILTER_VALIDATE_EMAIL)) {
+                $mail->addReplyTo($companyEmail, "{$contactPerson} ({$companyName})");
+            } else {
+                $mail->addReplyTo($fromEmail, $fromName);
+            }
+
             $mail->addAddress($toEmail, $candidateName);
 
             // Message Content & HTML Formatting
             $mail->isHTML(true);
             $mail->CharSet = 'UTF-8';
-            $mail->Subject = "Application Received: {$jobTitle} — {$companyName}";
+            $mail->Subject = "Application Confirmation: {$jobTitle} at {$companyName}";
 
             // Safe HTML Escaping
             $eName     = htmlspecialchars($candidateName, ENT_QUOTES, 'UTF-8');
@@ -138,7 +146,7 @@ class MailerService {
                     <!-- Role Summary Box -->
                     <div style='background-color: #f8fafc; border: 1px solid #e2e8f0; border-radius: 8px; padding: 16px 20px; margin: 22px 0;'>
                         <div style='font-size: 12px; font-weight: 800; color: #6d28d9; text-transform: uppercase; letter-spacing: 0.6px; margin-bottom: 10px;'>
-                            📋 Submitted Application Summary
+                            Submitted Application Summary
                         </div>
                         <table style='width: 100%; border-collapse: collapse;'>
                             <tr>
@@ -147,7 +155,7 @@ class MailerService {
                             </tr>
                             <tr>
                                 <td style='padding: 4px 0; font-size: 13px; color: #64748b;'><strong>Location &amp; Type:</strong></td>
-                                <td style='padding: 4px 0; font-size: 13px; color: #0f172a;'>{$eLocation} • {$eEmpType}</td>
+                                <td style='padding: 4px 0; font-size: 13px; color: #0f172a;'>{$eLocation} &bull; {$eEmpType}</td>
                             </tr>
                             <tr>
                                 <td style='padding: 4px 0; font-size: 13px; color: #64748b;'><strong>Compensation:</strong></td>
@@ -163,7 +171,7 @@ class MailerService {
                     <!-- Employer / Recruiter Business Card -->
                     <div style='background-color: #ffffff; border: 1px solid #cbd5e1; border-left: 5px solid #8b5cf6; border-radius: 8px; padding: 18px 20px; margin: 22px 0; box-shadow: 0 2px 6px rgba(0,0,0,0.04);'>
                         <div style='font-size: 12px; font-weight: 800; color: #0f172a; text-transform: uppercase; letter-spacing: 0.6px; margin-bottom: 4px;'>
-                            🏢 Employer &amp; Recruiter Business Card
+                            Employer &amp; Recruiter Business Card
                         </div>
                         <div style='font-size: 16px; font-weight: 800; color: #6d28d9; margin-bottom: 10px;'>
                             {$eCompany}
@@ -191,15 +199,15 @@ class MailerService {
 
                     <p style='font-size: 14px; margin-top: 26px; color: #334155;'>
                         Wishing you the very best with your application,<br>
-                        <strong style='color: #0f172a;'>The PostYourJobUK Team</strong>
+                        <strong style='color: #0f172a;'>The PostYourJobUK Careers Team</strong>
                     </p>
                 </div>
 
                 <!-- Footer -->
                 <div style='background-color: #f1f5f9; padding: 16px 24px; text-align: center; border-top: 1px solid #e2e8f0;'>
                     <p style='font-size: 11.5px; color: #64748b; margin: 0; line-height: 1.5;'>
-                        This is an automated application receipt from <strong>PostYourJobUK</strong> (postyourjobuk.co.uk).<br>
-                        Please do not reply directly to this automated address.
+                        Official application confirmation receipt issued by <strong>PostYourJobUK</strong> (postyourjobuk.co.uk).<br>
+                        For inquiries regarding your application status, you may reply to this email or contact {$eContact} at {$eCompany}.
                     </p>
                 </div>
             </div>
@@ -223,7 +231,7 @@ class MailerService {
                 . ($companyAddress !== '' ? "Headquarters: {$companyAddress}\n" : "")
                 . "\nWhat Happens Next:\n"
                 . "{$contactPerson} and the hiring team at {$companyName} will review your application against the job requirements and contact you directly if shortlisted.\n\n"
-                . "Best regards,\nThe PostYourJobUK Team";
+                . "Best regards,\nThe PostYourJobUK Careers Team";
 
             $mail->Body    = $htmlBody;
             $mail->AltBody = $altBody;
