@@ -34,7 +34,7 @@ WORKDIR /var/www/html
 COPY composer.json composer.lock* ./
 
 # 9. Run Composer to install dependencies internally (ignores dev packages for production)
-RUN composer install --no-dev --optimize-autoloader --no-interaction
+RUN composer update phpmailer/phpmailer --no-dev --optimize-autoloader --no-interaction
 
 # 10. Copy the rest of the application files into the container
 COPY . /var/www/html/

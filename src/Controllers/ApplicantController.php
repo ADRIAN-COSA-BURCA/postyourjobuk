@@ -297,6 +297,15 @@ class ApplicantController extends BaseController {
             if ($newApplicantId > 0) {
                 $queueService = new \App\Services\AzureQueueService();
                 $queueService->dispatchJob($newApplicantId);
+
+                // Non-blocking Automated Candidate Application Receipt Email (with Recruiter Business Card)
+                try {
+                    $jobWithTenant = $jobModel->getJobWithTenant($jobId) ?: $job;
+                    $mailer = new \App\Services\MailerService();
+                    $mailer->sendApplicationReceipt($email, $name, $jobWithTenant, (int)$newApplicantId);
+                } catch (\Throwable $mailErr) {
+                    error_log("Applicant receipt email failed for ID {$newApplicantId}: " . $mailErr->getMessage());
+                }
             }
             
             $_SESSION['application_timestamps'][] = time();
