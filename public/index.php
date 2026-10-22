@@ -88,7 +88,7 @@ if (!$isPublic) {
 $viewContext = 'public';
 if (str_starts_with($cleanPath, '/admin')) {
     $viewContext = 'admin';
-} elseif (str_starts_with($cleanPath, '/dashboard') || str_starts_with($cleanPath, '/jobs') || str_starts_with($cleanPath, '/applicants')) {
+} elseif (str_starts_with($cleanPath, '/dashboard') || str_starts_with($cleanPath, '/jobs') || str_starts_with($cleanPath, '/applicants') || str_starts_with($cleanPath, '/applicant')) {
     $viewContext = 'tenant';
 } elseif (str_contains($cleanPath, '/login')) {
     $viewContext = 'login';
@@ -171,6 +171,7 @@ $router->add('GET',  '/jobs/delete',            [\App\Controllers\JobController:
 // --- Applicant Tracking System (ATS) Routes ---
 $router->add('GET',  '/applicants',             [\App\Controllers\ApplicantController::class, 'index']);
 $router->add('POST', '/apply',                  [\App\Controllers\ApplicantController::class, 'store']);
+$router->add('POST', '/applicant/status',       [\App\Controllers\ApplicantController::class, 'changeStatus']);
 $router->add('POST', '/applicant/delete',       [\App\Controllers\ApplicantController::class, 'delete']); 
 $router->add('POST', '/applicant/delete-all',   [\App\Controllers\ApplicantController::class, 'deleteAll']);
 

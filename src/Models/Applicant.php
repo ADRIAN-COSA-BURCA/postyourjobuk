@@ -8,6 +8,16 @@ class Applicant extends BaseModel {
     protected $primaryKey = 'applicant_id';
 
     /**
+     * Allowed ATS pipeline statuses for recruiter transitions
+     */
+    public const ALLOWED_PIPELINE_STATUSES = [
+        'reviewed',
+        'interviewing',
+        'hired',
+        'rejected'
+    ];
+
+    /**
      * Legacy support for createApplication
      */
     public function createApplication(array $data) {
@@ -28,6 +38,31 @@ class Applicant extends BaseModel {
         if (!isset($data['ai_score'])) {
             $data['ai_score'] = null;
         }
+    }
+
+    /**
+     * Securely transitions a candidate's ATS pipeline status scoped strictly to tenant_id (BOLA protection).
+     * Returns the updated applicant row array on success, or null if unauthorized/invalid.
+     */
+    public function updateStatusSecure(int $tenantId, int $applicantId, string $newStatus): ?array {
+        $newStatus = strtolower(trim($newStatus));
+        if (!in_array($newStatus, self::ALLOWED_PIPELINE_STATUSES, true)) {
+            return null;
+        }
+
+        // Verify ownership first (BOLA protection) and retrieve candidate metadata for notifications
+        $sql = "SELECT * FROM {$this->table} WHERE applicant_id = ? AND tenant_id = ? LIMIT 1";
+        $applicant = $this->db->fetchOne($sql, [$applicantId, $tenantId]);
+
+        if (!$applicant) {
+            return null;
+        }
+
+        $updateSql = "UPDATE {$this->table} SET status = ? WHERE applicant_id = ? AND tenant_id = ?";
+        $this->db->query($updateSql, [$newStatus, $applicantId, $tenantId]);
+
+        $applicant['status'] = $newStatus;
+        return $applicant;
     }
 	
 	/**
@@ -80,7 +115,10 @@ class Applicant extends BaseModel {
                     COUNT(*) as total_applicants,
                     IFNULL(AVG(ai_score), 0) as average_score,
                     SUM(CASE WHEN ai_score >= 80 THEN 1 ELSE 0 END) as strong_matches,
-                    SUM(CASE WHEN ai_score >= 50 AND ai_score < 80 THEN 1 ELSE 0 END) as moderate_matches
+                    SUM(CASE WHEN ai_score >= 50 AND ai_score < 80 THEN 1 ELSE 0 END) as moderate_matches,
+                    SUM(CASE WHEN status = 'interviewing' THEN 1 ELSE 0 END) as interviewing_count,
+                    SUM(CASE WHEN status = 'hired' THEN 1 ELSE 0 END) as hired_count,
+                    SUM(CASE WHEN status = 'rejected' THEN 1 ELSE 0 END) as rejected_count
                 FROM {$this->table} 
                 WHERE tenant_id = ? AND job_id = ?";
         
@@ -88,10 +126,13 @@ class Applicant extends BaseModel {
         
         // Ensure we always return an array even if the result is empty
         return $result ?: [
-            'total_applicants' => 0, 
-            'average_score' => 0, 
-            'strong_matches' => 0, 
-            'moderate_matches' => 0
+            'total_applicants'   => 0, 
+            'average_score'      => 0, 
+            'strong_matches'     => 0, 
+            'moderate_matches'   => 0,
+            'interviewing_count' => 0,
+            'hired_count'        => 0,
+            'rejected_count'     => 0
         ];
     }
 

@@ -154,26 +154,25 @@ class Job extends BaseModel {
      * Get a single job by ID with its associated tenant details.
      */
     public function getJobWithTenant(int $jobId) {
-    // We update the SELECT clause to pull all the new profile fields from 't' (tenants)
-    $sql = "
-        SELECT 
-            j.*, 
-            t.company_name, 
-            t.contact_person, 
-            t.email as company_email, 
-            t.phone_number, 
-            t.website_url, 
-            t.industry, 
-            t.company_address 
-        FROM jobs j
-        JOIN tenants t ON j.tenant_id = t.tenant_id
-        WHERE j.job_id = ?
-    ";
-    
-    $stmt = $this->db->prepare($sql);
-    $stmt->execute([$jobId]);
-    return $stmt->fetch();
-}
+        $sql = "
+            SELECT 
+                j.*, 
+                t.company_name, 
+                t.contact_person, 
+                t.email as company_email, 
+                t.phone_number, 
+                t.website_url, 
+                t.industry, 
+                t.company_address 
+            FROM jobs j
+            JOIN tenants t ON j.tenant_id = t.tenant_id
+            WHERE j.job_id = ?
+        ";
+        
+        $stmt = $this->db->prepare($sql);
+        $stmt->execute([$jobId]);
+        return $stmt->fetch();
+    }
     
     public function getPostCountLastHour(int $tenantId): int {
         $sql = "SELECT COUNT(*) FROM {$this->table} 
@@ -185,74 +184,90 @@ class Job extends BaseModel {
         return (int)$stmt->fetchColumn();
     }
 	
-	
 	/**
- * Get applicant counts grouped by status for the Funnel Chart
- */
-public function getApplicantFunnelData(int $tenantId): array {
-    $sql = "
-        SELECT 
-            status, 
-            COUNT(*) as count 
-        FROM applicants 
-        WHERE tenant_id = ? 
-        GROUP BY status
-    ";
-    
-    $stmt = $this->db->prepare($sql);
-    $stmt->execute([$tenantId]);
-    
-    // Return an associative array: ['applied' => 10, 'interviewing' => 3, ...]
-    $results = $stmt->fetchAll(PDO::FETCH_KEY_PAIR);
-    
-    // Ensure all expected keys exist to prevent Chart.js errors
-    return array_merge([
-        'applied' => 0, 
-        'interviewing' => 0, 
-        'offered' => 0, 
-        'hired' => 0
-    ], $results);
-}
+     * Get applicant counts grouped by status for the Funnel Chart
+     */
+    public function getApplicantFunnelData(int $tenantId): array {
+        $sql = "
+            SELECT 
+                status, 
+                COUNT(*) as count 
+            FROM applicants 
+            WHERE tenant_id = ? 
+            GROUP BY status
+        ";
+        
+        $stmt = $this->db->prepare($sql);
+        $stmt->execute([$tenantId]);
+        
+        $results = $stmt->fetchAll(PDO::FETCH_KEY_PAIR);
+        
+        // Map raw DB statuses cleanly into the 4 ATS funnel stages matching Chart.js colors:
+        // ['#6366f1' (Reviewed), '#f59e0b' (Interviewing), '#10b981' (Hired), '#ef4444' (Rejected)]
+        $funnel = [
+            'reviewed'     => 0,
+            'interviewing' => 0,
+            'hired'        => 0,
+            'rejected'     => 0
+        ];
 
-public function getTrendData(int $tenantId): array {
-    $sql = "
-        SELECT DATE(created_at) as date, COUNT(*) as count 
-        FROM applicants 
-        WHERE tenant_id = ? 
-        AND created_at >= DATE_SUB(NOW(), INTERVAL 7 DAY)
-        GROUP BY DATE(created_at)
-        ORDER BY date ASC
-    ";
-    
-    $stmt = $this->db->prepare($sql);
-    $stmt->execute([$tenantId]);
-    $results = $stmt->fetchAll(PDO::FETCH_ASSOC);
+        foreach ($results as $statusKey => $cnt) {
+            $s = strtolower(trim((string)$statusKey));
+            $countVal = (int)$cnt;
+            if ($s === 'interviewing') {
+                $funnel['interviewing'] += $countVal;
+            } elseif ($s === 'hired' || $s === 'offered') {
+                $funnel['hired'] += $countVal;
+            } elseif ($s === 'rejected') {
+                $funnel['rejected'] += $countVal;
+            } else {
+                // 'new', 'pending', 'reviewed', 'applied', etc.
+                $funnel['reviewed'] += $countVal;
+            }
+        }
 
-    // Format for Chart.js
-    $labels = [];
-    $data = [];
-    foreach ($results as $row) {
-        $labels[] = $row['date'];
-        $data[] = (int)$row['count'];
+        return $funnel;
     }
-    
-    return ['labels' => $labels, 'data' => $data];
-}
 
-public function getTopPerformingJobs(int $tenantId, int $limit = 5): array {
-    $sql = "
-        SELECT j.title, COUNT(a.applicant_id) as applicant_count
-        FROM jobs j
-        LEFT JOIN applicants a ON j.job_id = a.job_id
-        WHERE j.tenant_id = ?
-        GROUP BY j.job_id
-        ORDER BY applicant_count DESC
-        LIMIT ?
-    ";
-    $stmt = $this->db->prepare($sql);
-    $stmt->execute([$tenantId, $limit]);
-    return $stmt->fetchAll(PDO::FETCH_ASSOC);
-}
+    public function getTrendData(int $tenantId): array {
+        $sql = "
+            SELECT DATE(created_at) as date, COUNT(*) as count 
+            FROM applicants 
+            WHERE tenant_id = ? 
+            AND created_at >= DATE_SUB(NOW(), INTERVAL 7 DAY)
+            GROUP BY DATE(created_at)
+            ORDER BY date ASC
+        ";
+        
+        $stmt = $this->db->prepare($sql);
+        $stmt->execute([$tenantId]);
+        $results = $stmt->fetchAll(PDO::FETCH_ASSOC);
+
+        // Format for Chart.js
+        $labels = [];
+        $data = [];
+        foreach ($results as $row) {
+            $labels[] = $row['date'];
+            $data[] = (int)$row['count'];
+        }
+        
+        return ['labels' => $labels, 'data' => $data];
+    }
+
+    public function getTopPerformingJobs(int $tenantId, int $limit = 5): array {
+        $sql = "
+            SELECT j.title, COUNT(a.applicant_id) as applicant_count
+            FROM jobs j
+            LEFT JOIN applicants a ON j.job_id = a.job_id
+            WHERE j.tenant_id = ?
+            GROUP BY j.job_id
+            ORDER BY applicant_count DESC
+            LIMIT ?
+        ";
+        $stmt = $this->db->prepare($sql);
+        $stmt->execute([$tenantId, $limit]);
+        return $stmt->fetchAll(PDO::FETCH_ASSOC);
+    }
 
     /**
      * Security check: Verify if a job belongs to a specific tenant.

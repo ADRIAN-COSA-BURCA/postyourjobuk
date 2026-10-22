@@ -401,6 +401,89 @@ class ApplicantController extends BaseController {
         Helpers::redirect('/applicant/view?id=' . $applicantId);
         return;
     }
+
+    /**
+     * PROTECTED: Recruiter transitions a candidate's ATS pipeline status and triggers phase emails
+     * Route: /applicant/status (POST)
+     */
+    public function changeStatus() {
+        $applicantId = isset($_POST['applicant_id']) ? (int)$_POST['applicant_id'] : 0;
+        $jobId       = isset($_POST['job_id']) ? (int)$_POST['job_id'] : 0;
+        $newStatus   = strtolower(trim((string)($_POST['status'] ?? '')));
+        $returnTo    = trim((string)($_POST['return_to'] ?? 'list'));
+        $tenantId    = isset($_SESSION['tenant_id']) ? (int)$_SESSION['tenant_id'] : 0;
+
+        $redirectUrl = ($returnTo === 'view' && $applicantId > 0)
+            ? '/applicant/view?id=' . $applicantId
+            : '/applicants?job_id=' . $jobId;
+
+        if (!isset($_POST['csrf_token']) || !Helpers::csrf_verify($_POST['csrf_token'])) {
+            SecurityLogger::logAlert("CSRF_STATUS_VIOLATION", $tenantId, "Invalid CSRF token on applicant status update (ID: $applicantId).");
+            $_SESSION['error_message'] = 'Your session has expired. Please refresh the page and try again.';
+            Helpers::redirect($redirectUrl);
+            return;
+        }
+
+        $applicantModel = new Applicant();
+        $updatedApplicant = $applicantModel->updateStatusSecure($tenantId, $applicantId, $newStatus);
+
+        if ($updatedApplicant === null) {
+            SecurityLogger::logAlert("UNAUTHORIZED_STATUS_UPDATE", $tenantId, "Blocked invalid or unauthorized status transition ('$newStatus') for Applicant ID: $applicantId");
+            $_SESSION['error_message'] = 'Unable to update candidate status: Record not found, unauthorized, or invalid stage.';
+            Helpers::redirect($redirectUrl);
+            return;
+        }
+
+        $resolvedJobId = (int)($updatedApplicant['job_id'] ?? $jobId);
+        if ($returnTo !== 'view') {
+            $redirectUrl = '/applicants?job_id=' . $resolvedJobId;
+        }
+
+        $jobModel = new Job();
+        $jobWithTenant = $jobModel->getJobWithTenant($resolvedJobId) ?: [];
+        $tenantProfile = $_SESSION['tenant_profile'] ?? [];
+
+        $candidateEmail = trim((string)($updatedApplicant['email'] ?? ''));
+        $candidateName  = trim((string)($updatedApplicant['name'] ?? 'Candidate'));
+
+        SecurityLogger::logAlert(
+            "APPLICANT_STATUS_UPDATED",
+            $tenantId,
+            "Candidate ID {$applicantId} ({$candidateName}) moved to pipeline stage '{$newStatus}' for Job ID {$resolvedJobId}."
+        );
+
+        // Execute phase-specific communication logic (Non-blocking fail-safe)
+        try {
+            $mailer = new \App\Services\MailerService();
+
+            switch ($newStatus) {
+                case 'interviewing':
+                    $mailer->sendInterviewInvitation($candidateEmail, $candidateName, $jobWithTenant, $tenantProfile);
+                    $_SESSION['success_message'] = "🟢 {$candidateName} moved to Interviewing stage — an official Interview Invitation email has been sent to {$candidateEmail}.";
+                    break;
+
+                case 'hired':
+                    $mailer->sendJobOffer($candidateEmail, $candidateName, $jobWithTenant, $tenantProfile);
+                    $_SESSION['success_message'] = "🎉 {$candidateName} marked as Hired — an official Job Offer email has been sent to {$candidateEmail}.";
+                    break;
+
+                case 'rejected':
+                    // Silent database update without triggering an email
+                    $_SESSION['success_message'] = "🛑 {$candidateName} has been moved to Rejected stage (silent update — no email sent).";
+                    break;
+
+                case 'reviewed':
+                default:
+                    $_SESSION['success_message'] = "Candidate status for {$candidateName} updated to Reviewed.";
+                    break;
+            }
+        } catch (\Throwable $mailErr) {
+            error_log("ATS pipeline email failed for Applicant ID {$applicantId} ({$newStatus}): " . $mailErr->getMessage());
+            $_SESSION['success_message'] = "Candidate status updated to '" . ucfirst($newStatus) . "', but the automated email notification could not be delivered right now.";
+        }
+
+        Helpers::redirect($redirectUrl);
+    }
 	
 	
 	/**

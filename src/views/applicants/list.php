@@ -55,7 +55,7 @@
 
     .dashboard-action-links {
         display: flex;
-        gap: 0.5rem;
+        gap: 0.45rem;
         align-items: center;
         flex-wrap: wrap;
     }
@@ -65,6 +65,93 @@
     }
     .dashboard-action-links .btn {
         border-radius: var(--radius-pill) !important;
+    }
+
+    .pipeline-action-bar {
+        display: flex;
+        gap: 0.4rem;
+        align-items: center;
+        flex-wrap: wrap;
+        margin-top: 0.55rem;
+        padding-top: 0.55rem;
+        border-top: 1px dashed rgba(255, 255, 255, 0.1);
+    }
+    .pipeline-action-bar form {
+        display: inline-flex;
+        margin: 0;
+    }
+    .pipeline-btn {
+        font-size: 0.76rem !important;
+        padding: 0.32rem 0.7rem !important;
+        border-radius: 9999px !important;
+        font-weight: 600 !important;
+        cursor: pointer;
+        transition: all 0.15s ease;
+        background: transparent;
+        white-space: nowrap;
+    }
+    .pipeline-btn:disabled {
+        opacity: 0.45;
+        cursor: not-allowed;
+    }
+    .pipeline-btn-interview {
+        color: #38bdf8;
+        border: 1px solid rgba(56, 189, 248, 0.55);
+    }
+    .pipeline-btn-interview:hover:not(:disabled) {
+        background: rgba(56, 189, 248, 0.15);
+    }
+    .pipeline-btn-hire {
+        color: #10b981;
+        border: 1px solid rgba(16, 185, 129, 0.55);
+    }
+    .pipeline-btn-hire:hover:not(:disabled) {
+        background: rgba(16, 185, 129, 0.15);
+    }
+    .pipeline-btn-reject {
+        color: #f87171;
+        border: 1px solid rgba(248, 113, 113, 0.45);
+    }
+    .pipeline-btn-reject:hover:not(:disabled) {
+        background: rgba(248, 113, 113, 0.15);
+    }
+
+    /* ATS Stage Badges */
+    .status-badge-flag {
+        display: inline-flex;
+        align-items: center;
+        gap: 0.3rem;
+        padding: 0.28rem 0.7rem;
+        border-radius: 9999px;
+        font-size: 0.75rem;
+        font-weight: 700;
+        letter-spacing: 0.02em;
+        white-space: nowrap;
+    }
+    .stage-reviewed {
+        background: rgba(99, 102, 241, 0.15);
+        color: #a5b4fc;
+        border: 1px solid rgba(99, 102, 241, 0.35);
+    }
+    .stage-interviewing {
+        background: rgba(14, 165, 233, 0.16);
+        color: #38bdf8;
+        border: 1px solid rgba(14, 165, 233, 0.4);
+    }
+    .stage-hired {
+        background: rgba(16, 185, 129, 0.16);
+        color: #34d399;
+        border: 1px solid rgba(16, 185, 129, 0.4);
+    }
+    .stage-rejected {
+        background: rgba(239, 68, 68, 0.15);
+        color: #f87171;
+        border: 1px solid rgba(239, 68, 68, 0.35);
+    }
+    .stage-failed {
+        background: rgba(245, 158, 11, 0.16);
+        color: #fbbf24;
+        border: 1px solid rgba(245, 158, 11, 0.4);
     }
 
     /* Mobile Responsive Cards (Screens under 768px) */
@@ -102,6 +189,7 @@
         .responsive-applicant-table td,
         .responsive-applicant-table .td-content,
         .responsive-applicant-table .dashboard-action-links,
+        .responsive-applicant-table .pipeline-action-bar,
         .responsive-applicant-table .btn {
             display: block;
             width: 100% !important;
@@ -123,7 +211,7 @@
             display: flex;
             flex-direction: column;
             align-items: flex-start;
-            padding: 0.75rem 0 !important;   /* beats inline padding */
+            padding: 0.75rem 0 !important;
             margin: 0 !important;
             text-align: left !important;
             border-bottom: 1px solid #334155;
@@ -143,7 +231,8 @@
             margin-bottom: 0.35rem;
         }
 
-        .responsive-applicant-table .dashboard-action-links {
+        .responsive-applicant-table .dashboard-action-links,
+        .responsive-applicant-table .pipeline-action-bar {
             display: flex;
             flex-direction: column;
             gap: 0.5rem;
@@ -151,15 +240,18 @@
         }
         .responsive-applicant-table .dashboard-action-links a,
         .responsive-applicant-table .dashboard-action-links form,
-        .responsive-applicant-table .dashboard-action-links button {
+        .responsive-applicant-table .dashboard-action-links button,
+        .responsive-applicant-table .pipeline-action-bar form,
+        .responsive-applicant-table .pipeline-action-bar button {
             display: block;
             width: 100% !important;
             text-align: center;
-            padding: 0.6rem;
+            padding: 0.6rem !important;
             border-radius: var(--radius-pill) !important;
             box-sizing: border-box !important;
         }
-        .responsive-applicant-table .dashboard-action-links form {
+        .responsive-applicant-table .dashboard-action-links form,
+        .responsive-applicant-table .pipeline-action-bar form {
             padding: 0 !important;
             margin: 0 !important;
             border: none !important;
@@ -184,25 +276,46 @@
     </div>
 
     <?php if (!empty($stats)): ?>
-    <div class="app-stats-grid" style="display: grid; grid-template-columns: repeat(auto-fit, minmax(200px, 1fr)); gap: 1rem; margin-bottom: 2rem;">
+    <div class="app-stats-grid" style="display: grid; grid-template-columns: repeat(auto-fit, minmax(190px, 1fr)); gap: 1rem; margin-bottom: 2rem;">
         <div class="card" style="display: flex; justify-content: space-between; align-items: center;">
             <div>
                 <div class="form-label">Total Applicants</div>
                 <div style="font-size: 1.5rem; font-weight: bold; color: var(--primary);">
-                    <?= (int)$stats['total_applicants'] ?>
+                    <?= (int)($stats['total_applicants'] ?? 0) ?>
                 </div>
             </div>
 
-            <?php if ((int)$stats['total_applicants'] > 0): ?>
+            <?php if ((int)($stats['total_applicants'] ?? 0) > 0): ?>
                 <form id="massDeleteForm" method="POST" action="/applicant/delete-all" style="margin: 0;">
                     <input type="hidden" name="csrf_token" value="<?= \App\Core\Helpers::csrf_token() ?>">
                     <input type="hidden" name="job_id" value="<?= (int)$job['job_id'] ?>">
                     
-                    <button type="button" onclick="showDeleteModal()" class="btn btn-sm" style="background: transparent; color: var(--danger, #dc3545); border: 1px solid var(--danger, #dc3545); border-radius: 4px; cursor: pointer; padding: 0.4rem 0.8rem; font-weight: bold;">
-                        ⚠️ Wipe All Candidates
+                    <button type="button" onclick="showDeleteModal()" class="btn btn-sm" style="background: transparent; color: var(--danger, #dc3545); border: 1px solid var(--danger, #dc3545); border-radius: 4px; cursor: pointer; padding: 0.35rem 0.65rem; font-weight: bold; font-size: 0.75rem;">
+                        ⚠️ Wipe All
                     </button>
                 </form>
             <?php endif; ?>
+        </div>
+
+        <div class="card">
+            <div class="form-label">🟢 Interviewing</div>
+            <div style="font-size: 1.5rem; font-weight: bold; color: #38bdf8;">
+                <?= (int)($stats['interviewing_count'] ?? 0) ?>
+            </div>
+        </div>
+
+        <div class="card">
+            <div class="form-label">🎉 Hired / Offered</div>
+            <div style="font-size: 1.5rem; font-weight: bold; color: #10b981;">
+                <?= (int)($stats['hired_count'] ?? 0) ?>
+            </div>
+        </div>
+
+        <div class="card">
+            <div class="form-label">🛑 Rejected</div>
+            <div style="font-size: 1.5rem; font-weight: bold; color: #f87171;">
+                <?= (int)($stats['rejected_count'] ?? 0) ?>
+            </div>
         </div>
     </div>
 
@@ -241,10 +354,17 @@
     <div class="card">
         <!-- APPLICANTS FILTER & SORT TOOLBAR -->
         <div class="filter-toolbar">
-            <div style="flex: 1 1 240px; min-width: 200px;">
+            <div style="flex: 1 1 220px; min-width: 180px;">
                 <input type="text" id="candidateSearchInput" placeholder="🔍 Search candidate name or email..." class="filter-input" style="width: 100%; box-sizing: border-box;">
             </div>
             <div class="filter-toolbar-group">
+                <select id="statusFilterSelect" class="filter-select">
+                    <option value="all">All Pipeline Stages</option>
+                    <option value="reviewed">🔍 Reviewed / Pending</option>
+                    <option value="interviewing">🟢 Interviewing</option>
+                    <option value="hired">🎉 Hired / Offered</option>
+                    <option value="rejected">🛑 Rejected</option>
+                </select>
                 <select id="scoreFilterSelect" class="filter-select">
                     <option value="all">All Match Scores</option>
                     <option value="80">Score ≥ 80% (High Match)</option>
@@ -275,10 +395,10 @@
                 <thead>
                     <tr style="text-align: left; border-bottom: 2px solid var(--border);">
                         <th style="padding: 1rem; color: #94a3b8;">Match Index</th>
-                        <th style="padding: 1rem; color: #94a3b8;">Full Name</th>
+                        <th style="padding: 1rem; color: #94a3b8;">Candidate &amp; Stage</th>
                         <th style="padding: 1rem; color: #94a3b8;">Email</th>
                         <th style="padding: 1rem; color: #94a3b8;">Submission</th>
-                        <th style="padding: 1rem; color: #94a3b8;">Actions</th>
+                        <th style="padding: 1rem; color: #94a3b8;">Actions &amp; ATS Pipeline</th>
                     </tr>
                 </thead>
                 <tbody id="applicantTableBody">
@@ -299,26 +419,55 @@
                                 } else {
                                     $scoreColor = '#ef4444'; // Red
                                 }
-                                $appliedTimestamp = strtotime($applicant['applied_at'] ?? 'now');
+                                $appliedTimestamp = strtotime($applicant['applied_at'] ?? ($applicant['created_at'] ?? 'now'));
+                                $rawStatus = strtolower(trim((string)($applicant['status'] ?? 'reviewed')));
+
+                                if ($rawStatus === 'interviewing') {
+                                    $stageBadgeClass = 'stage-interviewing';
+                                    $stageLabel = '🟢 Interviewing';
+                                    $filterStage = 'interviewing';
+                                } elseif ($rawStatus === 'hired' || $rawStatus === 'offered') {
+                                    $stageBadgeClass = 'stage-hired';
+                                    $stageLabel = '🎉 Hired / Offered';
+                                    $filterStage = 'hired';
+                                } elseif ($rawStatus === 'rejected') {
+                                    $stageBadgeClass = 'stage-rejected';
+                                    $stageLabel = '🛑 Rejected';
+                                    $filterStage = 'rejected';
+                                } elseif ($rawStatus === 'processing_failed') {
+                                    $stageBadgeClass = 'stage-failed';
+                                    $stageLabel = '⚠️ Needs Review';
+                                    $filterStage = 'reviewed';
+                                } else {
+                                    $stageBadgeClass = 'stage-reviewed';
+                                    $stageLabel = '🔍 Reviewed';
+                                    $filterStage = 'reviewed';
+                                }
                             ?>
                             <tr class="applicant-row" 
                                 data-score="<?= $score ?>"
+                                data-status="<?= htmlspecialchars($filterStage) ?>"
                                 data-name="<?= htmlspecialchars(strtolower($applicant['name'] ?? '')) ?>"
                                 data-email="<?= htmlspecialchars(strtolower($applicant['email'] ?? '')) ?>"
                                 data-date="<?= $appliedTimestamp ?>"
                                 style="border-bottom: 1px solid var(--border);">
-                                <td data-label="Match Index" style="padding: 1rem;">
+                                <td data-label="Match Index" style="padding: 1rem; vertical-align: top;">
                                     <div class="td-content">
                                         <span style="font-weight: 700; font-size: 1.15rem; color: <?= $scoreColor ?>;">
                                             <?= $score ?>%
                                         </span>
                                     </div>
                                 </td>
-                                <td data-label="Full Name" style="padding: 1rem; max-width: 400px; vertical-align: top;">
+                                <td data-label="Candidate & Stage" style="padding: 1rem; max-width: 380px; vertical-align: top;">
                                     <div class="td-content">
-                                        <strong style="display: block; font-size: 1.05rem; margin-bottom: 0.25rem; color: var(--text);">
-                                            <?= htmlspecialchars($applicant['name']) ?>
-                                        </strong>
+                                        <div style="display: flex; align-items: center; gap: 0.55rem; flex-wrap: wrap; margin-bottom: 0.35rem;">
+                                            <strong style="font-size: 1.05rem; color: var(--text);">
+                                                <?= htmlspecialchars($applicant['name']) ?>
+                                            </strong>
+                                            <span class="status-badge-flag <?= $stageBadgeClass ?>">
+                                                <?= $stageLabel ?>
+                                            </span>
+                                        </div>
                                         
                                         <?php if (!empty($applicant['ai_summary'])): ?>
                                             <?php 
@@ -330,18 +479,19 @@
                                         <?php endif; ?>
                                     </div>
                                 </td>
-                                <td data-label="Email" style="padding: 1rem; color: var(--secondary);">
+                                <td data-label="Email" style="padding: 1rem; color: var(--secondary); vertical-align: top;">
                                     <div class="td-content" style="word-break: break-all;">
                                         <?= htmlspecialchars($applicant['email']) ?>
                                     </div>
                                 </td>
-                                <td data-label="Submission" style="padding: 1rem; color: #9ca3af; font-size: 0.875rem;">
+                                <td data-label="Submission" style="padding: 1rem; color: #9ca3af; font-size: 0.875rem; vertical-align: top;">
                                     <div class="td-content">
                                         <?= date('M d, Y', $appliedTimestamp) ?>
                                     </div>
                                 </td>
-                                <td data-label="Actions" style="padding: 1rem;">
+                                <td data-label="Actions & ATS Pipeline" style="padding: 1rem; vertical-align: top;">
                                     <div class="td-content">
+                                        <!-- Primary Document & Profile Actions -->
                                         <div class="dashboard-action-links">
                                             <a href="/applicant/view?id=<?= (int)$applicant['applicant_id'] ?>" 
                                                class="btn btn-sm btn-ghost" 
@@ -360,7 +510,43 @@
                                                 <input type="hidden" name="applicant_id" value="<?= (int)$applicant['applicant_id'] ?>">
                                                 <input type="hidden" name="job_id" value="<?= (int)$job['job_id'] ?>">
                                                 <button type="submit" class="btn btn-sm btn-ghost" style="color: #ef4444; border: 1px solid #ef4444; background: transparent; cursor: pointer;">
-                                                    🗑️ Delete Candidate
+                                                    🗑️ Delete
+                                                </button>
+                                            </form>
+                                        </div>
+
+                                        <!-- ATS Pipeline Stage Progression Actions -->
+                                        <div class="pipeline-action-bar">
+                                            <form method="POST" action="/applicant/status" onsubmit="return confirm('Invite <?= htmlspecialchars(addslashes($applicant['name'])) ?> to Interview? This will automatically send an official Interview Invitation email with your recruiter contact details.');">
+                                                <input type="hidden" name="csrf_token" value="<?= \App\Core\Helpers::csrf_token() ?>">
+                                                <input type="hidden" name="applicant_id" value="<?= (int)$applicant['applicant_id'] ?>">
+                                                <input type="hidden" name="job_id" value="<?= (int)$job['job_id'] ?>">
+                                                <input type="hidden" name="return_to" value="list">
+                                                <input type="hidden" name="status" value="interviewing">
+                                                <button type="submit" class="pipeline-btn pipeline-btn-interview" <?= $rawStatus === 'interviewing' ? 'disabled title="Already in Interviewing stage"' : '' ?>>
+                                                    🟢 Invite to Interview
+                                                </button>
+                                            </form>
+
+                                            <form method="POST" action="/applicant/status" onsubmit="return confirm('Extend Job Offer to <?= htmlspecialchars(addslashes($applicant['name'])) ?>? This will automatically send an official Congratulatory Job Offer email.');">
+                                                <input type="hidden" name="csrf_token" value="<?= \App\Core\Helpers::csrf_token() ?>">
+                                                <input type="hidden" name="applicant_id" value="<?= (int)$applicant['applicant_id'] ?>">
+                                                <input type="hidden" name="job_id" value="<?= (int)$job['job_id'] ?>">
+                                                <input type="hidden" name="return_to" value="list">
+                                                <input type="hidden" name="status" value="hired">
+                                                <button type="submit" class="pipeline-btn pipeline-btn-hire" <?= $rawStatus === 'hired' ? 'disabled title="Already marked as Hired"' : '' ?>>
+                                                    🎉 Extend Offer
+                                                </button>
+                                            </form>
+
+                                            <form method="POST" action="/applicant/status" onsubmit="return confirm('Mark <?= htmlspecialchars(addslashes($applicant['name'])) ?> as Rejected? (Silent status update — no email will be sent)');">
+                                                <input type="hidden" name="csrf_token" value="<?= \App\Core\Helpers::csrf_token() ?>">
+                                                <input type="hidden" name="applicant_id" value="<?= (int)$applicant['applicant_id'] ?>">
+                                                <input type="hidden" name="job_id" value="<?= (int)$job['job_id'] ?>">
+                                                <input type="hidden" name="return_to" value="list">
+                                                <input type="hidden" name="status" value="rejected">
+                                                <button type="submit" class="pipeline-btn pipeline-btn-reject" <?= $rawStatus === 'rejected' ? 'disabled title="Already marked as Rejected"' : '' ?>>
+                                                    🛑 Reject
                                                 </button>
                                             </form>
                                         </div>
@@ -383,6 +569,7 @@
 <script>
 document.addEventListener('DOMContentLoaded', function() {
     const searchInput = document.getElementById('candidateSearchInput');
+    const statusFilter = document.getElementById('statusFilterSelect');
     const scoreFilter = document.getElementById('scoreFilterSelect');
     const limitFilter = document.getElementById('limitFilterSelect');
     const sortSelect = document.getElementById('candidateSortSelect');
@@ -392,6 +579,7 @@ document.addEventListener('DOMContentLoaded', function() {
 
     function applyApplicantFilters() {
         const query = searchInput.value.trim().toLowerCase();
+        const statusVal = statusFilter ? statusFilter.value : 'all';
         const scoreVal = scoreFilter.value;
         const limitVal = limitFilter.value;
         const sortVal = sortSelect.value;
@@ -403,10 +591,16 @@ document.addEventListener('DOMContentLoaded', function() {
         let visibleRows = allRows.filter(row => {
             const name = row.getAttribute('data-name') || '';
             const email = row.getAttribute('data-email') || '';
+            const status = row.getAttribute('data-status') || 'reviewed';
             const score = parseInt(row.getAttribute('data-score') || '0', 10);
 
             // Search filter
             if (query && !name.includes(query) && !email.includes(query)) {
+                return false;
+            }
+
+            // Pipeline Stage filter
+            if (statusVal !== 'all' && status !== statusVal) {
                 return false;
             }
 
@@ -467,6 +661,7 @@ document.addEventListener('DOMContentLoaded', function() {
     }
 
     searchInput.addEventListener('input', applyApplicantFilters);
+    if (statusFilter) statusFilter.addEventListener('change', applyApplicantFilters);
     scoreFilter.addEventListener('change', applyApplicantFilters);
     limitFilter.addEventListener('change', applyApplicantFilters);
     sortSelect.addEventListener('change', applyApplicantFilters);
