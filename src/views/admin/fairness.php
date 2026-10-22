@@ -52,27 +52,27 @@ $stats = $stats ?? ['total_pairs' => 0, 'mean_delta' => 0, 'max_skew' => 0, 'max
     </div>
 
     <!-- Summary Statistics Grid -->
-    <div class="admin-counters-grid" style="grid-template-columns: repeat(4, 1fr); margin-bottom: 1.5rem;">
+    <div class="admin-counters-grid" style="grid-template-columns: repeat(auto-fit, minmax(220px, 1fr)); margin-bottom: 1.5rem;">
         <div class="admin-metric-card">
-            <h3 style="color: var(--muted); font-size: 0.85rem; text-transform: uppercase;">Total Audit Pairs</h3>
+            <h3>Total Audit Pairs</h3>
             <p id="statTotalPairs" class="count-total"><?= htmlspecialchars($stats['total_pairs']) ?></p>
         </div>
         <div class="admin-metric-card">
-            <h3 style="color: var(--muted); font-size: 0.85rem; text-transform: uppercase;">Mean Score Delta</h3>
-            <p id="statMeanDelta" class="count-total" style="color: <?= $stats['mean_delta'] == 0 ? '#10b981' : '#f59e0b' ?>;">
+            <h3>Mean Score Delta</h3>
+            <p id="statMeanDelta" class="count-total">
                 <?= htmlspecialchars($stats['mean_delta']) ?> pts
             </p>
         </div>
         <div class="admin-metric-card">
-            <h3 style="color: #ef4444; font-size: 0.85rem; text-transform: uppercase;">Maximum Observed Delta</h3>
-            <p id="statMaxSkew" style="font-size: 2.2rem; font-weight: 700; color: <?= $stats['max_skew'] > 5 ? '#ef4444' : '#10b981' ?>; margin: 8px 0;">
+            <h3>Maximum Observed Delta</h3>
+            <p id="statMaxSkew" class="count-total" style="margin-bottom: 4px !important;">
                 <?= htmlspecialchars($stats['max_skew']) ?> pts
             </p>
-            <span style="font-size: 0.75rem; color: var(--muted);">Legal Threshold: 5 pts (EU AI Act)</span>
+            <span style="font-size: 0.75rem; color: var(--text-muted); display: block; margin-top: 0.35rem;">Legal Threshold: 5 pts (EU AI Act)</span>
         </div>
         <div class="admin-metric-card">
-            <h3 style="color: #f59e0b; font-size: 0.85rem; text-transform: uppercase;">Most Skewed Pair</h3>
-            <p id="statMaxSkewPair" style="font-size: 1.8rem; font-weight: 700; color: #f59e0b; margin: 8px 0;">
+            <h3>Most Skewed Pair</h3>
+            <p id="statMaxSkewPair" class="count-total">
                 <?= htmlspecialchars($stats['max_skew_pair']) ?>
             </p>
         </div>

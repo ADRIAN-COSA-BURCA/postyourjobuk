@@ -2,13 +2,13 @@
     .filter-toolbar {
         display: flex;
         flex-wrap: wrap;
-        gap: 0.75rem;
+        gap: 0.65rem;
         align-items: center;
         justify-content: space-between;
         margin-bottom: 1.5rem;
         background: #1f2937;
         border: 1px solid #374151;
-        padding: 0.85rem 1.25rem;
+        padding: 0.85rem 1.15rem;
         border-radius: 8px;
     }
     .filter-toolbar-group {
@@ -18,24 +18,27 @@
         align-items: center;
     }
     .filter-input {
-        padding: 0.5rem 0.75rem;
-        background: #111827;
-        border: 1px solid #374151;
+        padding: 0.5rem 0.75rem !important;
+        background: #111827 !important;
+        border: 1px solid #374151 !important;
         border-radius: 6px;
-        color: #fff;
-        font-size: 0.875rem;
+        color: #fff !important;
+        font-size: 0.85rem !important;
         outline: none;
     }
     .filter-input:focus {
-        border-color: #6366f1;
+        border-color: #6366f1 !important;
     }
     .filter-select {
-        padding: 0.5rem 0.75rem;
-        background: #111827;
-        border: 1px solid #374151;
+        width: auto !important;
+        min-width: 145px;
+        flex: 0 1 auto;
+        padding: 0.5rem 2.15rem 0.5rem 0.75rem !important;
+        background-color: #111827 !important;
+        border: 1px solid #374151 !important;
         border-radius: 6px;
-        color: #fff;
-        font-size: 0.875rem;
+        color: #fff !important;
+        font-size: 0.84rem !important;
         outline: none;
         cursor: pointer;
         color-scheme: dark;
@@ -50,14 +53,30 @@
         color: #ffffff !important;
     }
     .filter-select:focus {
-        border-color: #6366f1;
+        border-color: #6366f1 !important;
+    }
+
+    /* Override global .table-responsive nowrap / min-width rules on desktop */
+    .responsive-applicant-table {
+        width: 100% !important;
+        min-width: 0 !important;
+        border-collapse: collapse !important;
+        table-layout: auto;
+    }
+    .responsive-applicant-table th,
+    .responsive-applicant-table td {
+        white-space: normal !important;
+        min-width: 0 !important;
+        padding: 0.95rem 0.85rem !important;
+        vertical-align: middle !important;
     }
 
     .dashboard-action-links {
         display: flex;
-        gap: 0.45rem;
+        gap: 0.4rem;
         align-items: center;
         flex-wrap: wrap;
+        justify-content: flex-end;
     }
     .dashboard-action-links form {
         display: inline-flex;
@@ -65,24 +84,25 @@
     }
     .dashboard-action-links .btn {
         border-radius: var(--radius-pill) !important;
+        padding: 0.36rem 0.75rem !important;
+        font-size: 0.76rem !important;
+        white-space: nowrap;
     }
 
     .pipeline-action-bar {
         display: flex;
-        gap: 0.4rem;
+        gap: 0.38rem;
         align-items: center;
         flex-wrap: wrap;
-        margin-top: 0.55rem;
-        padding-top: 0.55rem;
-        border-top: 1px dashed rgba(255, 255, 255, 0.1);
+        margin-top: 0.45rem;
     }
     .pipeline-action-bar form {
         display: inline-flex;
         margin: 0;
     }
     .pipeline-btn {
-        font-size: 0.76rem !important;
-        padding: 0.32rem 0.7rem !important;
+        font-size: 0.74rem !important;
+        padding: 0.32rem 0.68rem !important;
         border-radius: 9999px !important;
         font-weight: 600 !important;
         cursor: pointer;
@@ -91,7 +111,7 @@
         white-space: nowrap;
     }
     .pipeline-btn:disabled {
-        opacity: 0.45;
+        opacity: 0.42;
         cursor: not-allowed;
     }
     .pipeline-btn-interview {
@@ -121,11 +141,11 @@
         display: inline-flex;
         align-items: center;
         gap: 0.3rem;
-        padding: 0.28rem 0.7rem;
+        padding: 0.24rem 0.65rem;
         border-radius: 9999px;
-        font-size: 0.75rem;
+        font-size: 0.72rem;
         font-weight: 700;
-        letter-spacing: 0.02em;
+        letter-spacing: 0.03em;
         white-space: nowrap;
     }
     .stage-reviewed {
@@ -174,7 +194,7 @@
             align-items: stretch;
         }
         .filter-input, .filter-select {
-            width: 100%;
+            width: 100% !important;
             box-sizing: border-box;
         }
 
@@ -182,7 +202,6 @@
             display: none;
         }
 
-        /* kill any desktop min-width / nowrap */
         .responsive-applicant-table,
         .responsive-applicant-table tbody,
         .responsive-applicant-table tr,
@@ -237,6 +256,7 @@
             flex-direction: column;
             gap: 0.5rem;
             width: 100%;
+            justify-content: stretch;
         }
         .responsive-applicant-table .dashboard-action-links a,
         .responsive-applicant-table .dashboard-action-links form,
@@ -249,6 +269,7 @@
             padding: 0.6rem !important;
             border-radius: var(--radius-pill) !important;
             box-sizing: border-box !important;
+            font-size: 0.84rem !important;
         }
         .responsive-applicant-table .dashboard-action-links form,
         .responsive-applicant-table .pipeline-action-bar form {
@@ -276,11 +297,11 @@
     </div>
 
     <?php if (!empty($stats)): ?>
-    <div class="app-stats-grid" style="display: grid; grid-template-columns: repeat(auto-fit, minmax(190px, 1fr)); gap: 1rem; margin-bottom: 2rem;">
+    <div class="app-stats-grid" style="display: grid; grid-template-columns: repeat(auto-fit, minmax(210px, 1fr)); gap: 1.25rem; margin-bottom: 2rem;">
         <div class="card" style="display: flex; justify-content: space-between; align-items: center;">
             <div>
                 <div class="form-label">Total Applicants</div>
-                <div style="font-size: 1.5rem; font-weight: bold; color: var(--primary);">
+                <div class="stat-value">
                     <?= (int)($stats['total_applicants'] ?? 0) ?>
                 </div>
             </div>
@@ -290,7 +311,7 @@
                     <input type="hidden" name="csrf_token" value="<?= \App\Core\Helpers::csrf_token() ?>">
                     <input type="hidden" name="job_id" value="<?= (int)$job['job_id'] ?>">
                     
-                    <button type="button" onclick="showDeleteModal()" class="btn btn-sm" style="background: transparent; color: var(--danger, #dc3545); border: 1px solid var(--danger, #dc3545); border-radius: 4px; cursor: pointer; padding: 0.35rem 0.65rem; font-weight: bold; font-size: 0.75rem;">
+                    <button type="button" onclick="showDeleteModal()" class="btn btn-sm" style="background: rgba(239, 68, 68, 0.12); color: #f87171; border: 1px solid rgba(239, 68, 68, 0.45); border-radius: 6px; cursor: pointer; padding: 0.35rem 0.65rem; font-weight: 700; font-size: 0.74rem;">
                         ⚠️ Wipe All
                     </button>
                 </form>
@@ -298,22 +319,22 @@
         </div>
 
         <div class="card">
-            <div class="form-label">🟢 Interviewing</div>
-            <div style="font-size: 1.5rem; font-weight: bold; color: #38bdf8;">
+            <div class="form-label">Interviewing</div>
+            <div class="stat-value">
                 <?= (int)($stats['interviewing_count'] ?? 0) ?>
             </div>
         </div>
 
         <div class="card">
-            <div class="form-label">🎉 Hired / Offered</div>
-            <div style="font-size: 1.5rem; font-weight: bold; color: #10b981;">
+            <div class="form-label">Hired / Offered</div>
+            <div class="stat-value">
                 <?= (int)($stats['hired_count'] ?? 0) ?>
             </div>
         </div>
 
         <div class="card">
-            <div class="form-label">🛑 Rejected</div>
-            <div style="font-size: 1.5rem; font-weight: bold; color: #f87171;">
+            <div class="form-label">Rejected</div>
+            <div class="stat-value">
                 <?= (int)($stats['rejected_count'] ?? 0) ?>
             </div>
         </div>
@@ -354,7 +375,7 @@
     <div class="card">
         <!-- APPLICANTS FILTER & SORT TOOLBAR -->
         <div class="filter-toolbar">
-            <div style="flex: 1 1 220px; min-width: 180px;">
+            <div style="flex: 1 1 200px; min-width: 180px;">
                 <input type="text" id="candidateSearchInput" placeholder="🔍 Search candidate name or email..." class="filter-input" style="width: 100%; box-sizing: border-box;">
             </div>
             <div class="filter-toolbar-group">
@@ -384,27 +405,26 @@
                     <option value="name_asc">Name (A - Z)</option>
                     <option value="name_desc">Name (Z - A)</option>
                 </select>
-                <span id="candidateCountBadge" style="font-size: 0.8rem; color: #94a3b8; white-space: nowrap; padding-left: 0.25rem;">
+                <span id="candidateCountBadge" style="font-size: 0.78rem; color: #94a3b8; white-space: nowrap; padding-left: 0.25rem;">
                     Showing <?= count($applicants) ?> candidates
                 </span>
             </div>
         </div>
 
         <div class="table-responsive">
-            <table class="responsive-applicant-table" style="width: 100%; border-collapse: collapse;">
+            <table class="responsive-applicant-table">
                 <thead>
                     <tr style="text-align: left; border-bottom: 2px solid var(--border);">
-                        <th style="padding: 1rem; color: #94a3b8;">Match Index</th>
-                        <th style="padding: 1rem; color: #94a3b8;">Candidate &amp; Stage</th>
-                        <th style="padding: 1rem; color: #94a3b8;">Email</th>
-                        <th style="padding: 1rem; color: #94a3b8;">Submission</th>
-                        <th style="padding: 1rem; color: #94a3b8;">Actions &amp; ATS Pipeline</th>
+                        <th style="color: #94a3b8; width: 90px;">Match</th>
+                        <th style="color: #94a3b8; width: 32%;">Candidate Profile</th>
+                        <th style="color: #94a3b8; width: 34%;">ATS Pipeline &amp; Follow-Up</th>
+                        <th style="color: #94a3b8; width: 26%; text-align: right;">Profile &amp; CV Actions</th>
                     </tr>
                 </thead>
                 <tbody id="applicantTableBody">
                     <?php if (empty($applicants)): ?>
                         <tr id="emptyInitialRow">
-                            <td colspan="5" style="text-align: center; color: #6b7280; padding: 2rem;">
+                            <td colspan="4" style="text-align: center; color: #6b7280; padding: 2rem;">
                                 No applications received for this job position yet.
                             </td>
                         </tr>
@@ -451,71 +471,49 @@
                                 data-email="<?= htmlspecialchars(strtolower($applicant['email'] ?? '')) ?>"
                                 data-date="<?= $appliedTimestamp ?>"
                                 style="border-bottom: 1px solid var(--border);">
-                                <td data-label="Match Index" style="padding: 1rem; vertical-align: top;">
+                                
+                                <!-- Column 1: Match Score & Date -->
+                                <td data-label="Match Index">
                                     <div class="td-content">
-                                        <span style="font-weight: 700; font-size: 1.15rem; color: <?= $scoreColor ?>;">
+                                        <span style="font-weight: 800; font-size: 1.2rem; color: <?= $scoreColor ?>; display: block; line-height: 1.2;">
                                             <?= $score ?>%
+                                        </span>
+                                        <span style="font-size: 0.74rem; color: #9ca3af; display: block; margin-top: 0.2rem;">
+                                            <?= date('M d, Y', $appliedTimestamp) ?>
                                         </span>
                                     </div>
                                 </td>
-                                <td data-label="Candidate & Stage" style="padding: 1rem; max-width: 380px; vertical-align: top;">
+
+                                <!-- Column 2: Candidate Name, Email & Compact Summary -->
+                                <td data-label="Candidate Profile">
                                     <div class="td-content">
-                                        <div style="display: flex; align-items: center; gap: 0.55rem; flex-wrap: wrap; margin-bottom: 0.35rem;">
-                                            <strong style="font-size: 1.05rem; color: var(--text);">
-                                                <?= htmlspecialchars($applicant['name']) ?>
-                                            </strong>
-                                            <span class="status-badge-flag <?= $stageBadgeClass ?>">
-                                                <?= $stageLabel ?>
-                                            </span>
-                                        </div>
+                                        <strong style="font-size: 1.02rem; color: var(--text); display: block; line-height: 1.3;">
+                                            <?= htmlspecialchars($applicant['name']) ?>
+                                        </strong>
+                                        <span style="font-size: 0.82rem; color: #a5b4fc; display: block; margin: 0.15rem 0 0.35rem 0; word-break: break-all;">
+                                            <?= htmlspecialchars($applicant['email']) ?>
+                                        </span>
                                         
                                         <?php if (!empty($applicant['ai_summary'])): ?>
                                             <?php 
                                                 $clean_summary_preview = strip_tags($applicant['ai_summary']); 
                                             ?>
-                                            <p style="color: var(--text-muted); font-size: 0.85rem; margin: 0; line-height: 1.4; display: -webkit-box; -webkit-line-clamp: 2; -webkit-box-orient: vertical; overflow: hidden; text-overflow: ellipsis;" title="<?= htmlspecialchars($clean_summary_preview) ?>">
+                                            <p style="color: var(--text-muted); font-size: 0.8rem; margin: 0; line-height: 1.38; display: -webkit-box; -webkit-line-clamp: 2; -webkit-box-orient: vertical; overflow: hidden; text-overflow: ellipsis; max-width: 310px;" title="<?= htmlspecialchars($clean_summary_preview) ?>">
                                                 <?= htmlspecialchars($clean_summary_preview) ?>
                                             </p>
                                         <?php endif; ?>
                                     </div>
                                 </td>
-                                <td data-label="Email" style="padding: 1rem; color: var(--secondary); vertical-align: top;">
-                                    <div class="td-content" style="word-break: break-all;">
-                                        <?= htmlspecialchars($applicant['email']) ?>
-                                    </div>
-                                </td>
-                                <td data-label="Submission" style="padding: 1rem; color: #9ca3af; font-size: 0.875rem; vertical-align: top;">
+
+                                <!-- Column 3: Current Stage + Horizontal ATS Follow-Up Buttons -->
+                                <td data-label="ATS Pipeline & Follow-Up">
                                     <div class="td-content">
-                                        <?= date('M d, Y', $appliedTimestamp) ?>
-                                    </div>
-                                </td>
-                                <td data-label="Actions & ATS Pipeline" style="padding: 1rem; vertical-align: top;">
-                                    <div class="td-content">
-                                        <!-- Primary Document & Profile Actions -->
-                                        <div class="dashboard-action-links">
-                                            <a href="/applicant/view?id=<?= (int)$applicant['applicant_id'] ?>" 
-                                               class="btn btn-sm btn-ghost" 
-                                               style="color: #3b82f6; border: 1px solid #3b82f6;">
-                                                👁️ Application Overview
-                                            </a>
-                                            
-                                            <a href="/applicant/download?id=<?= (int)$applicant['applicant_id'] ?>" 
-                                               class="btn btn-sm btn-ghost" 
-                                               style="color: #10b981; border: 1px solid #10b981;">
-                                                📥 Download CV
-                                            </a>
-                                            
-                                            <form method="POST" action="/applicant/delete" style="display:inline; margin:0;" onsubmit="return confirm('Are you sure you want to permanently delete this candidate and their CV? This cannot be undone.');">
-                                                <input type="hidden" name="csrf_token" value="<?= \App\Core\Helpers::csrf_token() ?>">
-                                                <input type="hidden" name="applicant_id" value="<?= (int)$applicant['applicant_id'] ?>">
-                                                <input type="hidden" name="job_id" value="<?= (int)$job['job_id'] ?>">
-                                                <button type="submit" class="btn btn-sm btn-ghost" style="color: #ef4444; border: 1px solid #ef4444; background: transparent; cursor: pointer;">
-                                                    🗑️ Delete
-                                                </button>
-                                            </form>
+                                        <div>
+                                            <span class="status-badge-flag <?= $stageBadgeClass ?>">
+                                                <?= $stageLabel ?>
+                                            </span>
                                         </div>
 
-                                        <!-- ATS Pipeline Stage Progression Actions -->
                                         <div class="pipeline-action-bar">
                                             <form method="POST" action="/applicant/status" onsubmit="return confirm('Invite <?= htmlspecialchars(addslashes($applicant['name'])) ?> to Interview? This will automatically send an official Interview Invitation email with your recruiter contact details.');">
                                                 <input type="hidden" name="csrf_token" value="<?= \App\Core\Helpers::csrf_token() ?>">
@@ -524,7 +522,7 @@
                                                 <input type="hidden" name="return_to" value="list">
                                                 <input type="hidden" name="status" value="interviewing">
                                                 <button type="submit" class="pipeline-btn pipeline-btn-interview" <?= $rawStatus === 'interviewing' ? 'disabled title="Already in Interviewing stage"' : '' ?>>
-                                                    🟢 Invite to Interview
+                                                    🟢 Interview
                                                 </button>
                                             </form>
 
@@ -535,7 +533,7 @@
                                                 <input type="hidden" name="return_to" value="list">
                                                 <input type="hidden" name="status" value="hired">
                                                 <button type="submit" class="pipeline-btn pipeline-btn-hire" <?= $rawStatus === 'hired' ? 'disabled title="Already marked as Hired"' : '' ?>>
-                                                    🎉 Extend Offer
+                                                    🎉 Offer
                                                 </button>
                                             </form>
 
@@ -552,11 +550,39 @@
                                         </div>
                                     </div>
                                 </td>
+
+                                <!-- Column 4: Profile & CV Actions -->
+                                <td data-label="Profile & CV Actions">
+                                    <div class="td-content">
+                                        <div class="dashboard-action-links">
+                                            <a href="/applicant/view?id=<?= (int)$applicant['applicant_id'] ?>" 
+                                               class="btn btn-sm btn-ghost" 
+                                               style="color: #3b82f6; border: 1px solid #3b82f6;">
+                                                👁️ Overview
+                                            </a>
+                                            
+                                            <a href="/applicant/download?id=<?= (int)$applicant['applicant_id'] ?>" 
+                                               class="btn btn-sm btn-ghost" 
+                                               style="color: #10b981; border: 1px solid #10b981;">
+                                                📥 CV
+                                            </a>
+                                            
+                                            <form method="POST" action="/applicant/delete" style="display:inline; margin:0;" onsubmit="return confirm('Are you sure you want to permanently delete this candidate and their CV? This cannot be undone.');">
+                                                <input type="hidden" name="csrf_token" value="<?= \App\Core\Helpers::csrf_token() ?>">
+                                                <input type="hidden" name="applicant_id" value="<?= (int)$applicant['applicant_id'] ?>">
+                                                <input type="hidden" name="job_id" value="<?= (int)$job['job_id'] ?>">
+                                                <button type="submit" class="btn btn-sm btn-ghost" style="color: #ef4444; border: 1px solid #ef4444; background: transparent; cursor: pointer;">
+                                                    🗑️ Delete
+                                                </button>
+                                            </form>
+                                        </div>
+                                    </div>
+                                </td>
                             </tr>
                         <?php endforeach; ?>
                     <?php endif; ?>
                     <tr id="noResultsFilterRow" style="display: none;">
-                        <td colspan="5" style="text-align: center; color: #94a3b8; padding: 2rem;">
+                        <td colspan="4" style="text-align: center; color: #94a3b8; padding: 2rem;">
                             No candidates match the selected filter criteria.
                         </td>
                     </tr>

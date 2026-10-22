@@ -9,16 +9,16 @@
 <!-- Stats Grid -->
 <section class="stats-grid" style="margin-bottom: 2rem !important;">
     <div class="card">
-        <h3 style="color: #94a3b8; font-size: 0.875rem; margin-bottom: 0.5rem;">Total Jobs</h3>
-        <p class="stat-value" style="font-size: 1.875rem; font-weight: 700; color: #ffffff;"><?= (int)$stats['total_jobs'] ?></p>
+        <h3>Total Jobs</h3>
+        <p class="stat-value"><?= (int)$stats['total_jobs'] ?></p>
     </div>
     <div class="card">
-        <h3 style="color: #94a3b8; font-size: 0.875rem; margin-bottom: 0.5rem;">Active Jobs</h3>
-        <p class="stat-value" style="font-size: 1.875rem; font-weight: 700; color: #10b981;"><?= (int)$stats['active_jobs'] ?></p>
+        <h3>Active Jobs</h3>
+        <p class="stat-value"><?= (int)$stats['active_jobs'] ?></p>
     </div>
     <div class="card">
-        <h3 style="color: #94a3b8; font-size: 0.875rem; margin-bottom: 0.5rem;">Total Applicants</h3>
-        <p class="stat-value" style="font-size: 1.875rem; font-weight: 700; color: #6366f1;"><?= (int)$stats['total_applicants'] ?></p>
+        <h3>Total Applicants</h3>
+        <p class="stat-value"><?= (int)$stats['total_applicants'] ?></p>
     </div>
 </section>
 

@@ -412,6 +412,9 @@ textarea {
 
 select {
     color-scheme: dark;
+    -webkit-appearance: none !important;
+    -moz-appearance: none !important;
+    appearance: none !important;
     background-image: url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' width='12' height='12' viewBox='0 0 12 12'%3E%3Cpath fill='%239ca3af' d='M6 8L1 3h10z'/%3E%3C/svg%3E") !important;
     background-repeat: no-repeat !important;
     background-position: right 1rem center !important;
@@ -1306,6 +1309,129 @@ select option:hover {
     grid-template-columns: repeat(auto-fit, minmax(240px, 1fr)) !important;
     gap: 1.5rem !important; /* Spacing between individual metric cards */
     margin-bottom: 0 !important; /* Prevents double-margin stacking */
+}
+
+/* =========================================================================
+   UNIFIED 4-COLOR KPI STAT CARD SYSTEM (Recruiter & Admin Dashboards)
+   Card 1: Amber / Orange (#f59e0b)
+   Card 2: Emerald Green  (#10b981)
+   Card 3: Sky Blue       (#38bdf8)
+   Card 4: Coral Rose/Red (#ef4444)
+   ========================================================================= */
+.stats-grid > .card,
+.app-stats-grid > .card,
+.admin-counters-grid > .admin-metric-card {
+    position: relative;
+    overflow: hidden;
+    border-radius: var(--radius-md) !important;
+    padding: 1.4rem 1.5rem !important;
+    transition: transform 0.2s ease, box-shadow 0.2s ease;
+}
+
+.stats-grid > .card h3,
+.app-stats-grid > .card .form-label,
+.admin-counters-grid > .admin-metric-card h3 {
+    font-size: 0.78rem !important;
+    font-weight: 700 !important;
+    text-transform: uppercase !important;
+    letter-spacing: 0.07em !important;
+    margin: 0 0 0.45rem 0 !important;
+}
+
+.stats-grid > .card .stat-value,
+.app-stats-grid > .card .stat-value,
+.admin-counters-grid > .admin-metric-card p {
+    font-size: 2rem !important;
+    font-weight: 800 !important;
+    line-height: 1.15 !important;
+    margin: 0 !important;
+    background: none !important;
+    -webkit-background-clip: initial !important;
+    background-clip: initial !important;
+}
+
+/* 1st Card — Amber / Orange */
+.stats-grid > .card:nth-child(1),
+.app-stats-grid > .card:nth-child(1),
+.admin-counters-grid > .admin-metric-card:nth-child(1) {
+    background: linear-gradient(145deg, rgba(245, 158, 11, 0.14) 0%, rgba(30, 41, 59, 0.90) 100%) !important;
+    border: 1px solid rgba(245, 158, 11, 0.35) !important;
+    border-top: 4px solid #f59e0b !important;
+    box-shadow: 0 6px 20px rgba(245, 158, 11, 0.10) !important;
+}
+.stats-grid > .card:nth-child(1) h3,
+.app-stats-grid > .card:nth-child(1) .form-label,
+.admin-counters-grid > .admin-metric-card:nth-child(1) h3 {
+    color: #fbbf24 !important;
+}
+.stats-grid > .card:nth-child(1) .stat-value,
+.app-stats-grid > .card:nth-child(1) .stat-value,
+.admin-counters-grid > .admin-metric-card:nth-child(1) p {
+    color: #f59e0b !important;
+    -webkit-text-fill-color: #f59e0b !important;
+}
+
+/* 2nd Card — Emerald Green */
+.stats-grid > .card:nth-child(2),
+.app-stats-grid > .card:nth-child(2),
+.admin-counters-grid > .admin-metric-card:nth-child(2) {
+    background: linear-gradient(145deg, rgba(16, 185, 129, 0.14) 0%, rgba(30, 41, 59, 0.90) 100%) !important;
+    border: 1px solid rgba(16, 185, 129, 0.35) !important;
+    border-top: 4px solid #10b981 !important;
+    box-shadow: 0 6px 20px rgba(16, 185, 129, 0.10) !important;
+}
+.stats-grid > .card:nth-child(2) h3,
+.app-stats-grid > .card:nth-child(2) .form-label,
+.admin-counters-grid > .admin-metric-card:nth-child(2) h3 {
+    color: #34d399 !important;
+}
+.stats-grid > .card:nth-child(2) .stat-value,
+.app-stats-grid > .card:nth-child(2) .stat-value,
+.admin-counters-grid > .admin-metric-card:nth-child(2) p {
+    color: #10b981 !important;
+    -webkit-text-fill-color: #10b981 !important;
+}
+
+/* 3rd Card — Electric Sky Blue */
+.stats-grid > .card:nth-child(3),
+.app-stats-grid > .card:nth-child(3),
+.admin-counters-grid > .admin-metric-card:nth-child(3) {
+    background: linear-gradient(145deg, rgba(56, 189, 248, 0.14) 0%, rgba(30, 41, 59, 0.90) 100%) !important;
+    border: 1px solid rgba(56, 189, 248, 0.35) !important;
+    border-top: 4px solid #38bdf8 !important;
+    box-shadow: 0 6px 20px rgba(56, 189, 248, 0.10) !important;
+}
+.stats-grid > .card:nth-child(3) h3,
+.app-stats-grid > .card:nth-child(3) .form-label,
+.admin-counters-grid > .admin-metric-card:nth-child(3) h3 {
+    color: #7dd3fc !important;
+}
+.stats-grid > .card:nth-child(3) .stat-value,
+.app-stats-grid > .card:nth-child(3) .stat-value,
+.admin-counters-grid > .admin-metric-card:nth-child(3) p {
+    color: #38bdf8 !important;
+    -webkit-text-fill-color: #38bdf8 !important;
+}
+
+/* 4th Card — Coral Rose / Red */
+.stats-grid > .card:nth-child(4),
+.app-stats-grid > .card:nth-child(4),
+.admin-counters-grid > .admin-metric-card:nth-child(4) {
+    background: linear-gradient(145deg, rgba(239, 68, 68, 0.14) 0%, rgba(30, 41, 59, 0.90) 100%) !important;
+    border: 1px solid rgba(239, 68, 68, 0.35) !important;
+    border-top: 4px solid #ef4444 !important;
+    box-shadow: 0 6px 20px rgba(239, 68, 68, 0.10) !important;
+}
+.stats-grid > .card:nth-child(4) h3,
+.app-stats-grid > .card:nth-child(4) .form-label,
+.admin-counters-grid > .admin-metric-card:nth-child(4) h3 {
+    color: #fca5a5 !important;
+}
+.stats-grid > .card:nth-child(4) .stat-value,
+.app-stats-grid > .card:nth-child(4) .stat-value,
+.admin-counters-grid > .admin-metric-card:nth-child(4) p {
+    color: #f87171 !important;
+    -webkit-text-fill-color: #f87171 !important;
 }
 
 

@@ -140,15 +140,23 @@
     border-color: #6366f1;
 }
 .job-filter-select {
-    padding: 0.5rem 0.75rem;
-    background: #111827;
-    border: 1px solid #374151;
+    width: auto !important;
+    min-width: 170px;
+    flex: 0 1 auto;
+    padding: 0.5rem 2.25rem 0.5rem 0.75rem !important;
+    background-color: #111827 !important;
+    border: 1px solid #374151 !important;
     border-radius: 6px;
-    color: #fff;
+    color: #fff !important;
     font-size: 0.875rem;
     outline: none;
     cursor: pointer;
     color-scheme: dark;
+}
+@media (max-width: 768px) {
+    .job-filter-select {
+        width: 100% !important;
+    }
 }
 .job-filter-select option {
     background-color: #111827 !important;
