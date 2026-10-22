@@ -55,26 +55,44 @@ class DashboardController extends BaseController {
         // Fetch funnel data
         $funnelData = method_exists($jobModel, 'getApplicantFunnelData') 
             ? $jobModel->getApplicantFunnelData($tenantId) 
-            : ['applied' => 0, 'interviewing' => 0, 'offered' => 0, 'hired' => 0];
+            : ['reviewed' => 0, 'interviewing' => 0, 'hired' => 0, 'rejected' => 0];
 
         // Fetch trend data
         $trendData = method_exists($jobModel, 'getTrendData') 
             ? $jobModel->getTrendData($tenantId) 
             : ['labels' => [], 'data' => []];
 
-        // NEW: Fetch top performing jobs
+        // Fetch top performing jobs (with avg_score and max_score)
         $topJobs = method_exists($jobModel, 'getTopPerformingJobs') 
-            ? $jobModel->getTopPerformingJobs($tenantId) 
+            ? $jobModel->getTopPerformingJobs($tenantId, 6) 
+            : [];
+
+        // Fetch AI Match Score distribution
+        $scoreDistribution = method_exists($jobModel, 'getScoreDistributionData')
+            ? $jobModel->getScoreDistributionData($tenantId)
+            : ['Strong Match (≥80%)' => 0, 'Qualified (50%–79%)' => 0, 'Low Match (<50%)' => 0];
+
+        // Fetch Employment Type breakdown
+        $employmentBreakdown = method_exists($jobModel, 'getEmploymentTypeBreakdown')
+            ? $jobModel->getEmploymentTypeBreakdown($tenantId)
+            : ['labels' => [], 'data' => []];
+
+        // Fetch Top 5 Candidates across all jobs
+        $topCandidates = method_exists($jobModel, 'getTopCandidatesForTenant')
+            ? $jobModel->getTopCandidatesForTenant($tenantId, 5)
             : [];
 
         // Render the analytics view with all datasets
         $this->render('dashboard/analytics', [
-            'pageTitle'  => 'Dashboard Analytics',
-            'tenant'     => $tenantProfile,
-            'stats'      => $stats,
-            'funnelData' => $funnelData,
-            'trendData'  => $trendData,
-            'topJobs'    => $topJobs // Pass the new data here
+            'pageTitle'           => 'Dashboard Analytics',
+            'tenant'              => $tenantProfile,
+            'stats'               => $stats,
+            'funnelData'          => $funnelData,
+            'trendData'           => $trendData,
+            'topJobs'             => $topJobs,
+            'scoreDistribution'   => $scoreDistribution,
+            'employmentBreakdown' => $employmentBreakdown,
+            'topCandidates'       => $topCandidates
         ]);
     }
 }

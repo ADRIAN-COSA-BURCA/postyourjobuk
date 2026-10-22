@@ -243,25 +243,128 @@ class Job extends BaseModel {
         $stmt->execute([$tenantId]);
         $results = $stmt->fetchAll(PDO::FETCH_ASSOC);
 
+        // If fewer than 2 days have activity in the last 7 calendar days, fallback to the last 7 active application dates
+        if (count($results) < 2) {
+            $fallbackSql = "
+                SELECT date, count FROM (
+                    SELECT DATE(created_at) as date, COUNT(*) as count 
+                    FROM applicants 
+                    WHERE tenant_id = ? 
+                    GROUP BY DATE(created_at)
+                    ORDER BY date DESC
+                    LIMIT 7
+                ) sub ORDER BY date ASC
+            ";
+            $stmtFb = $this->db->prepare($fallbackSql);
+            $stmtFb->execute([$tenantId]);
+            $fbResults = $stmtFb->fetchAll(PDO::FETCH_ASSOC);
+            if (!empty($fbResults)) {
+                $results = $fbResults;
+            }
+        }
+
         // Format for Chart.js
         $labels = [];
         $data = [];
         foreach ($results as $row) {
-            $labels[] = $row['date'];
+            $labels[] = date('M d', strtotime($row['date']));
             $data[] = (int)$row['count'];
         }
         
         return ['labels' => $labels, 'data' => $data];
     }
 
-    public function getTopPerformingJobs(int $tenantId, int $limit = 5): array {
+    public function getTopPerformingJobs(int $tenantId, int $limit = 6): array {
         $sql = "
-            SELECT j.title, COUNT(a.applicant_id) as applicant_count
+            SELECT 
+                j.title, 
+                COUNT(a.applicant_id) as applicant_count,
+                ROUND(IFNULL(AVG(a.ai_score), 0), 1) as avg_score,
+                IFNULL(MAX(a.ai_score), 0) as max_score
             FROM jobs j
             LEFT JOIN applicants a ON j.job_id = a.job_id
             WHERE j.tenant_id = ?
-            GROUP BY j.job_id
-            ORDER BY applicant_count DESC
+            GROUP BY j.job_id, j.title
+            ORDER BY applicant_count DESC, j.job_id DESC
+            LIMIT ?
+        ";
+        $stmt = $this->db->prepare($sql);
+        $stmt->execute([$tenantId, $limit]);
+        return $stmt->fetchAll(PDO::FETCH_ASSOC);
+    }
+
+    /**
+     * Get AI Match Score tier distribution for Recruiter Analytics Pie Chart
+     */
+    public function getScoreDistributionData(int $tenantId): array {
+        $sql = "
+            SELECT 
+                SUM(CASE WHEN ai_score >= 80 THEN 1 ELSE 0 END) as strong_match,
+                SUM(CASE WHEN ai_score >= 50 AND ai_score < 80 THEN 1 ELSE 0 END) as moderate_match,
+                SUM(CASE WHEN ai_score IS NOT NULL AND ai_score < 50 THEN 1 ELSE 0 END) as low_match
+            FROM applicants
+            WHERE tenant_id = ?
+        ";
+        $stmt = $this->db->prepare($sql);
+        $stmt->execute([$tenantId]);
+        $row = $stmt->fetch(PDO::FETCH_ASSOC);
+
+        return [
+            'Strong Match (≥80%)'    => (int)($row['strong_match'] ?? 0),
+            'Qualified (50%–79%)'    => (int)($row['moderate_match'] ?? 0),
+            'Low Match (<50%)'       => (int)($row['low_match'] ?? 0),
+        ];
+    }
+
+    /**
+     * Get application volume grouped by Job Employment Type for Recruiter Analytics
+     */
+    public function getEmploymentTypeBreakdown(int $tenantId): array {
+        $sql = "
+            SELECT 
+                COALESCE(NULLIF(TRIM(j.employment_type), ''), 'Full-time') as emp_type,
+                COUNT(a.applicant_id) as app_count,
+                COUNT(DISTINCT j.job_id) as job_count
+            FROM jobs j
+            LEFT JOIN applicants a ON j.job_id = a.job_id
+            WHERE j.tenant_id = ?
+            GROUP BY emp_type
+            ORDER BY app_count DESC, job_count DESC
+        ";
+        $stmt = $this->db->prepare($sql);
+        $stmt->execute([$tenantId]);
+        $rows = $stmt->fetchAll(PDO::FETCH_ASSOC);
+
+        $labels = [];
+        $data = [];
+        foreach ($rows as $r) {
+            $labels[] = ucfirst(str_replace('-', ' ', $r['emp_type']));
+            // Use application count if > 0, else job count so new recruiters still see their portfolio breakdown
+            $val = (int)$r['app_count'] > 0 ? (int)$r['app_count'] : (int)$r['job_count'];
+            $data[] = $val;
+        }
+
+        return ['labels' => $labels, 'data' => $data];
+    }
+
+    /**
+     * Get top highest-scoring candidates across all jobs for the tenant
+     */
+    public function getTopCandidatesForTenant(int $tenantId, int $limit = 5): array {
+        $sql = "
+            SELECT 
+                a.applicant_id,
+                a.name,
+                a.email,
+                a.ai_score,
+                a.status,
+                a.created_at,
+                a.job_id,
+                j.title as job_title
+            FROM applicants a
+            INNER JOIN jobs j ON a.job_id = j.job_id
+            WHERE a.tenant_id = ?
+            ORDER BY a.ai_score DESC, a.created_at DESC
             LIMIT ?
         ";
         $stmt = $this->db->prepare($sql);
