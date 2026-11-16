@@ -11,56 +11,235 @@
     const STATIC_VIEWS = {
         '/about': `
             <section class="container section">
-                <p class="about-eyebrow">Platform Architecture &amp; Mission</p>
-                <h1 class="about-title">About PostYourJobUK</h1>
-                <p class="about-lead">PostYourJobUK is a cloud-native, multi-tenant AI recruitment and Applicant Tracking System (ATS) engineered to eliminate demographic bias, prevent LLM hallucinations, and automate candidate communications.</p>
-                <div class="stats-grid">
+                <div style="margin-bottom: 2.25rem;">
+                    <span class="badge" style="background: rgba(139, 92, 246, 0.16); color: #c4b5fd; border: 1px solid rgba(139, 92, 246, 0.35); text-transform: uppercase; letter-spacing: 0.08em; font-size: 0.72rem; margin-bottom: 0.75rem; display: inline-block;">
+                        About the Platform &amp; Cloud Architecture
+                    </span>
+                    <h1 style="margin: 0 0 0.85rem 0;">The Engineering Behind PostYourJobUK</h1>
+                    <p class="text-muted" style="max-width: 820px; font-size: 1rem; line-height: 1.75; margin: 0 0 1.75rem 0;">
+                        <strong>PostYourJobUK</strong> is a cloud-native, multi-tenant AI recruitment Software-as-a-Service (SaaS) and Applicant Tracking System (ATS) engineered to solve two critical industry challenges: prohibitive enterprise ATS licensing costs for UK SMEs and black-box algorithmic bias in automated CV screening.
+                    </p>
+                    <hr style="border: none; border-top: 1px solid var(--glass-border); margin: 0;">
+                </div>
+
+                <!-- 4 Uniform KPI Stat Cards -->
+                <div class="stats-grid" style="margin-bottom: 2.25rem;">
                     <div class="card"><h3>AI Grounding Gate</h3><p class="stat-value">100%</p></div>
                     <div class="card"><h3>Demographic Disparity</h3><p class="stat-value">0.0 pt</p></div>
                     <div class="card"><h3>Cloud Architecture</h3><p class="stat-value">4-Tier Azure</p></div>
+                    <div class="card"><h3>Compliance Standards</h3><p class="stat-value">EU AI Act</p></div>
                 </div>
-                <div class="grid-2">
-                    <article class="card">
-                        <h2 style="font-size: 1.15rem; margin-bottom: 0.5rem;">Two-Stage Decoupled AI Evaluation</h2>
-                        <p class="text-muted">Candidate CVs undergo regex PII redaction before factual claim extraction at temperature 0.0, verified by a deterministic Python Grounding Gate and scored via Base-100 subtractive math.</p>
+
+                <!-- 6 Core Architectural Pillars (2x3 Grid) -->
+                <div class="grid-2" style="gap: 1.5rem; margin-bottom: 2.25rem;">
+                    <article class="card" style="border-top: 3px solid #8b5cf6;">
+                        <h3 style="font-size: 1.12rem; color: #ffffff; margin-bottom: 0.5rem;">🏢 Multi-Tenant Isolation &amp; Zero-Trust Security</h3>
+                        <p class="text-muted" style="font-size: 0.9rem; line-height: 1.65;">
+                            Built on a decoupled Three-Tier architecture (<code>client/</code> Presentation Tier + <code>server/</code> REST API Tier) enforcing strict <code>tenant_id</code> BOLA database scoping, Zero-Trust session fingerprinting (<code>User-Agent</code> + SHA-256 IP hash), and timing-safe CSRF token verification.
+                        </p>
                     </article>
-                    <article class="card">
-                        <h2 style="font-size: 1.15rem; margin-bottom: 0.5rem;">Automated ATS Follow-Up Pipeline</h2>
-                        <p class="text-muted">Recruiters advance candidates across Reviewed, Interviewing, Hired, and Rejected stages with 1-click automated Brevo SMTP emails embedding live employer business cards.</p>
+
+                    <article class="card" style="border-top: 3px solid #10b981;">
+                        <h3 style="font-size: 1.12rem; color: #ffffff; margin-bottom: 0.5rem;">🧠 Two-Stage Decoupled AI Evaluation</h3>
+                        <p class="text-muted" style="font-size: 0.9rem; line-height: 1.65;">
+                            Candidate CVs undergo Stage 0 regex PII redaction before factual claim extraction via Google Gemini 2.5 Flash at <code>temperature = 0.0</code>. Every claim is verified character-for-character by a deterministic Python Grounding Gate (<code>difflib</code> anti-plagiarism + timeline overlap merging) and scored via Base-100 subtractive math.
+                        </p>
                     </article>
+
+                    <article class="card" style="border-top: 3px solid #38bdf8;">
+                        <h3 style="font-size: 1.12rem; color: #ffffff; margin-bottom: 0.5rem;">⚡ Event-Driven Serverless Azure Ecosystem</h3>
+                        <p class="text-muted" style="font-size: 0.9rem; line-height: 1.65;">
+                            Web ingestion (<code>postyourjobuk-web</code> on Azure App Service) is decoupled from heavy document processing via Azure Blob Storage (<code>hranalyticalstorage</code>), Azure Storage Queues (<code>ai-processing-queue</code>), Python 3.11 Azure Functions (<code>postyourjobuk-ai-func</code>), Azure Key Vault (<code>kv-postyourjobuk</code>), and Azure MySQL Flexible Server.
+                        </p>
+                    </article>
+
+                    <article class="card" style="border-top: 3px solid #f59e0b;">
+                        <h3 style="font-size: 1.12rem; color: #ffffff; margin-bottom: 0.5rem;">✉️ Automated ATS Pipeline &amp; Brevo Transactional SMTP</h3>
+                        <p class="text-muted" style="font-size: 0.9rem; line-height: 1.65;">
+                            Recruiters transition candidates across <code>Reviewed</code>, <code>Interviewing</code>, <code>Hired</code>, and <code>Rejected</code> stages with 1-click automated HTML emails dispatched via PHPMailer and Brevo SMTP Relay (authenticated with Cloudflare <code>SPF</code>, <code>DKIM</code>, and <code>DMARC</code>) embedding live employer business cards.
+                        </p>
+                    </article>
+
+                    <article class="card" style="border-top: 3px solid #ec4899;">
+                        <h3 style="font-size: 1.12rem; color: #ffffff; margin-bottom: 0.5rem;">⚖️ Live Counterfactual Fairness Testbed (Tenant 9999)</h3>
+                        <p class="text-muted" style="font-size: 0.9rem; line-height: 1.65;">
+                            Features a dedicated Super-Admin compliance workspace that dispatches 18 synthetic CVs across 9 protected demographic pairs into the live Azure Queue, providing a 4-tab Counterfactual Evidence Inspector and SHA-256 signed PDF Compliance Certificates.
+                        </p>
+                    </article>
+
+                    <article class="card" style="border-top: 3px solid #06b6d4;">
+                        <h3 style="font-size: 1.12rem; color: #ffffff; margin-bottom: 0.5rem;">📊 Executive Analytics &amp; Zero-CDN Vector CV Builder</h3>
+                        <p class="text-muted" style="font-size: 0.9rem; line-height: 1.65;">
+                            Provides candidates with a 100% private, 6-template client-side Resume Builder that compiles native PDF-1.4 vector text streams for <code>PyPDF2</code>, alongside 12 interactive HTML5 <code>&lt;canvas&gt;</code> charts across the Recruiter and Super-Admin analytics suites.
+                        </p>
+                    </article>
+                </div>
+
+                <div class="card" style="border-left: 4px solid #8b5cf6; background: rgba(30, 41, 59, 0.75); padding: 1.35rem 1.75rem;">
+                    <p style="margin: 0; font-size: 0.95rem; color: #e2e8f0; font-style: italic; line-height: 1.7;">
+                        "PostYourJobUK was engineered to prove that automated AI talent acquisition can be simultaneously low-cost for SMEs, cloud-scalable on Microsoft Azure, and 100% mathematically transparent."
+                    </p>
                 </div>
             </section>
         `,
         '/vision': `
             <section class="container section">
-                <p class="vision-eyebrow">Algorithmic Fairness &amp; Transparency</p>
-                <h1 class="vision-title">Our Vision for Ethical AI Recruitment</h1>
-                <p class="vision-lead">We believe every candidate deserves to be evaluated strictly on verified competencies and domain experience—never on demographic proxies, name origin, or formatting style.</p>
-                <div class="grid-2">
-                    <article class="card">
-                        <h2 style="font-size: 1.15rem; margin-bottom: 0.5rem;">Zero Hallucination Guarantee</h2>
-                        <p class="text-muted">Every extracted skill claim is cross-checked character-for-character against the raw CV text and guarded against job description copy-pasting.</p>
+                <div style="margin-bottom: 2.25rem;">
+                    <span class="badge" style="background: rgba(16, 185, 129, 0.16); color: #34d399; border: 1px solid rgba(16, 185, 129, 0.35); text-transform: uppercase; letter-spacing: 0.08em; font-size: 0.72rem; margin-bottom: 0.75rem; display: inline-block;">
+                        Our Vision &amp; Ethical AI Charter
+                    </span>
+                    <h1 style="margin: 0 0 0.85rem 0;">Hiring Should Be Simple, Fast, Fair, and Verifiable</h1>
+                    <p class="text-muted" style="max-width: 820px; font-size: 1rem; line-height: 1.75; margin: 0 0 1.75rem 0;">
+                        PostYourJobUK was built for recruiters and candidates who value transparency and merit. We believe every applicant deserves to be evaluated strictly on verified competencies and domain experience—never on demographic proxies, name origin, or ungrounded black-box AI guesses.
+                    </p>
+                    <hr style="border: none; border-top: 1px solid var(--glass-border); margin: 0;">
+                </div>
+
+                <!-- 4 Uniform KPI Vision Pillars -->
+                <div class="stats-grid" style="margin-bottom: 2.25rem;">
+                    <div class="card"><h3>Zero Hallucinations</h3><p class="stat-value">Verbatim</p></div>
+                    <div class="card"><h3>Protected Dimensions</h3><p class="stat-value">9 Pairs</p></div>
+                    <div class="card"><h3>PII Anonymization</h3><p class="stat-value">Stage 0</p></div>
+                    <div class="card"><h3>Audit Traceability</h3><p class="stat-value">SHA-256</p></div>
+                </div>
+
+                <!-- 6 Core Vision Cards (2x3 Grid) -->
+                <div class="grid-2" style="gap: 1.5rem; margin-bottom: 2.25rem;">
+                    <article class="card" style="border-top: 3px solid #f59e0b;">
+                        <h3 style="font-size: 1.12rem; color: #ffffff; margin-bottom: 0.5rem;">🚀 Speed Without Compromise</h3>
+                        <p class="text-muted" style="font-size: 0.9rem; line-height: 1.65;">
+                            Post a live job specification in minutes and receive instant AI-scored candidate evaluations asynchronously via Azure Storage Queues—removing manual screening bottlenecks from sign-up to shortlisting.
+                        </p>
                     </article>
-                    <article class="card">
-                        <h2 style="font-size: 1.15rem; margin-bottom: 0.5rem;">Live Counterfactual Auditing</h2>
-                        <p class="text-muted">Our Super-Admin Fairness Workspace (Tenant 9999) continuously verifies parity across 9 protected social dimensions aligned with the EU AI Act and UK Equality Act 2010.</p>
+
+                    <article class="card" style="border-top: 3px solid #10b981;">
+                        <h3 style="font-size: 1.12rem; color: #ffffff; margin-bottom: 0.5rem;">🔎 Verbatim Evidence Over Formatting</h3>
+                        <p class="text-muted" style="font-size: 0.9rem; line-height: 1.65;">
+                            Our Python Grounding Gate rejects unverified AI claims and job-description copy-pasting (<code>difflib &gt; 0.85</code>), ensuring recruiters only see candidate scores backed by exact character-for-character quotes from the CV.
+                        </p>
                     </article>
+
+                    <article class="card" style="border-top: 3px solid #38bdf8;">
+                        <h3 style="font-size: 1.12rem; color: #ffffff; margin-bottom: 0.5rem;">⚖️ Mathematical Parity by Design</h3>
+                        <p class="text-muted" style="font-size: 0.9rem; line-height: 1.65;">
+                            By stripping names, contact handles, birth dates, graduation eras, and affinity markers before LLM extraction and applying deterministic Base-100 subtractive math, identical qualifications always yield an identical score (<code>0.0 pt</code> delta).
+                        </p>
+                    </article>
+
+                    <article class="card" style="border-top: 3px solid #8b5cf6;">
+                        <h3 style="font-size: 1.12rem; color: #ffffff; margin-bottom: 0.5rem;">🤝 Respectful Candidate Communication</h3>
+                        <p class="text-muted" style="font-size: 0.9rem; line-height: 1.65;">
+                            Candidates are never left in the dark. Every application triggers an instant HTML confirmation receipt, and 1-click recruiter stage transitions dispatch official Interview Invitations and Job Offers with direct hiring contact details.
+                        </p>
+                    </article>
+
+                    <article class="card" style="border-top: 3px solid #ec4899;">
+                        <h3 style="font-size: 1.12rem; color: #ffffff; margin-bottom: 0.5rem;">🇬🇧 UK-Rooted, Regulatory-First Engineering</h3>
+                        <p class="text-muted" style="font-size: 0.9rem; line-height: 1.65;">
+                            Purpose-built for UK organisations with native alignment to the <strong>UK Equality Act 2010 (Section 19)</strong>, <strong>UK GDPR / Data Protection Act 2018</strong>, <strong>EU AI Act (Annex III)</strong>, and <strong>ISO/IEC 42001:2023</strong>.
+                        </p>
+                    </article>
+
+                    <article class="card" style="border-top: 3px solid #06b6d4;">
+                        <h3 style="font-size: 1.12rem; color: #ffffff; margin-bottom: 0.5rem;">♿ Universal Accessibility (WCAG 2.1 Level AA)</h3>
+                        <p class="text-muted" style="font-size: 0.9rem; line-height: 1.65;">
+                            Engineered with high-contrast dark-mode typography, keyboard-navigable tables and focus-trapped modals, screen-reader live regions, and a free client-side ATS CV builder so every job seeker can participate equally.
+                        </p>
+                    </article>
+                </div>
+
+                <div class="card" style="border-left: 4px solid #10b981; background: rgba(30, 41, 59, 0.75); padding: 1.35rem 1.75rem;">
+                    <p style="margin: 0; font-size: 0.95rem; color: #e2e8f0; font-style: italic; line-height: 1.7;">
+                        "Our goal is straightforward: to give recruiters the simplest, most effective, and most verifiable AI hiring platform available—where technology amplifies human judgment without ever introducing bias."
+                    </p>
                 </div>
             </section>
         `,
         '/terms': `
             <section class="container section">
-                <p class="terms-eyebrow">Governance &amp; Data Protection</p>
-                <h1 class="terms-title">Terms of Service &amp; UK GDPR Privacy Policy</h1>
-                <p class="text-muted" style="margin-bottom: 1.5rem;">Aligned with UK Data Protection Act 2018, UK GDPR, EU AI Act (Annex III), and ISO/IEC 42001:2023.</p>
-                <div class="card" style="margin-bottom: 1.25rem;">
-                    <h2 style="font-size: 1.1rem; margin-bottom: 0.5rem;">1. Data Minimization &amp; Stage 0 PII Redaction</h2>
-                    <p class="text-muted">Uploaded CVs are stored in encrypted Azure Blob Storage scoped to the hiring tenant. Prior to AI evaluation, personal identifiers (names, emails, phones, dates of birth, graduation years) are redacted.</p>
+                <div style="margin-bottom: 2.25rem;">
+                    <span class="badge" style="background: rgba(56, 189, 248, 0.16); color: #38bdf8; border: 1px solid rgba(56, 189, 248, 0.35); text-transform: uppercase; letter-spacing: 0.08em; font-size: 0.72rem; margin-bottom: 0.75rem; display: inline-block;">
+                        Legal, Governance &amp; Data Protection
+                    </span>
+                    <h1 style="margin: 0 0 0.5rem 0;">Terms of Service &amp; UK GDPR Privacy Policy</h1>
+                    <p style="font-size: 0.82rem; color: var(--text-subtle); margin: 0 0 0.85rem 0;">
+                        Effective &amp; Last Updated: October 2026 &bull; Aligned with UK Data Protection Act 2018, UK GDPR, EU AI Act (Regulation EU 2024/1689 Annex III), UK Equality Act 2010, &amp; ISO/IEC 42001:2023
+                    </p>
+                    <p class="text-muted" style="max-width: 820px; font-size: 0.98rem; line-height: 1.75; margin: 0 0 1.75rem 0;">
+                        Please read these Terms of Service and Data Governance provisions carefully before using <strong>PostYourJobUK</strong>. By registering a recruiter workspace, posting a job specification, or submitting a candidate application, you agree to be bound by the following terms.
+                    </p>
+                    <hr style="border: none; border-top: 1px solid var(--glass-border); margin: 0;">
                 </div>
-                <div class="card" style="margin-bottom: 1.25rem;">
-                    <h2 style="font-size: 1.1rem; margin-bottom: 0.5rem;">2. Multi-Tenant Isolation &amp; Erasure Rights</h2>
-                    <p class="text-muted">Each recruiter organization operates within a strict BOLA-protected tenant boundary. Recruiters can permanently wipe individual or bulk candidate records and CV blobs at any time.</p>
+
+                <!-- 9 Comprehensive Legal & Compliance Cards -->
+                <div class="grid-2" style="gap: 1.35rem; margin-bottom: 2rem;">
+                    <article class="card">
+                        <h3 style="font-size: 1.05rem; color: #f59e0b; margin-bottom: 0.45rem;">1. Acceptance of Terms &amp; Eligibility</h3>
+                        <p class="text-muted" style="font-size: 0.88rem; line-height: 1.65;">
+                            By accessing or using any part of the PostYourJobUK platform, you confirm that you have read, understood, and agreed to these Terms of Service. Recruiter workspaces are restricted to authorised hiring managers, HR professionals, and registered organisations (18+).
+                        </p>
+                    </article>
+
+                    <article class="card">
+                        <h3 style="font-size: 1.05rem; color: #10b981; margin-bottom: 0.45rem;">2. Multi-Tenant Isolation &amp; BOLA Security</h3>
+                        <p class="text-muted" style="font-size: 0.88rem; line-height: 1.65;">
+                            Each recruiter organisation operates within a strictly isolated tenant boundary (<code>tenant_id</code>). Attempting to access, modify, or exfiltrate job postings or candidate CVs belonging to another tenant is blocked by Broken Object Level Authorization (BOLA) guards and logged in <code>system_logs</code>.
+                        </p>
+                    </article>
+
+                    <article class="card">
+                        <h3 style="font-size: 1.05rem; color: #38bdf8; margin-bottom: 0.45rem;">3. Stage 0 PII Redaction &amp; Data Minimization</h3>
+                        <p class="text-muted" style="font-size: 0.88rem; line-height: 1.65;">
+                            In compliance with UK GDPR Article 5(1)(c) (Data Minimization), candidate CVs undergo automated Stage 0 regular-expression anonymization prior to AI inference—redacting names, email addresses, phone numbers, dates of birth, graduation years, and demographic markers before text reaches Google Gemini 2.5 Flash.
+                        </p>
+                    </article>
+
+                    <article class="card">
+                        <h3 style="font-size: 1.05rem; color: #a855f7; margin-bottom: 0.45rem;">4. Encrypted Cloud Storage &amp; Right to Erasure</h3>
+                        <p class="text-muted" style="font-size: 0.88rem; line-height: 1.65;">
+                            Uploaded PDF and DOCX resumes are stored in encrypted Azure Blob Storage (<code>hranalyticalstorage</code>) scoped strictly to the hiring job and tenant. Recruiters can permanently delete individual or bulk candidate records and cloud CV blobs at any time in accordance with UK GDPR Article 17 (Right to Erasure).
+                        </p>
+                    </article>
+
+                    <article class="card">
+                        <h3 style="font-size: 1.05rem; color: #ec4899; margin-bottom: 0.45rem;">5. Algorithmic Transparency (EU AI Act Annex III)</h3>
+                        <p class="text-muted" style="font-size: 0.88rem; line-height: 1.65;">
+                            AI compatibility scores are advisory decision-support metrics computed deterministically from verbatim CV evidence and Base-100 subtractive math. Every evaluation generates an immutable SHA-256 cryptographic audit fingerprint (<code>ai_audit_fingerprint</code>), and final hiring decisions remain under human recruiter oversight.
+                        </p>
+                    </article>
+
+                    <article class="card">
+                        <h3 style="font-size: 1.05rem; color: #06b6d4; margin-bottom: 0.45rem;">6. Non-Discrimination &amp; UK Equality Act 2010</h3>
+                        <p class="text-muted" style="font-size: 0.88rem; line-height: 1.65;">
+                            Recruiters must ensure all job specifications comply with the UK Equality Act 2010 and do not discriminate across protected characteristics. PostYourJobUK reserves the right to suspend any tenant account (`status = 'suspended'`) that posts unlawful, misleading, or discriminatory listings.
+                        </p>
+                    </article>
+
+                    <article class="card">
+                        <h3 style="font-size: 1.05rem; color: #eab308; margin-bottom: 0.45rem;">7. Transactional Email Communications</h3>
+                        <p class="text-muted" style="font-size: 0.88rem; line-height: 1.65;">
+                            By submitting an application or advancing a candidate in the ATS pipeline, users consent to receive transactional status notifications (Application Confirmation, Interview Invitation, and Formal Job Offer) dispatched via our authenticated Brevo SMTP relay (`careers@postyourjobuk.co.uk`).
+                        </p>
+                    </article>
+
+                    <article class="card">
+                        <h3 style="font-size: 1.05rem; color: #f43f5e; margin-bottom: 0.45rem;">8. Client-Side Resume Builder Privacy</h3>
+                        <p class="text-muted" style="font-size: 0.88rem; line-height: 1.65;">
+                            The Free ATS CV &amp; Resume Builder (`/resume-builder`) executes 100% client-side inside the user's browser. Draft resume inputs are never transmitted to or stored on PostYourJobUK servers unless the candidate subsequently chooses to upload the generated PDF to an active job listing.
+                        </p>
+                    </article>
                 </div>
+
+                <!-- 9th Full-Width Governing Law & Contact Card -->
+                <article class="card" style="border-left: 4px solid #38bdf8; display: flex; justify-content: space-between; align-items: center; flex-wrap: wrap; gap: 1rem;">
+                    <div style="flex: 1; min-width: 260px;">
+                        <h3 style="font-size: 1.05rem; color: #ffffff; margin-bottom: 0.35rem;">9. Limitation of Liability &amp; Governing Law (England &amp; Wales)</h3>
+                        <p class="text-muted" style="font-size: 0.88rem; line-height: 1.6; margin: 0;">
+                            These Terms of Service are governed by and construed in accordance with the laws of England and Wales. Any disputes arising in connection with the platform shall be subject to the exclusive jurisdiction of the courts of England and Wales.
+                        </p>
+                    </div>
+                    <a href="/contact" class="btn btn-primary btn-sm">✉️ Contact Data Protection &amp; Support Team →</a>
+                </article>
             </section>
         `
     };
