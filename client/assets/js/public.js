@@ -211,21 +211,21 @@
                     <article class="card">
                         <h3 style="font-size: 1.05rem; color: #06b6d4; margin-bottom: 0.45rem;">6. Non-Discrimination &amp; UK Equality Act 2010</h3>
                         <p class="text-muted" style="font-size: 0.88rem; line-height: 1.65;">
-                            Recruiters must ensure all job specifications comply with the UK Equality Act 2010 and do not discriminate across protected characteristics. PostYourJobUK reserves the right to suspend any tenant account (`status = 'suspended'`) that posts unlawful, misleading, or discriminatory listings.
+                            Recruiters must ensure all job specifications comply with the UK Equality Act 2010 and do not discriminate across protected characteristics. PostYourJobUK reserves the right to suspend any tenant account (<code>status = 'suspended'</code>) that posts unlawful, misleading, or discriminatory listings.
                         </p>
                     </article>
 
                     <article class="card">
                         <h3 style="font-size: 1.05rem; color: #eab308; margin-bottom: 0.45rem;">7. Transactional Email Communications</h3>
                         <p class="text-muted" style="font-size: 0.88rem; line-height: 1.65;">
-                            By submitting an application or advancing a candidate in the ATS pipeline, users consent to receive transactional status notifications (Application Confirmation, Interview Invitation, and Formal Job Offer) dispatched via our authenticated Brevo SMTP relay (`careers@postyourjobuk.co.uk`).
+                            By submitting an application or advancing a candidate in the ATS pipeline, users consent to receive transactional status notifications (Application Confirmation, Interview Invitation, and Formal Job Offer) dispatched via our authenticated Brevo SMTP relay (<code>careers@postyourjobuk.co.uk</code>).
                         </p>
                     </article>
 
                     <article class="card">
                         <h3 style="font-size: 1.05rem; color: #f43f5e; margin-bottom: 0.45rem;">8. Client-Side Resume Builder Privacy</h3>
                         <p class="text-muted" style="font-size: 0.88rem; line-height: 1.65;">
-                            The Free ATS CV &amp; Resume Builder (`/resume-builder`) executes 100% client-side inside the user's browser. Draft resume inputs are never transmitted to or stored on PostYourJobUK servers unless the candidate subsequently chooses to upload the generated PDF to an active job listing.
+                            The Free ATS CV &amp; Resume Builder (<code>/resume-builder</code>) executes 100% client-side inside the user's browser. Draft resume inputs are never transmitted to or stored on PostYourJobUK servers unless the candidate subsequently chooses to upload the generated PDF to an active job listing.
                         </p>
                     </article>
                 </div>
