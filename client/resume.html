@@ -4,134 +4,249 @@
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <title>Free ATS CV &amp; Resume Builder — PostYourJobUK</title>
-    <link rel="stylesheet" href="/assets/css/styles.css?v=5">
+    <link rel="stylesheet" href="/assets/css/styles.css?v=6">
+    <style>
+        .resume-gallery-grid {
+            display: grid;
+            grid-template-columns: repeat(auto-fit, minmax(300px, 1fr));
+            gap: 1.5rem;
+            margin-bottom: 2.5rem;
+        }
+        .template-card {
+            background: rgba(17, 24, 39, 0.85);
+            border: 2px solid rgba(255, 255, 255, 0.1);
+            border-radius: 16px;
+            padding: 1.5rem;
+            cursor: pointer;
+            transition: all 0.25s cubic-bezier(0.4, 0, 0.2, 1);
+            display: flex;
+            flex-direction: column;
+            justify-content: space-between;
+            position: relative;
+        }
+        .template-card:hover {
+            border-color: rgba(139, 92, 246, 0.55);
+            transform: translateY(-5px);
+            box-shadow: 0 16px 40px rgba(0, 0, 0, 0.45), 0 0 20px rgba(139, 92, 246, 0.2);
+        }
+        .template-card.selected {
+            border-color: #10b981;
+            background: linear-gradient(180deg, rgba(16, 185, 129, 0.1) 0%, rgba(17, 24, 39, 0.92) 100%);
+            box-shadow: 0 18px 45px rgba(0, 0, 0, 0.5), 0 0 28px rgba(16, 185, 129, 0.3);
+            transform: translateY(-5px);
+        }
+        .selected-pill {
+            position: absolute;
+            top: 1rem;
+            right: 1rem;
+            background: #10b981;
+            color: #06281e;
+            font-size: 0.72rem;
+            font-weight: 800;
+            padding: 0.25rem 0.65rem;
+            border-radius: 999px;
+            text-transform: uppercase;
+            letter-spacing: 0.04em;
+            display: none;
+            z-index: 5;
+            box-shadow: 0 4px 12px rgba(16, 185, 129, 0.4);
+        }
+        .template-card.selected .selected-pill {
+            display: inline-flex;
+            align-items: center;
+            gap: 4px;
+        }
+        .mini-a4-preview {
+            height: 245px;
+            background: #ffffff;
+            border-radius: 10px;
+            margin-bottom: 1.25rem;
+            padding: 14px;
+            color: #0f172a;
+            font-family: system-ui, -apple-system, sans-serif;
+            box-shadow: inset 0 0 0 1px rgba(0,0,0,0.08), 0 6px 16px rgba(0,0,0,0.25);
+            overflow: hidden;
+            position: relative;
+            text-align: left;
+            user-select: none;
+        }
+        .mini-line {
+            height: 5px;
+            background: #cbd5e1;
+            border-radius: 3px;
+            margin-bottom: 5px;
+        }
+        .mini-line.short { width: 45%; }
+        .mini-line.med { width: 72%; }
+        .mini-line.full { width: 95%; }
+        .mini-sec-head {
+            font-size: 6.5px;
+            font-weight: 800;
+            letter-spacing: 0.08em;
+            text-transform: uppercase;
+            margin: 8px 0 4px 0;
+            color: #334155;
+        }
+        .start-build-bar {
+            background: rgba(17, 24, 39, 0.95);
+            border: 1px solid rgba(139, 92, 246, 0.4);
+            border-radius: 14px;
+            padding: 1.5rem 2rem;
+            display: flex;
+            flex-wrap: wrap;
+            align-items: center;
+            justify-content: space-between;
+            gap: 1.25rem;
+            box-shadow: 0 20px 50px rgba(0, 0, 0, 0.5);
+            margin-bottom: 3rem;
+        }
+        .btn-start-build {
+            padding: 0.9rem 2.25rem;
+            font-size: 1rem;
+            font-weight: 700;
+            border-radius: 999px;
+            border: none;
+            transition: all 0.25s ease;
+            cursor: not-allowed;
+            background: #374151;
+            color: #9ca3af;
+            display: inline-flex;
+            align-items: center;
+            gap: 0.6rem;
+            text-decoration: none;
+        }
+        .btn-start-build.active {
+            cursor: pointer;
+            background: linear-gradient(135deg, #10b981, #059669);
+            color: #ffffff;
+            box-shadow: 0 8px 25px rgba(16, 185, 129, 0.45);
+        }
+        /* Editor Styles */
+        .builder-layout {
+            display: grid;
+            grid-template-columns: 1.05fr 0.95fr;
+            gap: 2rem;
+            align-items: start;
+        }
+        @media (max-width: 1080px) {
+            .builder-layout { grid-template-columns: 1fr; }
+        }
+        .step-tabs {
+            display: flex;
+            gap: 0.4rem;
+            flex-wrap: wrap;
+            margin-bottom: 1.5rem;
+            padding-bottom: 1rem;
+            border-bottom: 1px solid var(--border);
+        }
+        .step-tab-btn {
+            flex: 1 1 auto;
+            background: rgba(255, 255, 255, 0.04);
+            border: 1px solid var(--border);
+            color: var(--text-muted);
+            padding: 0.55rem 0.75rem;
+            border-radius: 8px;
+            font-size: 0.8rem;
+            font-weight: 700;
+            cursor: pointer;
+            transition: all 0.2s ease;
+            text-align: center;
+        }
+        .step-tab-btn.active {
+            background: linear-gradient(135deg, var(--primary), var(--primary-dark));
+            color: #ffffff;
+            border-color: var(--primary);
+            box-shadow: 0 4px 14px rgba(139, 92, 246, 0.35);
+        }
+        .step-tab-btn.completed {
+            border-color: rgba(16, 185, 129, 0.5);
+            color: #34d399;
+        }
+        .wizard-step { display: none; }
+        .wizard-step.active { display: block; }
+        .repeater-box {
+            background: rgba(17, 24, 39, 0.75);
+            border: 1px solid rgba(255, 255, 255, 0.12);
+            border-radius: 10px;
+            padding: 1.25rem;
+            margin-bottom: 1rem;
+            position: relative;
+        }
+        .ai-tip-banner {
+            background: rgba(16, 185, 129, 0.08);
+            border: 1px solid rgba(16, 185, 129, 0.3);
+            border-radius: 8px;
+            padding: 0.85rem 1rem;
+            margin-bottom: 1.25rem;
+            font-size: 0.83rem;
+            color: #d1fae5;
+            line-height: 1.5;
+        }
+        .preview-stage {
+            background: #1e293b;
+            border: 1px solid rgba(255, 255, 255, 0.12);
+            border-radius: 14px;
+            padding: 1.5rem;
+            position: sticky;
+            top: 90px;
+        }
+        #cv-document {
+            background: #ffffff;
+            color: #0f172a;
+            width: 100%;
+            min-height: 680px;
+            padding: 28px 32px;
+            border-radius: 6px;
+            box-shadow: 0 12px 35px rgba(0, 0, 0, 0.45);
+            font-family: 'Helvetica Neue', Helvetica, Arial, sans-serif;
+            font-size: 12.5px;
+            line-height: 1.5;
+            overflow-wrap: break-word;
+        }
+        /* 6 Template Live Preview Variations */
+        #cv-document.tpl-professional { border-top: 6px solid #1e293b; }
+        #cv-document.tpl-professional .cv-doc-header { border-bottom: 2px solid #0f172a; padding-bottom: 12px; margin-bottom: 16px; }
+        #cv-document.tpl-professional .cv-sec-title { color: #0f172a; border-bottom: 1.5px solid #cbd5e1; padding-bottom: 3px; margin: 14px 0 8px 0; font-size: 12px; font-weight: 800; text-transform: uppercase; letter-spacing: 0.06em; }
+
+        #cv-document.tpl-modern { padding: 0; overflow: hidden; }
+        #cv-document.tpl-modern .cv-doc-header { background: linear-gradient(135deg, #6d28d9, #4f46e5); color: #ffffff !important; padding: 22px 28px; margin-bottom: 16px; }
+        #cv-document.tpl-modern .cv-doc-header h1, #cv-document.tpl-modern .cv-doc-header div { color: #ffffff !important; }
+        #cv-document.tpl-modern .cv-doc-body { padding: 0 28px 28px 28px; }
+        #cv-document.tpl-modern .cv-sec-title { color: #6d28d9; border-left: 4px solid #7c3aed; border-bottom: 1px solid #ede9fe; padding-left: 8px; padding-bottom: 2px; margin: 14px 0 8px 0; font-size: 12px; font-weight: 800; text-transform: uppercase; letter-spacing: 0.06em; }
+
+        #cv-document.tpl-executive { border-top: 10px solid #0f172a; }
+        #cv-document.tpl-executive .cv-doc-header { text-align: center; border-bottom: 1px solid #94a3b8; padding-bottom: 14px; margin-bottom: 16px; }
+        #cv-document.tpl-executive .cv-sec-title { text-align: center; color: #0f172a; border-top: 1px solid #cbd5e1; border-bottom: 1px solid #cbd5e1; background: #f8fafc; padding: 4px 0; margin: 14px 0 8px 0; font-size: 11.5px; font-weight: 800; text-transform: uppercase; letter-spacing: 0.12em; }
+
+        #cv-document.tpl-technical { border-left: 8px solid #059669; }
+        #cv-document.tpl-technical .cv-doc-header { border-bottom: 2px solid #059669; padding-bottom: 12px; margin-bottom: 16px; }
+        #cv-document.tpl-technical .cv-sec-title { color: #065f46; background: #ecfdf5; border-left: 3px solid #059669; padding: 3px 8px; margin: 14px 0 8px 0; font-size: 11.5px; font-weight: 800; text-transform: uppercase; letter-spacing: 0.06em; }
+
+        #cv-document.tpl-creative { padding: 0; overflow: hidden; }
+        #cv-document.tpl-creative .cv-doc-header { background: linear-gradient(135deg, #e11d48, #be123c); color: #ffffff !important; padding: 22px 28px; margin-bottom: 16px; }
+        #cv-document.tpl-creative .cv-doc-header h1, #cv-document.tpl-creative .cv-doc-header div { color: #ffffff !important; }
+        #cv-document.tpl-creative .cv-doc-body { padding: 0 28px 28px 28px; }
+        #cv-document.tpl-creative .cv-sec-title { color: #be123c; border-bottom: 2px solid #fecdd3; padding-bottom: 3px; margin: 14px 0 8px 0; font-size: 12px; font-weight: 800; text-transform: uppercase; letter-spacing: 0.06em; }
+
+        #cv-document.tpl-academic { padding: 0; overflow: hidden; }
+        #cv-document.tpl-academic .cv-doc-header { background: linear-gradient(135deg, #0284c7, #0369a1); color: #ffffff !important; padding: 22px 28px; margin-bottom: 16px; }
+        #cv-document.tpl-academic .cv-doc-header h1, #cv-document.tpl-academic .cv-doc-header div { color: #ffffff !important; }
+        #cv-document.tpl-academic .cv-doc-body { padding: 0 28px 28px 28px; }
+        #cv-document.tpl-academic .cv-sec-title { color: #0369a1; border-bottom: 2px solid #bae6fd; padding-bottom: 3px; margin: 14px 0 8px 0; font-size: 12px; font-weight: 800; text-transform: uppercase; letter-spacing: 0.06em; }
+    </style>
 </head>
 <body>
     <div id="app-header"></div>
 
-    <main id="main-content" class="container section" tabindex="-1">
-        <div style="display: flex; justify-content: space-between; align-items: center; flex-wrap: wrap; gap: 1rem; margin-bottom: 1.75rem;">
-            <div>
-                <h1 style="margin: 0; font-size: 1.85rem;">📄 ATS-Optimised CV &amp; Resume Builder</h1>
-                <p class="text-muted" style="margin-top: 0.25rem;">Generates a clean, native vector PDF-1.4 document with zero external dependencies—100% compatible with our AI Grounding Gate.</p>
-            </div>
-            <div style="display: flex; gap: 0.75rem;">
-                <button type="button" id="download-cv-pdf-btn" class="btn btn-primary">⬇️ Download ATS PDF</button>
-                <a href="/" class="btn btn-ghost">← Back to Jobs</a>
-            </div>
-        </div>
-
-        <div class="grid-2" style="align-items: start;">
-            <!-- Left Column: Guided CV Form -->
-            <section class="card" aria-labelledby="builder-form-heading">
-                <h2 id="builder-form-heading" style="font-size: 1.2rem; margin-bottom: 1rem;">1. Candidate &amp; Competency Details</h2>
-                <form id="resume-builder-form">
-                    <div class="grid-2" style="gap: 0.85rem; margin-bottom: 0;">
-                        <div class="form-group">
-                            <label for="cv-name">Full Name</label>
-                            <input type="text" id="cv-name" value="Alex Sterling">
-                        </div>
-                        <div class="form-group">
-                            <label for="cv-title">Target Job Title</label>
-                            <input type="text" id="cv-title" value="Full-Stack Software Engineer">
-                        </div>
-                    </div>
-                    <div class="grid-3" style="gap: 0.85rem; margin-bottom: 0;">
-                        <div class="form-group">
-                            <label for="cv-email">Email Address</label>
-                            <input type="email" id="cv-email" value="alex.sterling@example.co.uk">
-                        </div>
-                        <div class="form-group">
-                            <label for="cv-phone">Phone Number</label>
-                            <input type="tel" id="cv-phone" value="+44 7700 900123">
-                        </div>
-                        <div class="form-group">
-                            <label for="cv-location">Location</label>
-                            <input type="text" id="cv-location" value="London, UK">
-                        </div>
-                    </div>
-
-                    <div class="form-group">
-                        <label for="cv-summary">Executive Summary</label>
-                        <textarea id="cv-summary" rows="3">Full-Stack Engineer with 5+ years of production experience building cloud-native PHP MVC, Python serverless microservices, MySQL databases, and accessible web applications.</textarea>
-                    </div>
-
-                    <div class="form-group">
-                        <label for="cv-skills">Core Technical Competencies (Comma-Separated)</label>
-                        <input type="text" id="cv-skills" value="PHP 8, MySQL, Python, JavaScript ES6, REST APIs, Docker, Microsoft Azure, Git">
-                    </div>
-
-                    <h3 style="font-size: 1rem; margin: 1.25rem 0 0.75rem 0;">Primary Work Experience</h3>
-                    <div class="grid-3" style="gap: 0.75rem; margin-bottom: 0;">
-                        <div class="form-group">
-                            <label for="cv-exp1-role">Role Title</label>
-                            <input type="text" id="cv-exp1-role" value="Senior Software Developer">
-                        </div>
-                        <div class="form-group">
-                            <label for="cv-exp1-comp">Company Name</label>
-                            <input type="text" id="cv-exp1-comp" value="FinTech Cloud UK">
-                        </div>
-                        <div class="form-group">
-                            <label for="cv-exp1-dates">Dates (YYYY - YYYY)</label>
-                            <input type="text" id="cv-exp1-dates" value="2021 - 2026">
-                        </div>
-                    </div>
-                    <div class="form-group">
-                        <label for="cv-exp1-desc">Key Achievements &amp; Verbatim Evidence</label>
-                        <textarea id="cv-exp1-desc" rows="3">Architected multi-tenant PHP MVC and REST API services backed by MySQL and Docker containers on Azure App Service. Automated asynchronous Python background workers.</textarea>
-                    </div>
-
-                    <h3 style="font-size: 1rem; margin: 1.25rem 0 0.75rem 0;">Previous Work Experience (Optional)</h3>
-                    <div class="grid-3" style="gap: 0.75rem; margin-bottom: 0;">
-                        <div class="form-group">
-                            <label for="cv-exp2-role">Role Title</label>
-                            <input type="text" id="cv-exp2-role" value="Web Application Developer">
-                        </div>
-                        <div class="form-group">
-                            <label for="cv-exp2-comp">Company Name</label>
-                            <input type="text" id="cv-exp2-comp" value="Digital Systems Ltd">
-                        </div>
-                        <div class="form-group">
-                            <label for="cv-exp2-dates">Dates</label>
-                            <input type="text" id="cv-exp2-dates" value="2019 - 2021">
-                        </div>
-                    </div>
-                    <div class="form-group">
-                        <label for="cv-exp2-desc">Key Achievements</label>
-                        <textarea id="cv-exp2-desc" rows="2">Developed responsive HTML5, CSS3, and Vanilla JavaScript frontends integrated with SQL databases.</textarea>
-                    </div>
-
-                    <h3 style="font-size: 1rem; margin: 1.25rem 0 0.75rem 0;">Education</h3>
-                    <div class="grid-3" style="gap: 0.75rem; margin-bottom: 0;">
-                        <div class="form-group">
-                            <label for="cv-edu-degree">Degree / Qualification</label>
-                            <input type="text" id="cv-edu-degree" value="BSc (Hons) Computer Science">
-                        </div>
-                        <div class="form-group">
-                            <label for="cv-edu-school">Institution</label>
-                            <input type="text" id="cv-edu-school" value="University of Manchester">
-                        </div>
-                        <div class="form-group">
-                            <label for="cv-edu-year">Year</label>
-                            <input type="text" id="cv-edu-year" value="2019">
-                        </div>
-                    </div>
-                </form>
-            </section>
-
-            <!-- Right Column: Live A4 Preview -->
-            <section aria-labelledby="preview-heading">
-                <h2 id="preview-heading" style="font-size: 1.15rem; margin-bottom: 0.75rem;">Live ATS Document Preview</h2>
-                <div id="cv-live-preview"></div>
-            </section>
-        </div>
+    <main id="main-content" tabindex="-1">
+        <div id="resume-app-host"></div>
     </main>
 
     <div id="app-footer"></div>
 
-    <script src="/assets/js/api.js?v=5"></script>
-    <script src="/assets/js/a11y.js?v=5"></script>
-    <script src="/assets/js/resume.js?v=5"></script>
+    <script src="/assets/js/api.js?v=6"></script>
+    <script src="/assets/js/a11y.js?v=6"></script>
+    <script src="/assets/js/resume.js?v=6"></script>
     <script>
         document.addEventListener('DOMContentLoaded', async function () {
             const session = await window.AppApi.initSession();

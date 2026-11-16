@@ -1,25 +1,55 @@
 /**
  * PostYourJobUK — Recruiter Workspace, Job CRUD, ATS Pipeline & 6-Chart Analytics (recruiter.js)
- * Zero External Dependencies | WCAG 2.1 Level AA Compliant
+ * Zero External Dependencies | Full Filter/Sort Toolbars + Clickable Column Sorting | WCAG 2.1 Level AA
  */
 (function (window) {
     'use strict';
 
     const { escapeHtml, showToast } = window.AppApi;
 
+    const VIBRANT_TITLE_COLORS = [
+        '#38bdf8', // Sky Cyan
+        '#34d399', // Mint Emerald
+        '#a78bfa', // Lavender Violet
+        '#fbbf24', // Amber Gold
+        '#f472b6', // Neon Rose
+        '#fb923c', // Tangerine Orange
+        '#2dd4bf'  // Electric Teal
+    ];
+
     function statusBadgeHtml(status) {
-        const s = String(status || 'new').toLowerCase();
+        const s = String(status || 'reviewed').toLowerCase();
         const map = {
-            hired: { cls: 'hired', label: '🎉 Hired' },
+            hired: { cls: 'hired', label: '🎉 Hired / Offered' },
+            offered: { cls: 'hired', label: '🎉 Hired / Offered' },
             interviewing: { cls: 'interviewing', label: '🟢 Interviewing' },
             reviewed: { cls: 'reviewed', label: '🔍 Reviewed' },
             rejected: { cls: 'rejected', label: '🛑 Rejected' },
             pending: { cls: 'pending', label: '⏳ Pending AI' },
-            new: { cls: 'new', label: '✨ New' },
-            processing_failed: { cls: 'failed', label: '⚠️ AI Retry' }
+            new: { cls: 'reviewed', label: '🔍 Reviewed' },
+            processing_failed: { cls: 'failed', label: '⚠️ Needs Review' }
         };
-        const cfg = map[s] || { cls: 'reviewed', label: escapeHtml(status) };
+        const cfg = map[s] || { cls: 'reviewed', label: '🔍 Reviewed' };
         return `<span class="status-badge-flag ${cfg.cls}">${cfg.label}</span>`;
+    }
+
+    function normalizeFilterStage(status) {
+        const s = String(status || 'reviewed').toLowerCase();
+        if (s === 'interviewing') return 'interviewing';
+        if (s === 'hired' || s === 'offered') return 'hired';
+        if (s === 'rejected') return 'rejected';
+        return 'reviewed';
+    }
+
+    function timeAgoLabel(dateStr) {
+        if (!dateStr) return 'Recently';
+        const ts = new Date(dateStr).getTime();
+        if (isNaN(ts)) return dateStr;
+        const diff = Math.floor((Date.now() - ts) / 1000);
+        if (diff < 60) return 'just now';
+        if (diff < 3600) return Math.floor(diff / 60) + ' mins ago';
+        if (diff < 86400) return Math.floor(diff / 3600) + ' hours ago';
+        return Math.floor(diff / 86400) + ' days ago';
     }
 
     /**
@@ -33,18 +63,45 @@
         document.title = `${tenant.company_name || 'Recruiter'} Dashboard — PostYourJobUK`;
 
         host.innerHTML = `
-            <div style="display: flex; justify-content: space-between; align-items: center; flex-wrap: wrap; gap: 1rem; margin-bottom: 1.5rem;">
-                <div>
-                    <h1 style="margin: 0; font-size: 1.85rem;">${escapeHtml(tenant.company_name || 'Recruiter Workspace')}</h1>
-                    <p class="text-muted" style="margin-top: 0.25rem;">
-                        👤 ${escapeHtml(tenant.contact_person || 'Hiring Team')} &bull; ✉️ ${escapeHtml(tenant.email || '')}
-                        ${tenant.phone_number ? ` &bull; 📞 ${escapeHtml(tenant.phone_number)}` : ''}
-                    </p>
+            <!-- Corporate Profile Business Card -->
+            <div class="card" style="margin-bottom: 2rem; border-top: 4px solid #4f46e5; background: #111827; border: 1px solid #374151;">
+                <div style="display: flex; justify-content: space-between; align-items: center; flex-wrap: wrap; gap: 1rem; margin-bottom: 1.5rem;">
+                    <div>
+                        <h1 style="margin: 0 0 0.35rem 0; font-size: 1.85rem; color: #ffffff;">Welcome, ${escapeHtml(tenant.company_name || 'Recruiter')}</h1>
+                        <p class="text-muted" style="margin: 0; color: #94a3b8;">Your Corporate Profile Dashboard</p>
+                    </div>
+                    <a href="/dashboard/analytics" class="btn btn-primary">📊 View Analytics</a>
                 </div>
-                <div style="display: flex; gap: 0.75rem; flex-wrap: wrap;">
-                    <a href="/dashboard/analytics" class="btn btn-ghost">📊 View Analytics</a>
-                    <a href="/jobs/create" class="btn btn-primary">+ Post New Job</a>
+
+                <div style="display: grid; grid-template-columns: repeat(auto-fit, minmax(175px, 1fr)); gap: 1rem; background: #1f2937; padding: 1rem; border-radius: 8px; border: 1px solid #374151;">
+                    <div>
+                        <span style="display: block; font-size: 0.82rem; color: #94a3b8; margin-bottom: 0.2rem;">Industry</span>
+                        <strong style="color: #ffffff;">${escapeHtml(tenant.industry || 'Not Specified')}</strong>
+                    </div>
+                    <div>
+                        <span style="display: block; font-size: 0.82rem; color: #94a3b8; margin-bottom: 0.2rem;">Contact Person</span>
+                        <strong style="color: #ffffff;">${escapeHtml(tenant.contact_person || 'Not Specified')}</strong>
+                    </div>
+                    <div>
+                        <span style="display: block; font-size: 0.82rem; color: #94a3b8; margin-bottom: 0.2rem;">Email Address</span>
+                        <strong style="color: #ffffff; word-break: break-all;">${escapeHtml(tenant.email || 'Not Specified')}</strong>
+                    </div>
+                    <div>
+                        <span style="display: block; font-size: 0.82rem; color: #94a3b8; margin-bottom: 0.2rem;">Phone Number</span>
+                        <strong style="color: #ffffff;">${escapeHtml(tenant.phone_number || 'Not Specified')}</strong>
+                    </div>
+                    <div>
+                        <span style="display: block; font-size: 0.82rem; color: #94a3b8; margin-bottom: 0.2rem;">Website</span>
+                        ${tenant.website_url ? `<a href="${escapeHtml(tenant.website_url)}" target="_blank" rel="noopener" style="color: #818cf8; font-weight: 700;">Visit Site ↗</a>` : `<strong style="color: #ffffff;">Not Specified</strong>`}
+                    </div>
                 </div>
+
+                ${tenant.company_address ? `
+                    <div style="margin-top: 1.15rem; padding: 0 0.25rem;">
+                        <span style="display: block; font-size: 0.82rem; color: #94a3b8; margin-bottom: 0.2rem;">Headquarters / Address</span>
+                        <p style="margin: 0; font-size: 0.92rem; color: #ffffff;">${escapeHtml(tenant.company_address)}</p>
+                    </div>
+                ` : ''}
             </div>
 
             <!-- 3 Uniform KPI Stat Cards -->
@@ -63,52 +120,95 @@
                 </div>
             </section>
 
-            <!-- Job Postings Roster -->
+            <!-- Job Postings Roster with Filter & Sort Toolbar -->
             <section class="card" aria-labelledby="jobs-table-heading">
-                <div style="display: flex; justify-content: space-between; align-items: center; flex-wrap: wrap; gap: 1rem; margin-bottom: 1rem;">
-                    <h2 id="jobs-table-heading" style="font-size: 1.25rem; margin: 0;">Your Job Postings (${jobs.length})</h2>
+                <div style="display: flex; justify-content: space-between; align-items: center; flex-wrap: wrap; gap: 1rem; margin-bottom: 1.25rem;">
+                    <h2 id="jobs-table-heading" style="font-size: 1.35rem; margin: 0;">Your Current Postings</h2>
+                    <a href="/jobs/create" class="btn btn-primary">+ Create New Job</a>
                 </div>
+
+                <!-- JOB POSTINGS FILTER & SORT TOOLBAR -->
+                <div class="job-filter-toolbar">
+                    <div style="flex: 1 1 240px; min-width: 200px;">
+                        <label for="jobSearchInput" class="sr-only">Search by job title</label>
+                        <input type="text" id="jobSearchInput" placeholder="🔍 Search by job title..." class="job-filter-input">
+                    </div>
+                    <div class="job-filter-group">
+                        <label for="jobStatusFilter" class="sr-only">Filter by status</label>
+                        <select id="jobStatusFilter" class="job-filter-select">
+                            <option value="all">All Statuses</option>
+                            <option value="active">Active Only</option>
+                            <option value="inactive">Inactive Only</option>
+                        </select>
+
+                        <label for="jobSortSelect" class="sr-only">Sort job postings</label>
+                        <select id="jobSortSelect" class="job-filter-select">
+                            <option value="date_desc">Posted (Newest First)</option>
+                            <option value="date_asc">Posted (Oldest First)</option>
+                            <option value="title_asc">Title (A - Z)</option>
+                            <option value="title_desc">Title (Z - A)</option>
+                            <option value="applicants_desc">Applicants (Most First)</option>
+                            <option value="applicants_asc">Applicants (Least First)</option>
+                        </select>
+
+                        <span id="jobCountBadge" style="font-size: 0.8rem; color: #94a3b8; white-space: nowrap; padding-left: 0.25rem;">
+                            Showing ${jobs.length} postings
+                        </span>
+                    </div>
+                </div>
+
                 ${jobs.length === 0 ? `
-                    <p class="text-muted text-center" style="padding: 2rem 0;">You have not posted any jobs yet. Click <strong>+ Post New Job</strong> above to get started.</p>
+                    <p class="text-muted text-center" style="padding: 2rem 0;">No job postings detected inside this corporate tenant workspace.</p>
                 ` : `
                     <div class="table-wrapper">
                         <table id="recruiter-jobs-table" class="app-table stack-table">
                             <thead>
                                 <tr>
-                                    <th class="sortable-th" data-sort-key="title">Role Title</th>
+                                    <th class="sortable-th" data-sort-key="title">Title</th>
                                     <th class="sortable-th" data-sort-key="status">Status</th>
                                     <th class="sortable-th" data-sort-key="applicants" data-sort-type="number">Applicants</th>
-                                    <th class="sortable-th" data-sort-key="topscore" data-sort-type="number">Top AI Match</th>
+                                    <th class="sortable-th" data-sort-key="date" data-sort-type="number">Posted</th>
                                     <th style="text-align: right;">Actions</th>
                                 </tr>
                             </thead>
-                            <tbody>
-                                ${jobs.map(j => `
-                                    <tr data-title="${escapeHtml(j.title)}" data-status="${escapeHtml(j.status)}" data-applicants="${Number(j.applicant_count || 0)}" data-topscore="${Number(j.top_score || 0)}">
-                                        <td data-label="Role Title">
-                                            <div style="font-weight: 700; color: #ffffff;">${escapeHtml(j.title)}</div>
+                            <tbody id="jobTableBody">
+                                ${jobs.map((j, idx) => {
+                                    const st = String(j.status || 'active').toLowerCase();
+                                    const titleColor = VIBRANT_TITLE_COLORS[idx % VIBRANT_TITLE_COLORS.length];
+                                    const ts = new Date(j.created_at || Date.now()).getTime() || 0;
+                                    return `
+                                    <tr class="job-posting-row"
+                                        data-title="${escapeHtml(String(j.title || '').toLowerCase())}"
+                                        data-status="${escapeHtml(st)}"
+                                        data-applicants="${Number(j.applicant_count || 0)}"
+                                        data-date="${ts}">
+                                        <td data-label="Title">
+                                            <div style="font-weight: 700; color: ${titleColor}; font-size: 1rem;">${escapeHtml(j.title)}</div>
                                             <small class="text-muted">📍 ${escapeHtml(j.location || 'Remote')} &bull; ${escapeHtml(j.employment_type || 'full-time')}</small>
                                         </td>
                                         <td data-label="Status">
-                                            <span class="status-badge ${j.status === 'active' ? 'active' : 'suspended'}">${escapeHtml(j.status)}</span>
+                                            <span class="status-badge ${st === 'active' ? 'active' : 'suspended'}">
+                                                ${st === 'active' ? '✅ Active' : '⏸️ Inactive'}
+                                            </span>
                                         </td>
                                         <td data-label="Applicants">
-                                            <a href="/applicants?job_id=${Number(j.job_id)}" class="btn btn-ghost btn-sm">
-                                                👥 ${Number(j.applicant_count || 0)} Candidates
-                                            </a>
+                                            <strong style="color: #818cf8;">${Number(j.applicant_count || 0)}</strong> applicants
                                         </td>
-                                        <td data-label="Top AI Match">
-                                            <strong style="color: ${Number(j.top_score) >= 80 ? '#10b981' : '#38bdf8'};">${Number(j.top_score || 0)}%</strong>
+                                        <td data-label="Posted" style="color: #9ca3af; font-size: 0.875rem;">
+                                            ${escapeHtml(timeAgoLabel(j.created_at))}
                                         </td>
                                         <td data-label="Actions" style="text-align: right;">
                                             <div style="display: inline-flex; gap: 0.45rem; flex-wrap: wrap;">
-                                                <a href="/applicants?job_id=${Number(j.job_id)}" class="btn btn-primary btn-sm">Review</a>
-                                                <a href="/jobs/edit?id=${Number(j.job_id)}" class="btn btn-ghost btn-sm">Edit</a>
-                                                <button type="button" class="btn btn-danger btn-sm js-delete-job" data-job-id="${Number(j.job_id)}" data-job-title="${escapeHtml(j.title)}">Delete</button>
+                                                <a href="/applicants?job_id=${Number(j.job_id)}" class="btn btn-sm btn-ghost" style="color: #38bdf8; border-color: #38bdf8;">👥 Applicants</a>
+                                                <a href="/jobs/edit?id=${Number(j.job_id)}" class="btn btn-sm btn-ghost" style="color: #10b981; border-color: #10b981;">✏️ Edit</a>
+                                                <button type="button" class="btn btn-sm btn-ghost js-delete-job" style="color: #ef4444; border-color: #ef4444;" data-job-id="${Number(j.job_id)}" data-job-title="${escapeHtml(j.title)}">🗑️ Delete</button>
                                             </div>
                                         </td>
-                                    </tr>
-                                `).join('')}
+                                    </tr>`;
+                                }).join('')}
+                                <tr id="jobNoResultsRow" style="display: none;">
+                                    <td colspan="5" style="text-align: center; color: #94a3b8; padding: 2rem;">No job postings match your search or filter criteria.</td>
+                                </tr>
                             </tbody>
                         </table>
                     </div>
@@ -118,11 +218,73 @@
 
         window.AppA11y.initSortableTable(document.getElementById('recruiter-jobs-table'));
 
+        // Wire Job Filter & Sort Toolbar
+        const searchInput = document.getElementById('jobSearchInput');
+        const statusFilter = document.getElementById('jobStatusFilter');
+        const sortSelect = document.getElementById('jobSortSelect');
+        const countBadge = document.getElementById('jobCountBadge');
+        const tableBody = document.getElementById('jobTableBody');
+        const noResultsRow = document.getElementById('jobNoResultsRow');
+
+        if (tableBody) {
+            const allRows = Array.from(tableBody.querySelectorAll('tr.job-posting-row'));
+            const applyJobFilters = () => {
+                const query = (searchInput?.value || '').trim().toLowerCase();
+                const statusVal = statusFilter?.value || 'all';
+                const sortVal = sortSelect?.value || 'date_desc';
+
+                const visibleRows = allRows.filter(row => {
+                    const title = row.getAttribute('data-title') || '';
+                    const status = row.getAttribute('data-status') || '';
+                    if (query && !title.includes(query)) return false;
+                    if (statusVal !== 'all' && status !== statusVal) return false;
+                    return true;
+                });
+
+                visibleRows.sort((a, b) => {
+                    const dateA = parseInt(a.getAttribute('data-date') || '0', 10);
+                    const dateB = parseInt(b.getAttribute('data-date') || '0', 10);
+                    const appA = parseInt(a.getAttribute('data-applicants') || '0', 10);
+                    const appB = parseInt(b.getAttribute('data-applicants') || '0', 10);
+                    const titleA = a.getAttribute('data-title') || '';
+                    const titleB = b.getAttribute('data-title') || '';
+
+                    switch (sortVal) {
+                        case 'date_desc': return dateB - dateA;
+                        case 'date_asc': return dateA - dateB;
+                        case 'title_asc': return titleA.localeCompare(titleB);
+                        case 'title_desc': return titleB.localeCompare(titleA);
+                        case 'applicants_desc': return appB - appA;
+                        case 'applicants_asc': return appA - appB;
+                        default: return dateB - dateA;
+                    }
+                });
+
+                allRows.forEach(r => { r.style.display = 'none'; });
+                visibleRows.forEach(r => {
+                    r.style.display = '';
+                    tableBody.appendChild(r);
+                });
+
+                if (noResultsRow) {
+                    tableBody.appendChild(noResultsRow);
+                    noResultsRow.style.display = visibleRows.length === 0 ? '' : 'none';
+                }
+                if (countBadge) {
+                    countBadge.textContent = `Showing ${visibleRows.length} of ${allRows.length} postings`;
+                }
+            };
+
+            searchInput?.addEventListener('input', applyJobFilters);
+            statusFilter?.addEventListener('change', applyJobFilters);
+            sortSelect?.addEventListener('change', applyJobFilters);
+        }
+
         host.querySelectorAll('.js-delete-job').forEach(btn => {
             btn.addEventListener('click', async () => {
                 const jobId = Number(btn.dataset.jobId);
                 const title = btn.dataset.jobTitle;
-                if (!window.confirm(`Delete job posting "${title}" and all associated applicants?`)) return;
+                if (!window.confirm(`Are you sure you want to delete job posting "${title}"?`)) return;
                 const r = await window.AppApi.post('/api/jobs/delete', { id: jobId });
                 if (r.ok && r.data.success) {
                     showToast(r.data.message, 'success');
@@ -216,26 +378,26 @@
                 </div>
             </div>
 
-            <!-- 5. Row 4: Top 5 Candidates Leaderboard -->
+            <!-- 5. Row 4: Top 5 Candidates Leaderboard (with Clickable Column Sorting) -->
             <div class="card">
                 <h2 style="font-size: 1.2rem; margin-bottom: 0.35rem;">🏆 Top 5 Highest-Scoring Candidates Across All Jobs</h2>
-                <p class="text-muted" style="font-size: 0.84rem; margin-bottom: 1rem;">Quick-action leaderboard of your strongest AI-verified talent pool.</p>
+                <p class="text-muted" style="font-size: 0.84rem; margin-bottom: 1rem;">Quick-action leaderboard of your strongest AI-verified talent pool. Click any column header to sort.</p>
                 ${topCands.length === 0 ? `<p class="text-muted">No evaluated candidates yet.</p>` : `
                     <div class="table-wrapper">
-                        <table class="app-table stack-table">
+                        <table id="rec-top-cands-table" class="app-table stack-table">
                             <thead>
                                 <tr>
-                                    <th>Rank</th>
-                                    <th>Candidate</th>
-                                    <th>Applied Position</th>
-                                    <th>AI Match Score</th>
-                                    <th>ATS Stage</th>
+                                    <th class="sortable-th" data-sort-key="rank" data-sort-type="number">Rank</th>
+                                    <th class="sortable-th" data-sort-key="name">Candidate</th>
+                                    <th class="sortable-th" data-sort-key="role">Applied Position</th>
+                                    <th class="sortable-th" data-sort-key="score" data-sort-type="number">AI Match Score</th>
+                                    <th class="sortable-th" data-sort-key="stage">ATS Stage</th>
                                     <th style="text-align: right;">Action</th>
                                 </tr>
                             </thead>
                             <tbody>
                                 ${topCands.map((c, i) => `
-                                    <tr>
+                                    <tr data-rank="${i + 1}" data-name="${escapeHtml(c.name)}" data-role="${escapeHtml(c.job_title)}" data-score="${Number(c.ai_score || 0)}" data-stage="${escapeHtml(c.status)}">
                                         <td data-label="Rank"><strong style="color: #f59e0b;">#${i + 1}</strong></td>
                                         <td data-label="Candidate">
                                             <div style="font-weight: 700;">${escapeHtml(c.name)}</div>
@@ -256,7 +418,8 @@
             </div>
         `;
 
-        // Render all 6 charts via native HTML5 <canvas> engine
+        window.AppA11y.initSortableTable(document.getElementById('rec-top-cands-table'));
+
         const jobLabels = topJobs.length ? topJobs.map(j => j.title) : ['No Jobs'];
         window.AppCharts.renderHorizontalBar('rec-top-jobs-canvas', {
             title: 'Top Jobs by Applicant Volume',
@@ -409,7 +572,7 @@
     }
 
     /**
-     * 4. Applicants Roster & 1-Click ATS Pipeline (/applicants?job_id=X)
+     * 4. Applicants Roster with Full Filter/Sort Toolbar & Clickable Column Headers (/applicants?job_id=X)
      */
     async function renderApplicantsList(host) {
         const params = new URLSearchParams(window.location.search);
@@ -421,74 +584,164 @@
         document.title = `Applicants: ${job.title} — PostYourJobUK`;
 
         host.innerHTML = `
-            <div style="display: flex; justify-content: space-between; align-items: center; flex-wrap: wrap; gap: 1rem; margin-bottom: 1.5rem;">
+            <div style="margin-bottom: 1rem;">
+                <a href="/dashboard" class="btn btn-ghost btn-sm">← Back to Dashboard</a>
+            </div>
+
+            <div class="card" style="margin-bottom: 1.75rem; display: flex; justify-content: space-between; align-items: center; flex-wrap: wrap; gap: 1rem;">
                 <div>
-                    <h1 style="margin: 0; font-size: 1.75rem;">👥 Candidates for ${escapeHtml(job.title)}</h1>
-                    <p class="text-muted" style="margin-top: 0.25rem;">AI-evaluated candidate roster &amp; automated ATS communication pipeline.</p>
-                </div>
-                <div style="display: flex; gap: 0.75rem; flex-wrap: wrap;">
-                    ${applicants.length > 0 ? `<button type="button" id="wipe-all-cands-btn" class="btn btn-danger btn-sm">🗑️ Wipe All Candidates</button>` : ''}
-                    <a href="/dashboard" class="btn btn-ghost btn-sm">← Back to Dashboard</a>
+                    <h1 style="margin: 0; font-size: 1.75rem;">👥 Applications for: ${escapeHtml(job.title)}</h1>
+                    <div style="margin-top: 0.35rem;">
+                        Status:
+                        <span class="status-badge ${job.status === 'active' ? 'active' : 'suspended'}">
+                            ${job.status === 'active' ? '✅ Active' : '⏸️ Inactive'}
+                        </span>
+                    </div>
                 </div>
             </div>
 
-            <!-- 4 Uniform KPI Stage Cards -->
+            <!-- 4 Uniform KPI Stage Cards (with ⚠️ Wipe All button inside Card 1) -->
             <section class="app-stats-grid" aria-label="Job Pipeline Counters">
-                <div class="card"><span class="form-label">Total Applicants</span><p class="stat-value" id="kpi-total">${Number(stats.total_applicants || 0)}</p></div>
+                <div class="card" style="display: flex; justify-content: space-between; align-items: center;">
+                    <div>
+                        <span class="form-label">Total Applicants</span>
+                        <p class="stat-value" id="kpi-total">${Number(stats.total_applicants || 0)}</p>
+                    </div>
+                    ${applicants.length > 0 ? `
+                        <button type="button" id="wipe-all-cands-btn" class="btn btn-sm" style="background: rgba(239, 68, 68, 0.14); color: #f87171; border: 1px solid rgba(239, 68, 68, 0.45); border-radius: 6px; padding: 0.35rem 0.65rem; font-weight: 700; font-size: 0.74rem;">
+                            ⚠️ Wipe All
+                        </button>
+                    ` : ''}
+                </div>
                 <div class="card"><span class="form-label">Interviewing</span><p class="stat-value" id="kpi-interviewing">${Number(stats.interviewing_count || 0)}</p></div>
                 <div class="card"><span class="form-label">Hired / Offered</span><p class="stat-value" id="kpi-hired">${Number(stats.hired_count || 0)}</p></div>
                 <div class="card"><span class="form-label">Rejected</span><p class="stat-value" id="kpi-rejected">${Number(stats.rejected_count || 0)}</p></div>
             </section>
 
-            <!-- Balanced 4-Column Desktop Applicants Table -->
+            <!-- Balanced 4-Column Desktop Applicants Card with Filter & Sort Toolbar -->
             <section class="card">
-                ${applicants.length === 0 ? `<p class="text-muted text-center" style="padding: 2rem 0;">No candidates have applied to this position yet.</p>` : `
+                <!-- APPLICANTS FILTER & SORT TOOLBAR -->
+                <div class="filter-toolbar">
+                    <div style="flex: 1 1 200px; min-width: 180px;">
+                        <label for="candidateSearchInput" class="sr-only">Search candidate name or email</label>
+                        <input type="text" id="candidateSearchInput" placeholder="🔍 Search candidate name or email..." class="filter-input">
+                    </div>
+                    <div class="filter-toolbar-group">
+                        <label for="statusFilterSelect" class="sr-only">Filter by pipeline stage</label>
+                        <select id="statusFilterSelect" class="filter-select">
+                            <option value="all">All Pipeline Stages</option>
+                            <option value="reviewed">🔍 Reviewed / Pending</option>
+                            <option value="interviewing">🟢 Interviewing</option>
+                            <option value="hired">🎉 Hired / Offered</option>
+                            <option value="rejected">🛑 Rejected</option>
+                        </select>
+
+                        <label for="scoreFilterSelect" class="sr-only">Filter by AI match score</label>
+                        <select id="scoreFilterSelect" class="filter-select">
+                            <option value="all">All Match Scores</option>
+                            <option value="80">Score ≥ 80% (High Match)</option>
+                            <option value="50">Score ≥ 50% (Qualified)</option>
+                            <option value="low">Score &lt; 50% (Low / Non-Fit)</option>
+                        </select>
+
+                        <label for="limitFilterSelect" class="sr-only">Limit displayed candidates</label>
+                        <select id="limitFilterSelect" class="filter-select">
+                            <option value="all">Show All</option>
+                            <option value="5">Top 5 Candidates</option>
+                            <option value="10">Top 10 Candidates</option>
+                        </select>
+
+                        <label for="candidateSortSelect" class="sr-only">Sort candidates</label>
+                        <select id="candidateSortSelect" class="filter-select">
+                            <option value="score_desc">Score (Highest First)</option>
+                            <option value="score_asc">Score (Lowest First)</option>
+                            <option value="date_desc">Newest Submission</option>
+                            <option value="date_asc">Oldest Submission</option>
+                            <option value="name_asc">Name (A - Z)</option>
+                            <option value="name_desc">Name (Z - A)</option>
+                        </select>
+
+                        <span id="candidateCountBadge" style="font-size: 0.78rem; color: #94a3b8; white-space: nowrap; padding-left: 0.25rem;">
+                            Showing ${applicants.length} candidates
+                        </span>
+                    </div>
+                </div>
+
+                ${applicants.length === 0 ? `<p class="text-muted text-center" style="padding: 2rem 0;">No applications received for this job position yet.</p>` : `
                     <div class="table-wrapper">
                         <table id="applicants-roster-table" class="app-table stack-table">
                             <thead>
                                 <tr>
-                                    <th class="sortable-th" data-sort-key="name">Candidate &amp; Stage</th>
-                                    <th class="sortable-th" data-sort-key="score" data-sort-type="number">AI Match &amp; Evaluation</th>
-                                    <th>ATS Pipeline Follow-Up</th>
-                                    <th style="text-align: right;">Profile &amp; CV</th>
+                                    <th class="sortable-th" data-sort-key="score" data-sort-type="number" style="width: 110px;">Match</th>
+                                    <th class="sortable-th" data-sort-key="name" style="width: 34%;">Candidate Profile</th>
+                                    <th class="sortable-th" data-sort-key="status" style="width: 32%;">ATS Pipeline &amp; Follow-Up</th>
+                                    <th style="width: 24%; text-align: right;">Profile &amp; CV Actions</th>
                                 </tr>
                             </thead>
-                            <tbody>
+                            <tbody id="applicantTableBody">
                                 ${applicants.map(a => {
-                                    const st = String(a.status || 'new').toLowerCase();
+                                    const rawSt = String(a.status || 'reviewed').toLowerCase();
+                                    const filterStage = normalizeFilterStage(rawSt);
                                     const score = Number(a.ai_score || 0);
-                                    const scoreColor = score >= 80 ? '#10b981' : (score >= 50 ? '#f59e0b' : '#f87171');
+                                    const scoreColor = score >= 80 ? '#10b981' : (score >= 50 ? '#f59e0b' : '#ef4444');
+                                    const ts = new Date(a.applied_at || a.created_at || Date.now()).getTime() || 0;
+                                    const dateFormatted = new Date(ts).toLocaleDateString('en-GB', { month: 'short', day: '2-digit', year: 'numeric' });
+                                    const cleanSummary = String(a.ai_summary || '').replace(/<[^>]*>/g, ' ').replace(/\s+/g, ' ').trim();
+
                                     return `
-                                    <tr id="cand-row-${Number(a.applicant_id)}" data-name="${escapeHtml(a.name)}" data-score="${score}">
-                                        <td data-label="Candidate & Stage">
-                                            <div style="font-weight: 700; color: #ffffff;">${escapeHtml(a.name)}</div>
-                                            <small class="text-muted" style="display: block; margin-bottom: 0.35rem;">${escapeHtml(a.email)}</small>
-                                            <span class="js-stage-badge">${statusBadgeHtml(st)}</span>
+                                    <tr class="applicant-row"
+                                        data-score="${score}"
+                                        data-status="${escapeHtml(filterStage)}"
+                                        data-name="${escapeHtml(String(a.name || '').toLowerCase())}"
+                                        data-email="${escapeHtml(String(a.email || '').toLowerCase())}"
+                                        data-date="${ts}">
+                                        
+                                        <!-- Column 1: Match Score & Date -->
+                                        <td data-label="Match Index">
+                                            <div>
+                                                <span style="font-weight: 800; font-size: 1.2rem; color: ${scoreColor}; display: block; line-height: 1.2;">${score}%</span>
+                                                <span style="font-size: 0.74rem; color: #9ca3af; display: block; margin-top: 0.2rem;">${escapeHtml(dateFormatted)}</span>
+                                            </div>
                                         </td>
-                                        <td data-label="AI Match & Evaluation">
-                                            <div style="display: flex; align-items: center; gap: 0.6rem;">
-                                                <strong style="font-size: 1.15rem; color: ${scoreColor};">${score}%</strong>
-                                                <div style="width: 80px; height: 7px; background: rgba(255,255,255,0.1); border-radius: 999px; overflow: hidden;">
-                                                    <div style="width: ${Math.min(100, score)}%; height: 100%; background: ${scoreColor};"></div>
+
+                                        <!-- Column 2: Candidate Profile & Compact Summary Preview -->
+                                        <td data-label="Candidate Profile">
+                                            <div>
+                                                <strong style="font-size: 1.02rem; color: #ffffff; display: block; line-height: 1.3;">${escapeHtml(a.name)}</strong>
+                                                <span style="font-size: 0.82rem; color: #a5b4fc; display: block; margin: 0.15rem 0 0.35rem 0; word-break: break-all;">${escapeHtml(a.email)}</span>
+                                                ${cleanSummary ? `
+                                                    <p style="color: var(--text-muted); font-size: 0.8rem; margin: 0; line-height: 1.38; display: -webkit-box; -webkit-line-clamp: 2; -webkit-box-orient: vertical; overflow: hidden; text-overflow: ellipsis; max-width: 320px;" title="${escapeHtml(cleanSummary)}">
+                                                        ${escapeHtml(cleanSummary.slice(0, 140))}${cleanSummary.length > 140 ? '…' : ''}
+                                                    </p>
+                                                ` : ''}
+                                            </div>
+                                        </td>
+
+                                        <!-- Column 3: Current Stage + Horizontal ATS Follow-Up Buttons -->
+                                        <td data-label="ATS Pipeline & Follow-Up">
+                                            <div>
+                                                <div style="margin-bottom: 0.45rem;">${statusBadgeHtml(rawSt)}</div>
+                                                <div style="display: inline-flex; gap: 0.38rem; flex-wrap: wrap;">
+                                                    <button type="button" class="pipeline-btn pipeline-btn-interview js-ats-btn" data-id="${Number(a.applicant_id)}" data-name="${escapeHtml(a.name)}" data-status="interviewing" ${rawSt === 'interviewing' ? 'disabled' : ''}>🟢 Interview</button>
+                                                    <button type="button" class="pipeline-btn pipeline-btn-offer js-ats-btn" data-id="${Number(a.applicant_id)}" data-name="${escapeHtml(a.name)}" data-status="hired" ${rawSt === 'hired' ? 'disabled' : ''}>🎉 Offer</button>
+                                                    <button type="button" class="pipeline-btn pipeline-btn-reject js-ats-btn" data-id="${Number(a.applicant_id)}" data-name="${escapeHtml(a.name)}" data-status="rejected" ${rawSt === 'rejected' ? 'disabled' : ''}>🛑 Reject</button>
                                                 </div>
                                             </div>
                                         </td>
-                                        <td data-label="ATS Pipeline Follow-Up">
-                                            <div style="display: inline-flex; gap: 0.4rem; flex-wrap: wrap;">
-                                                <button type="button" class="pipeline-btn pipeline-btn-interview js-ats-btn" data-id="${Number(a.applicant_id)}" data-status="interviewing" ${st === 'interviewing' ? 'disabled' : ''}>🟢 Invite</button>
-                                                <button type="button" class="pipeline-btn pipeline-btn-offer js-ats-btn" data-id="${Number(a.applicant_id)}" data-status="hired" ${st === 'hired' ? 'disabled' : ''}>🎉 Offer</button>
-                                                <button type="button" class="pipeline-btn pipeline-btn-reject js-ats-btn" data-id="${Number(a.applicant_id)}" data-status="rejected" ${st === 'rejected' ? 'disabled' : ''}>🛑 Reject</button>
-                                            </div>
-                                        </td>
-                                        <td data-label="Profile & CV" style="text-align: right;">
-                                            <div style="display: inline-flex; gap: 0.4rem; flex-wrap: wrap;">
-                                                <a href="/applicant/view?id=${Number(a.applicant_id)}" class="btn btn-primary btn-sm">👁️ Profile</a>
-                                                <a href="/api/applicants/download?id=${Number(a.applicant_id)}" class="btn btn-ghost btn-sm">⬇️ CV</a>
-                                                <button type="button" class="btn btn-danger btn-sm js-del-cand" data-id="${Number(a.applicant_id)}" aria-label="Delete ${escapeHtml(a.name)}">🗑️</button>
+
+                                        <!-- Column 4: Profile & CV Actions -->
+                                        <td data-label="Profile & CV Actions" style="text-align: right;">
+                                            <div style="display: inline-flex; gap: 0.4rem; flex-wrap: wrap; justify-content: flex-end;">
+                                                <a href="/applicant/view?id=${Number(a.applicant_id)}" class="btn btn-sm btn-ghost" style="color: #38bdf8; border-color: #38bdf8;">👁️ Overview</a>
+                                                <a href="/api/applicants/download?id=${Number(a.applicant_id)}" class="btn btn-sm btn-ghost" style="color: #10b981; border-color: #10b981;">📥 CV</a>
+                                                <button type="button" class="btn btn-sm btn-ghost js-del-cand" style="color: #ef4444; border-color: #ef4444;" data-id="${Number(a.applicant_id)}" aria-label="Delete ${escapeHtml(a.name)}">🗑️ Delete</button>
                                             </div>
                                         </td>
                                     </tr>`;
                                 }).join('')}
+                                <tr id="noResultsFilterRow" style="display: none;">
+                                    <td colspan="4" style="text-align: center; color: #94a3b8; padding: 2rem;">No candidates match the selected filter criteria.</td>
+                                </tr>
                             </tbody>
                         </table>
                     </div>
@@ -498,13 +751,102 @@
 
         window.AppA11y.initSortableTable(document.getElementById('applicants-roster-table'));
 
+        // Wire Applicants Filter & Sort Toolbar
+        const searchInput = document.getElementById('candidateSearchInput');
+        const statusFilter = document.getElementById('statusFilterSelect');
+        const scoreFilter = document.getElementById('scoreFilterSelect');
+        const limitFilter = document.getElementById('limitFilterSelect');
+        const sortSelect = document.getElementById('candidateSortSelect');
+        const countBadge = document.getElementById('candidateCountBadge');
+        const tableBody = document.getElementById('applicantTableBody');
+        const noResultsRow = document.getElementById('noResultsFilterRow');
+
+        if (tableBody) {
+            const allRows = Array.from(tableBody.querySelectorAll('tr.applicant-row'));
+            const applyApplicantFilters = () => {
+                const query = (searchInput?.value || '').trim().toLowerCase();
+                const statusVal = statusFilter?.value || 'all';
+                const scoreVal = scoreFilter?.value || 'all';
+                const limitVal = limitFilter?.value || 'all';
+                const sortVal = sortSelect?.value || 'score_desc';
+
+                const visibleRows = allRows.filter(row => {
+                    const name = row.getAttribute('data-name') || '';
+                    const email = row.getAttribute('data-email') || '';
+                    const status = row.getAttribute('data-status') || 'reviewed';
+                    const score = parseInt(row.getAttribute('data-score') || '0', 10);
+
+                    if (query && !name.includes(query) && !email.includes(query)) return false;
+                    if (statusVal !== 'all' && status !== statusVal) return false;
+                    if (scoreVal === '80' && score < 80) return false;
+                    if (scoreVal === '50' && score < 50) return false;
+                    if (scoreVal === 'low' && score >= 50) return false;
+                    return true;
+                });
+
+                visibleRows.sort((a, b) => {
+                    const scoreA = parseInt(a.getAttribute('data-score') || '0', 10);
+                    const scoreB = parseInt(b.getAttribute('data-score') || '0', 10);
+                    const dateA = parseInt(a.getAttribute('data-date') || '0', 10);
+                    const dateB = parseInt(b.getAttribute('data-date') || '0', 10);
+                    const nameA = a.getAttribute('data-name') || '';
+                    const nameB = b.getAttribute('data-name') || '';
+
+                    switch (sortVal) {
+                        case 'score_desc': return scoreB - scoreA;
+                        case 'score_asc':  return scoreA - scoreB;
+                        case 'date_desc':  return dateB - dateA;
+                        case 'date_asc':   return dateA - dateB;
+                        case 'name_asc':   return nameA.localeCompare(nameB);
+                        case 'name_desc':  return nameB.localeCompare(nameA);
+                        default:           return scoreB - scoreA;
+                    }
+                });
+
+                allRows.forEach(r => { r.style.display = 'none'; });
+
+                let displayLimit = visibleRows.length;
+                if (limitVal === '5') displayLimit = Math.min(5, visibleRows.length);
+                if (limitVal === '10') displayLimit = Math.min(10, visibleRows.length);
+
+                const rowsToDisplay = visibleRows.slice(0, displayLimit);
+                rowsToDisplay.forEach(r => {
+                    r.style.display = '';
+                    tableBody.appendChild(r);
+                });
+
+                if (noResultsRow) {
+                    tableBody.appendChild(noResultsRow);
+                    noResultsRow.style.display = rowsToDisplay.length === 0 ? '' : 'none';
+                }
+                if (countBadge) {
+                    countBadge.textContent = `Showing ${rowsToDisplay.length} of ${allRows.length} candidates`;
+                }
+            };
+
+            searchInput?.addEventListener('input', applyApplicantFilters);
+            statusFilter?.addEventListener('change', applyApplicantFilters);
+            scoreFilter?.addEventListener('change', applyApplicantFilters);
+            limitFilter?.addEventListener('change', applyApplicantFilters);
+            sortSelect?.addEventListener('change', applyApplicantFilters);
+        }
+
         // Wire ATS Pipeline Buttons
         host.querySelectorAll('.js-ats-btn').forEach(btn => {
             btn.addEventListener('click', async () => {
                 const applicantId = Number(btn.dataset.id);
+                const candName = btn.dataset.name || 'Candidate';
                 const newStatus = btn.dataset.status;
-                btn.disabled = true;
 
+                const confirmMsg = newStatus === 'interviewing'
+                    ? `Invite ${candName} to Interview? This will automatically send an official Interview Invitation email with your recruiter contact details.`
+                    : (newStatus === 'hired'
+                        ? `Extend Job Offer to ${candName}? This will automatically send an official Congratulatory Job Offer email.`
+                        : `Mark ${candName} as Rejected? (Silent status update — no email will be sent)`);
+
+                if (!window.confirm(confirmMsg)) return;
+
+                btn.disabled = true;
                 const r = await window.AppApi.post('/api/applicants/status', {
                     applicant_id: applicantId,
                     job_id: jobId,
@@ -525,7 +867,7 @@
         host.querySelectorAll('.js-del-cand').forEach(btn => {
             btn.addEventListener('click', async () => {
                 const applicantId = Number(btn.dataset.id);
-                if (!window.confirm('Permanently delete this candidate and their CV?')) return;
+                if (!window.confirm('Are you sure you want to permanently delete this candidate and their CV? This cannot be undone.')) return;
                 const r = await window.AppApi.post('/api/applicants/delete', { applicant_id: applicantId, job_id: jobId });
                 if (r.ok && r.data.success) {
                     showToast(r.data.message, 'success');
@@ -538,7 +880,7 @@
         const wipeBtn = document.getElementById('wipe-all-cands-btn');
         if (wipeBtn) {
             wipeBtn.addEventListener('click', async () => {
-                if (!window.confirm('WARNING: Permanently delete ALL candidates and CV blobs for this job?')) return;
+                if (!window.confirm('CRITICAL WARNING: Are you absolutely sure you want to delete ALL candidates and their CVs for this job? This will wipe cloud storage and CANNOT be undone.')) return;
                 const r = await window.AppApi.post('/api/applicants/delete-all', { job_id: jobId });
                 if (r.ok && r.data.success) {
                     showToast(r.data.message, 'success');

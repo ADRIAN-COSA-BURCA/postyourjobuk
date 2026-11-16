@@ -1,12 +1,44 @@
 /**
  * PostYourJobUK — Super-Admin Governance, 6-Chart Analytics, Audit Logs & Tenant 9999 Fairness Suite (admin.js)
- * Zero External Dependencies | WCAG 2.1 Level AA Compliant
+ * Zero External Dependencies | Full 4-Tab Evidence Inspector & Uniform Table Sorting | WCAG 2.1 Level AA
  */
 (function (window) {
     'use strict';
 
     const { escapeHtml, showToast } = window.AppApi;
     let fairnessPollTimer = null;
+
+    function extractQuotesFromSummary(summaryHtml) {
+        if (!summaryHtml) {
+            return '<p style="color:#94a3b8; padding:10px;">Pending evidence extraction from CV...</p>';
+        }
+        const div = document.createElement('div');
+        div.innerHTML = summaryHtml;
+        const lis = div.querySelectorAll('li, p');
+        const quotes = [];
+        lis.forEach(el => {
+            const text = el.innerText || el.textContent || '';
+            if (text.includes('“') || text.includes('"') || text.includes('Evidence') || text.includes('experience') || text.includes('deduction')) {
+                quotes.push('<div class="evidence-quote-card">' + el.innerHTML + '</div>');
+            }
+        });
+        if (quotes.length === 0) {
+            return '<div style="font-size:0.85rem; color:#e2e8f0;">' + summaryHtml + '</div>';
+        }
+        return quotes.join('');
+    }
+
+    function switchFairnessModalTab(tabId) {
+        document.querySelectorAll('#fairness-evidence-modal .modal-tab-pane').forEach(p => {
+            p.style.display = 'none';
+        });
+        const target = document.getElementById('tab-' + tabId);
+        if (target) target.style.display = 'block';
+
+        document.querySelectorAll('#fairness-evidence-modal .modal-tab-btn').forEach(b => {
+            b.classList.toggle('active', b.getAttribute('data-tab') === tabId);
+        });
+    }
 
     /**
      * 1. Admin System Overview & Tenants Roster (/admin)
@@ -186,27 +218,33 @@
                 </div>
             </div>
 
-            <!-- 5. Row 4: Multi-Tenant Utilisation Leaderboard -->
+            <!-- 5. Row 4: Multi-Tenant Utilisation Leaderboard (with Clickable Column Sorting) -->
             <div class="card">
                 <h2 style="font-size: 1.2rem; margin-bottom: 0.35rem;">🏆 Multi-Tenant Utilisation &amp; Performance Leaderboard</h2>
-                <p class="text-muted" style="font-size: 0.84rem; margin-bottom: 1rem;">Ranks active recruiter workspaces by candidate volume, active job postings, average AI score, and ATS hiring velocity.</p>
+                <p class="text-muted" style="font-size: 0.84rem; margin-bottom: 1rem;">Ranks active recruiter workspaces by candidate volume, active job postings, average AI score, and ATS hiring velocity. Click any column header to sort.</p>
                 <div class="table-wrapper">
-                    <table class="admin-table-view stack-table">
+                    <table id="admin-leaderboard-table" class="admin-table-view stack-table">
                         <thead>
                             <tr>
-                                <th>Rank</th>
-                                <th>Tenant Organization</th>
-                                <th>Status</th>
-                                <th>Jobs (Active / Total)</th>
-                                <th>Applicants</th>
-                                <th>Mean AI Score</th>
-                                <th>ATS Outcomes</th>
+                                <th class="sortable-th" data-sort-key="rank" data-sort-type="number">Rank</th>
+                                <th class="sortable-th" data-sort-key="company">Tenant Organization</th>
+                                <th class="sortable-th" data-sort-key="status">Status</th>
+                                <th class="sortable-th" data-sort-key="jobs" data-sort-type="number">Jobs (Active / Total)</th>
+                                <th class="sortable-th" data-sort-key="apps" data-sort-type="number">Applicants</th>
+                                <th class="sortable-th" data-sort-key="score" data-sort-type="number">Mean AI Score</th>
+                                <th class="sortable-th" data-sort-key="hired" data-sort-type="number">ATS Outcomes</th>
                                 <th style="text-align: right;">Action</th>
                             </tr>
                         </thead>
                         <tbody>
                             ${topTenants.map((t, idx) => `
-                                <tr>
+                                <tr data-rank="${idx + 1}"
+                                    data-company="${escapeHtml(t.company_name)}"
+                                    data-status="${escapeHtml(t.status)}"
+                                    data-jobs="${Number(t.job_count || 0)}"
+                                    data-apps="${Number(t.applicant_count || 0)}"
+                                    data-score="${Number(t.avg_ai_score || 0)}"
+                                    data-hired="${Number(t.hired_count || 0) * 100 + Number(t.interviewing_count || 0)}">
                                     <td data-label="Rank"><strong style="color: #f59e0b;">#${idx + 1}</strong></td>
                                     <td data-label="Tenant Organization">
                                         <div style="font-weight: 700;">${escapeHtml(t.company_name)}</div>
@@ -217,8 +255,8 @@
                                     <td data-label="Applicants"><strong style="color: #38bdf8;">${Number(t.applicant_count || 0)}</strong></td>
                                     <td data-label="Mean AI Score"><strong>${t.avg_ai_score ? Number(t.avg_ai_score).toFixed(1) + '%' : 'N/A'}</strong></td>
                                     <td data-label="ATS Outcomes">
-                                        <span style="color: #38bdf8; margin-right: 0.5rem;">🟢 ${Number(t.interviewing_count || 0)}</span>
-                                        <span style="color: #10b981;">🎉 ${Number(t.hired_count || 0)}</span>
+                                        <span style="color: #38bdf8; margin-right: 0.5rem;">🟢 ${Number(t.interviewing_count || 0)} Interview</span>
+                                        <span style="color: #10b981;">🎉 ${Number(t.hired_count || 0)} Hired</span>
                                     </td>
                                     <td data-label="Action" style="text-align: right;">
                                         <a href="/admin/view-tenant?id=${Number(t.tenant_id)}" class="btn btn-ghost btn-sm">🏢 Inspect</a>
@@ -230,6 +268,8 @@
                 </div>
             </div>
         `;
+
+        window.AppA11y.initSortableTable(document.getElementById('admin-leaderboard-table'));
 
         const tLabels = topTenants.length ? topTenants.map(t => t.company_name) : ['No Tenants'];
         window.AppCharts.renderHorizontalBar('adm-tenants-bar-canvas', {
@@ -441,70 +481,134 @@
         document.title = 'Algorithmic Fairness & Bias Audit — Super-Admin Portal';
 
         host.innerHTML = `
-            <div style="display: flex; justify-content: space-between; align-items: center; flex-wrap: wrap; gap: 1rem; margin-bottom: 1.5rem;">
-                <div>
-                    <h1 style="margin: 0; font-size: 1.8rem;">⚖️ Algorithmic Fairness &amp; Bias Transparency Panel</h1>
-                    <p class="text-muted" style="margin-top: 0.25rem;">Counterfactual parity verification on Tenant 9999 (EU AI Act Annex III &amp; UK Equality Act 2010).</p>
-                </div>
-                <div style="display: flex; gap: 0.65rem; flex-wrap: wrap;">
-                    <button type="button" id="run-live-audit-btn" class="btn btn-primary btn-sm">⚡ Run Live Algorithmic Parity Audit</button>
-                    <a href="/admin/fairness/certificate" target="_blank" class="btn btn-ghost btn-sm">📜 Export Compliance Certificate</a>
-                    <a href="/admin" class="btn btn-ghost btn-sm">← Back to Overview</a>
+            <div class="card" style="margin-bottom: 1.5rem;">
+                <div style="display: flex; justify-content: space-between; align-items: center; flex-wrap: wrap; gap: 1rem;">
+                    <div>
+                        <div style="display: flex; align-items: center; gap: 10px; flex-wrap: wrap;">
+                            <h1 style="margin: 0; font-size: 1.65rem;">Fairness &amp; Bias Transparency Panel</h1>
+                            <span style="background: rgba(16, 185, 129, 0.15); color: #10b981; border: 1px solid rgba(16, 185, 129, 0.3); font-size: 0.72rem; font-weight: 700; padding: 3px 8px; border-radius: 9999px; text-transform: uppercase;">
+                                EU AI Act &amp; Equality Act Audited
+                            </span>
+                        </div>
+                        <p class="text-muted" style="margin-top: 5px; font-size: 0.9rem;">
+                            System Audit Workspace (Tenant 9999) — Live counterfactual parity testing powered by Azure Functions AI pipeline.
+                        </p>
+                    </div>
+                    <div style="display: flex; align-items: center; gap: 10px; flex-wrap: wrap;">
+                        <button type="button" id="btnRunAudit" class="btn btn-primary btn-sm">
+                            <span id="btnRunIcon">⚡</span>
+                            <span id="btnRunText">Run Live Algorithmic Parity Audit</span>
+                        </button>
+                        <a href="/admin/fairness/certificate" target="_blank" class="btn btn-ghost btn-sm">📄 Export Compliance Certificate</a>
+                        <a href="/admin" class="btn btn-ghost btn-sm">← Back to Dashboard</a>
+                    </div>
                 </div>
             </div>
 
-            <div id="fairness-progress-banner" class="card" style="display: none; margin-bottom: 1.5rem; border-color: #38bdf8;">
-                <strong id="fairness-progress-text" style="color: #38bdf8;">Dispatching 18 synthetic CVs to Azure Storage Queue…</strong>
+            <!-- Live Execution Progress Card -->
+            <div id="auditProgressCard" class="card" style="display: none; margin-bottom: 1.5rem; border: 1px solid #3b82f6;">
+                <div style="display: flex; justify-content: space-between; align-items: center; margin-bottom: 0.75rem;">
+                    <div style="display: flex; align-items: center; gap: 10px;">
+                        <div class="pulse-indicator"></div>
+                        <strong style="color: #60a5fa; font-size: 1rem;">Live Cloud Audit In Progress...</strong>
+                    </div>
+                    <span id="auditProgressCount" style="font-size: 0.9rem; font-weight: 700; color: #60a5fa;">0 / 18 Completed</span>
+                </div>
+                <div style="width: 100%; height: 10px; background: rgba(255,255,255,0.08); border-radius: 5px; overflow: hidden; margin-bottom: 0.5rem;">
+                    <div id="auditProgressBar" style="width: 5%; height: 100%; background: linear-gradient(90deg, #3b82f6, #10b981); transition: width 0.4s ease; border-radius: 5px;"></div>
+                </div>
+                <div style="display: flex; justify-content: space-between; font-size: 0.8rem; color: var(--text-muted);">
+                    <span id="auditProgressStep">Step 1/3: Resetting applicant records &amp; dispatching queue messages...</span>
+                    <span>Evaluating with Gemini 2.5 Flash</span>
+                </div>
             </div>
 
             <!-- 4 Uniform KPI Stat Cards -->
             <div class="admin-counters-grid">
-                <div class="admin-metric-card"><h3>Total Audit Pairs</h3><p>${Number(stats.total_pairs || 0)}</p></div>
-                <div class="admin-metric-card"><h3>Mean Score Delta</h3><p>${Number(stats.mean_delta || 0)} pt</p></div>
-                <div class="admin-metric-card"><h3>Maximum Observed Delta</h3><p>${Number(stats.max_skew || 0)} pt</p></div>
-                <div class="admin-metric-card"><h3>Most Skewed Pair</h3><p>${escapeHtml(stats.max_skew_pair || 'None')}</p></div>
+                <div class="admin-metric-card"><h3>Total Audit Pairs</h3><p id="statTotalPairs">${Number(stats.total_pairs || 0)}</p></div>
+                <div class="admin-metric-card"><h3>Mean Score Delta</h3><p id="statMeanDelta">${Number(stats.mean_delta || 0)} pts</p></div>
+                <div class="admin-metric-card">
+                    <h3>Maximum Observed Delta</h3>
+                    <p id="statMaxSkew">${Number(stats.max_skew || 0)} pts</p>
+                    <span style="font-size: 0.72rem; color: var(--text-muted); display: block; margin-top: 0.3rem;">Legal Threshold: 5 pts (EU AI Act)</span>
+                </div>
+                <div class="admin-metric-card"><h3>Most Skewed Pair</h3><p id="statMaxSkewPair">${escapeHtml(stats.max_skew_pair || 'None')}</p></div>
             </div>
 
-            <section class="card">
-                <h2 style="font-size: 1.2rem; margin-bottom: 1rem;">9 Counterfactual Demographic Benchmark Pairs</h2>
+            <!-- Main Comparison Table -->
+            <section class="card admin-data-card">
+                <div style="padding: 0.5rem 0 1rem 0; border-bottom: 1px solid var(--border); display: flex; justify-content: space-between; align-items: center; flex-wrap: wrap; gap: 0.75rem; margin-bottom: 0.5rem;">
+                    <h2 style="margin: 0; font-size: 1.2rem;">Algorithmic Parity Test Results (9 Protected Dimensions)</h2>
+                    <div style="font-size: 0.82rem; color: var(--text-muted);">
+                        Audit Target Job: <strong>Full-Stack Software Engineer (Job #9999)</strong>
+                    </div>
+                </div>
                 <div class="table-wrapper">
                     <table class="admin-table-view stack-table">
                         <thead>
                             <tr>
-                                <th>Pair &amp; Protected Dimension</th>
-                                <th>Baseline Candidate (A)</th>
-                                <th>Counterfactual Variant (B)</th>
-                                <th>Score Delta</th>
-                                <th>Parity Verdict</th>
-                                <th style="text-align: right;">Forensic Evidence</th>
+                                <th>Audit Pair</th>
+                                <th>Profile A (Baseline)</th>
+                                <th style="text-align: center;">Score A</th>
+                                <th>Profile B (Variant)</th>
+                                <th style="text-align: center;">Score B</th>
+                                <th style="text-align: center; width: 220px;">Score Delta Parity</th>
+                                <th style="text-align: center;">Status</th>
+                                <th style="text-align: right;">Audit Proof</th>
                             </tr>
                         </thead>
                         <tbody>
                             ${pairs.map(p => {
                                 const code = p.pair_code;
                                 const dimInfo = dimensions[code] || { dim: code, desc: '' };
+                                const scoreA = p.score_a !== null ? Number(p.score_a) : null;
+                                const scoreB = p.score_b !== null ? Number(p.score_b) : null;
+                                const isPending = (scoreA === null || scoreB === null);
                                 const delta = p.score_delta !== null ? Number(p.score_delta) : 0;
-                                const isSafe = Math.abs(delta) <= 5;
+                                const absDelta = Math.abs(delta);
+                                const isAlert = !isPending && absDelta > 5;
+                                const cleanA = String(p.name_a || '').split(':').slice(1).join(':').trim() || p.name_a;
+                                const cleanB = String(p.name_b || '').split(':').slice(1).join(':').trim() || p.name_b;
+
                                 return `
                                 <tr>
-                                    <td data-label="Dimension">
+                                    <td data-label="Audit Pair">
                                         <div style="font-weight: 700; color: #ffffff;">${escapeHtml(code)}: ${escapeHtml(dimInfo.dim)}</div>
                                         <small class="text-muted">${escapeHtml(dimInfo.desc)}</small>
                                     </td>
-                                    <td data-label="Baseline (A)">
-                                        <div>${escapeHtml(p.name_a)}</div>
-                                        <strong style="color: #10b981;">${p.score_a !== null ? p.score_a + '%' : 'Pending'}</strong>
+                                    <td data-label="Profile A (Baseline)">${escapeHtml(cleanA)}</td>
+                                    <td data-label="Score A" style="text-align: center; font-size: 1.15rem; font-weight: 700; color: #38bdf8;">
+                                        ${scoreA !== null ? scoreA : '⏳'}
                                     </td>
-                                    <td data-label="Variant (B)">
-                                        <div>${escapeHtml(p.name_b)}</div>
-                                        <strong style="color: #38bdf8;">${p.score_b !== null ? p.score_b + '%' : 'Pending'}</strong>
+                                    <td data-label="Profile B (Variant)">${escapeHtml(cleanB)}</td>
+                                    <td data-label="Score B" style="text-align: center; font-size: 1.15rem; font-weight: 700; color: #a78bfa;">
+                                        ${scoreB !== null ? scoreB : '⏳'}
                                     </td>
-                                    <td data-label="Score Delta"><strong>${delta > 0 ? '+' + delta : delta} pt</strong></td>
-                                    <td data-label="Parity Verdict">
-                                        <span class="status-badge-flag ${isSafe ? 'active' : 'rejected'}">${isSafe ? '✅ Parity Safe' : '⚠️ Review'}</span>
+                                    <td data-label="Score Delta Parity">
+                                        ${isPending ? `<div style="text-align:center; font-size:0.75rem; color:var(--text-muted);">Processing on Azure...</div>` : `
+                                            <div style="display: flex; align-items: center; width: 100%; gap: 2px;">
+                                                <div style="flex: 1; display: flex; justify-content: flex-end;">
+                                                    ${delta < 0 ? `<div style="width: ${Math.min(absDelta * 5, 100)}%; background: #ef4444; height: 10px; border-radius: 4px 0 0 4px;"></div>` : ''}
+                                                </div>
+                                                <div style="width: 2px; height: 16px; background: #94a3b8;"></div>
+                                                <div style="flex: 1; display: flex; justify-content: flex-start;">
+                                                    ${delta > 0 ? `<div style="width: ${Math.min(delta * 5, 100)}%; background: #3b82f6; height: 10px; border-radius: 0 4px 4px 0;"></div>` : ''}
+                                                </div>
+                                            </div>
+                                            <div style="text-align: center; font-size: 0.75rem; color: ${absDelta === 0 ? '#10b981' : 'var(--text-muted)'}; font-weight: ${absDelta === 0 ? '700' : 'normal'}; margin-top: 4px;">
+                                                ${absDelta === 0 ? '✓ Zero Disparity (0 pts)' : absDelta + ' pt deviation'}
+                                            </div>
+                                        `}
                                     </td>
-                                    <td data-label="Forensic Evidence" style="text-align: right;">
-                                        <button type="button" class="btn btn-ghost btn-sm js-inspect-pair" data-pair="${escapeHtml(code)}">🔍 Inspect Evidence</button>
+                                    <td data-label="Status" style="text-align: center;">
+                                        <span class="status-badge-flag ${isPending ? 'pending' : (isAlert ? 'rejected' : 'active')}">
+                                            ${isPending ? 'In Queue' : (isAlert ? 'Bias Alert' : 'Parity Safe')}
+                                        </span>
+                                    </td>
+                                    <td data-label="Audit Proof" style="text-align: right;">
+                                        <button type="button" class="btn btn-sm js-inspect-pair" data-pair="${escapeHtml(code)}" style="background: #f1f5f9; border: 1px solid #cbd5e1; font-size: 0.8rem; padding: 5px 10px; border-radius: 6px; color: #1e293b; font-weight: 700;">
+                                            🔍 Inspect Evidence
+                                        </button>
                                     </td>
                                 </tr>`;
                             }).join('')}
@@ -514,43 +618,74 @@
             </section>
         `;
 
-        // Wire Inspect Evidence Modal
+        // Wire 4-Tab Counterfactual Evidence Inspector Modal
         host.querySelectorAll('.js-inspect-pair').forEach(btn => {
             btn.addEventListener('click', async () => {
                 const pairCode = btn.dataset.pair;
+                switchFairnessModalTab('evidence');
+                window.AppA11y.openModal('fairness-evidence-modal', btn);
+
+                document.getElementById('modalPairTitle').textContent = 'Inspecting ' + pairCode + '...';
+
                 const r = await window.AppApi.get(`/api/admin/fairness/detail?pair=${encodeURIComponent(pairCode)}`);
-                if (!r.ok || !r.data.success) return;
+                if (!r.ok || !r.data.success) {
+                    showToast((r.data && r.data.error) || 'Could not load evidence.', 'error');
+                    window.AppA11y.closeModal('fairness-evidence-modal');
+                    return;
+                }
 
                 const d = r.data;
-                const modalBody = document.getElementById('fairness-modal-body');
-                document.getElementById('fairness-modal-title').textContent = `${d.pair_code}: ${d.dimension} (Delta: ${d.delta ?? 0} pt)`;
+                const candA = d.candidate_a;
+                const candB = d.candidate_b;
 
-                modalBody.innerHTML = `
-                    <div class="grid-2" style="margin-top: 1rem;">
-                        <div class="card">
-                            <h3 style="font-size: 1rem; color: #10b981; margin-bottom: 0.5rem;">${escapeHtml(d.candidate_a.name)} (${d.candidate_a.score ?? 0}%)</h3>
-                            <p class="text-muted" style="font-size: 0.8rem; margin-bottom: 0.5rem;">SHA-256 Clean Hash: <code>${escapeHtml(d.candidate_a.fingerprint?.clean_cv_sha256 || 'Verified')}</code></p>
-                            <pre style="white-space: pre-wrap; font-size: 0.78rem; background: #0b0f19; padding: 0.75rem; border-radius: 8px; max-height: 260px; overflow-y: auto;">${escapeHtml(d.candidate_a.raw_cv || 'Raw CV stored in cloud')}</pre>
-                        </div>
-                        <div class="card">
-                            <h3 style="font-size: 1rem; color: #38bdf8; margin-bottom: 0.5rem;">${escapeHtml(d.candidate_b.name)} (${d.candidate_b.score ?? 0}%)</h3>
-                            <p class="text-muted" style="font-size: 0.8rem; margin-bottom: 0.5rem;">SHA-256 Clean Hash: <code>${escapeHtml(d.candidate_b.fingerprint?.clean_cv_sha256 || 'Verified')}</code></p>
-                            <pre style="white-space: pre-wrap; font-size: 0.78rem; background: #0b0f19; padding: 0.75rem; border-radius: 8px; max-height: 260px; overflow-y: auto;">${escapeHtml(d.candidate_b.raw_cv || 'Raw CV stored in cloud')}</pre>
-                        </div>
-                    </div>
-                `;
-                window.AppA11y.openModal('fairness-evidence-modal', btn);
+                document.getElementById('modalPairTitle').textContent = `${d.pair_code} — ${d.dimension || 'Parity Audit'}`;
+                document.getElementById('modalNameA').textContent = String(candA.name || '').replace(/Pair \d+[A-Z]:\s*/i, '');
+                document.getElementById('modalNameB').textContent = String(candB.name || '').replace(/Pair \d+[A-Z]:\s*/i, '');
+                document.getElementById('modalScoreA').textContent = candA.score !== null ? `${candA.score} / 100` : 'In Queue';
+                document.getElementById('modalScoreB').textContent = candB.score !== null ? `${candB.score} / 100` : 'In Queue';
+
+                const delta = d.delta !== null ? Math.abs(Number(d.delta)) : null;
+                const deltaBadge = document.getElementById('modalDeltaBadge');
+                if (delta === 0) {
+                    deltaBadge.textContent = '0 pts (100% Parity)';
+                    deltaBadge.style.color = '#059669';
+                } else if (delta !== null) {
+                    deltaBadge.textContent = `${delta} pts deviation`;
+                    deltaBadge.style.color = delta > 5 ? '#dc2626' : '#d97706';
+                } else {
+                    deltaBadge.textContent = 'Pending Azure Score';
+                }
+
+                // Tab 1: Verbatim Grounding Quotes
+                document.getElementById('evidenceQuotesA').innerHTML = extractQuotesFromSummary(candA.summary_html);
+                document.getElementById('evidenceQuotesB').innerHTML = extractQuotesFromSummary(candB.summary_html);
+
+                // Tab 2: Raw CV Text
+                document.getElementById('rawCvA').textContent = candA.raw_cv || 'No raw CV text available.';
+                document.getElementById('rawCvB').textContent = candB.raw_cv || 'No raw CV text available.';
+
+                // Tab 3: Full AI Summary Output
+                document.getElementById('summaryHtmlA').innerHTML = candA.summary_html || '<p>Pending AI analysis...</p>';
+                document.getElementById('summaryHtmlB').innerHTML = candB.summary_html || '<p>Pending AI analysis...</p>';
+
+                // Tab 4: Cryptographic Audit Fingerprint
+                document.getElementById('fingerprintA').textContent = candA.fingerprint ? JSON.stringify(candA.fingerprint, null, 2) : '{"status": "queued"}';
+                document.getElementById('fingerprintB').textContent = candB.fingerprint ? JSON.stringify(candB.fingerprint, null, 2) : '{"status": "queued"}';
             });
         });
 
         // Wire Live Audit Execution
-        const runBtn = document.getElementById('run-live-audit-btn');
+        const runBtn = document.getElementById('btnRunAudit');
         if (runBtn) {
             runBtn.addEventListener('click', async () => {
                 runBtn.disabled = true;
-                const banner = document.getElementById('fairness-progress-banner');
-                const txt = document.getElementById('fairness-progress-text');
-                banner.style.display = 'block';
+                const progressCard = document.getElementById('auditProgressCard');
+                const progressBar = document.getElementById('auditProgressBar');
+                const progressCount = document.getElementById('auditProgressCount');
+                const progressStep = document.getElementById('auditProgressStep');
+
+                progressCard.style.display = 'block';
+                progressBar.style.width = '10%';
 
                 const r = await window.AppApi.post('/api/admin/fairness/run');
                 if (!r.ok || !r.data.success) {
@@ -564,14 +699,20 @@
                 fairnessPollTimer = setInterval(async () => {
                     const stRes = await window.AppApi.get('/api/admin/fairness/status');
                     if (stRes.ok && stRes.data.success) {
-                        txt.textContent = `⚡ Azure Function Progress: ${stRes.data.completed} / ${stRes.data.total} Synthetic CVs Evaluated…`;
-                        if (stRes.data.is_complete) {
+                        const total = stRes.data.total || 18;
+                        const completed = stRes.data.completed || 0;
+                        const pct = Math.max(10, Math.min(100, Math.round((completed / total) * 100)));
+                        progressBar.style.width = pct + '%';
+                        progressCount.textContent = `${completed} / ${total} Completed`;
+                        progressStep.textContent = `Evaluating candidates with Gemini 2.5 Flash Grounding Engine (${completed} scored)...`;
+
+                        if (stRes.data.is_complete || completed >= total) {
                             clearInterval(fairnessPollTimer);
                             showToast('Live Algorithmic Parity Audit Complete!', 'success');
                             renderFairnessAudit(host);
                         }
                     }
-                }, 3000);
+                }, 2500);
             });
         }
     }
@@ -580,6 +721,11 @@
         const host = document.getElementById('admin-view-host');
         if (!host) return;
         const path = window.location.pathname.replace(/\/+$/, '');
+
+        // Wire 4-Tab switching inside Fairness Evidence Modal
+        document.querySelectorAll('#fairness-evidence-modal .modal-tab-btn').forEach(btn => {
+            btn.addEventListener('click', () => switchFairnessModalTab(btn.getAttribute('data-tab')));
+        });
 
         // Wire Create Tenant Modal Form
         const createForm = document.getElementById('create-tenant-form');

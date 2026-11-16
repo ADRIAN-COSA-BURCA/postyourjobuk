@@ -125,55 +125,72 @@
         }
     }
 
-    function renderJobsList(jobs) {
+    function renderJobsList(jobs, totalCount = null) {
         const container = document.getElementById('jobs-list-container');
         const counterEl = document.getElementById('jobs-count-label');
         if (!container) return;
 
+        const total = totalCount !== null ? totalCount : allJobs.length;
         if (counterEl) {
-            counterEl.textContent = `Showing ${jobs.length} active opportunity${jobs.length === 1 ? '' : 's'}`;
+            counterEl.textContent = jobs.length === total
+                ? `Showing ${jobs.length} opportunities`
+                : `Showing ${jobs.length} of ${total} opportunities`;
         }
 
         if (!jobs.length) {
+            container.style.display = 'block';
             container.innerHTML = `
-                <div class="card text-center" style="padding: 2.5rem;">
-                    <h3>No Matching Job Postings Found</h3>
-                    <p class="text-muted" style="margin-top: 0.5rem;">Try clearing your search filters or browsing all active positions.</p>
+                <div class="card text-center" style="padding: 2.5rem; background: #1f2937; border: 1px solid #374151;">
+                    <p style="font-size: 1.1rem; color: #94a3b8; margin-bottom: 1rem;">🔍 No job opportunities match your selected filter criteria.</p>
+                    <button type="button" class="btn btn-primary btn-sm" onclick="document.getElementById('filter-reset-btn')?.click()">Clear Filters</button>
                 </div>
             `;
             return;
         }
 
+        container.style.display = 'grid';
         container.innerHTML = jobs.map(job => {
             const loc = job.location ? escapeHtml(job.location) : 'Remote';
             const salary = job.salary ? escapeHtml(job.salary) : 'Competitive';
-            const empType = escapeHtml((job.employment_type || 'full-time').replace('-', ' '));
-            const industry = escapeHtml(job.industry || 'General');
-            const desc = escapeHtml((job.description || '').slice(0, 180)) + ((job.description || '').length > 180 ? '…' : '');
+            const rawEmp = (job.employment_type || 'full-time').replace('-', ' ');
+            const empType = escapeHtml(rawEmp.charAt(0).toUpperCase() + rawEmp.slice(1));
+            const industry = job.industry ? escapeHtml(job.industry) : '';
 
             return `
-                <article class="card job-card-item" style="margin-bottom: 1.15rem;">
-                    <div style="display: flex; justify-content: space-between; align-items: flex-start; flex-wrap: wrap; gap: 1rem;">
-                        <div style="flex: 1; min-width: 240px;">
-                            <div style="display: flex; align-items: center; gap: 0.6rem; flex-wrap: wrap; margin-bottom: 0.35rem;">
-                                <h3 style="margin: 0;"><a href="/job?id=${Number(job.job_id)}" style="color: #ffffff;">${escapeHtml(job.title)}</a></h3>
-                                <span class="status-badge active">${empType}</span>
+                <div class="job-card-wrapper">
+                    <a href="/job?id=${Number(job.job_id)}" class="card job-card-link">
+                        <div>
+                            <!-- Header: FULL Company Name + Employment Badge -->
+                            <div class="flex-between" style="margin-bottom: 1rem; align-items: center; gap: 0.75rem; display: flex; justify-content: space-between;">
+                                <div style="font-weight: 700; color: #f3f4f6; font-size: 1.05rem; white-space: nowrap; overflow: hidden; text-overflow: ellipsis; min-width: 0; flex: 1;" title="${escapeHtml(job.company_name || 'Company')}">
+                                    ${escapeHtml(job.company_name || 'Hiring Company')}
+                                </div>
+                                <span class="badge" style="background: rgba(139, 92, 246, 0.15); color: #a78bfa; border: 1px solid rgba(139, 92, 246, 0.3); font-size: 0.75rem; white-space: nowrap; flex-shrink: 0;">
+                                    ${empType}
+                                </span>
                             </div>
-                            <p style="color: #a78bfa; font-weight: 700; font-size: 0.92rem; margin-bottom: 0.5rem;">
-                                🏢 ${escapeHtml(job.company_name || 'Verified Employer')} &bull; <span class="text-muted">${industry}</span>
-                            </p>
-                            <p class="text-muted" style="font-size: 0.9rem; margin-bottom: 0.85rem;">${desc}</p>
-                            <div style="display: flex; gap: 1rem; flex-wrap: wrap; font-size: 0.84rem; color: #cbd5e1;">
+
+                            <!-- Title -->
+                            <h3 style="margin-bottom: 0.5rem; font-size: 1.15rem; color: #ffffff;">${escapeHtml(job.title)}</h3>
+
+                            <!-- Meta details (Location, Salary, Industry) -->
+                            <p style="font-size: 0.9rem; color: var(--text-muted); margin-bottom: 1.25rem; display: flex; flex-wrap: wrap; gap: 0.5rem; align-items: center;">
                                 <span>📍 ${loc}</span>
+                                <span style="color: var(--border);">•</span>
                                 <span>💷 ${salary}</span>
-                                <span>🕒 ${escapeHtml(job.time_ago || 'Recently')}</span>
-                            </div>
+                                ${industry ? `<span style="color: var(--border);">•</span><span style="color: #38bdf8;">🏷️ ${industry}</span>` : ''}
+                            </p>
                         </div>
-                        <div style="display: flex; flex-direction: column; align-items: flex-end; justify-content: center;">
-                            <a href="/job?id=${Number(job.job_id)}" class="btn btn-primary btn-sm">View &amp; Apply →</a>
+
+                        <!-- Card Footer: Time Ago (Left) + Unique Job ID (Right) -->
+                        <div class="text-muted" style="font-size: 0.8rem; border-top: 1px solid var(--border); padding-top: 0.85rem; display: flex; justify-content: space-between; align-items: center;">
+                            <span>🕒 Posted ${escapeHtml(job.time_ago || 'recently')}</span>
+                            <span style="font-family: monospace; font-size: 0.78rem; font-weight: 600; color: #94a3b8; background: rgba(255, 255, 255, 0.04); border: 1px solid var(--border); padding: 0.2rem 0.5rem; border-radius: 4px;">
+                                Job ID: ${Number(job.job_id)}
+                            </span>
                         </div>
-                    </div>
-                </article>
+                    </a>
+                </div>
             `;
         }).join('');
     }
@@ -183,6 +200,12 @@
         const locVal = (document.getElementById('filter-location')?.value || 'all').toLowerCase();
         const indVal = (document.getElementById('filter-industry')?.value || 'all').toLowerCase();
         const sortVal = document.getElementById('filter-sort')?.value || 'newest';
+        const resetBtn = document.getElementById('filter-reset-btn');
+
+        const isFiltered = (typeVal !== 'all' || locVal !== 'all' || indVal !== 'all' || sortVal !== 'newest');
+        if (resetBtn) {
+            resetBtn.style.display = isFiltered ? 'inline-block' : 'none';
+        }
 
         let filtered = allJobs.slice();
 
@@ -190,7 +213,7 @@
             filtered = filtered.filter(j => {
                 const t = String(j.employment_type || '').toLowerCase();
                 const l = String(j.location || 'remote').toLowerCase();
-                if (typeVal === 'remote') return l.includes('remote');
+                if (typeVal === 'remote') return t.includes('remote') || l.includes('remote');
                 return t === typeVal;
             });
         }
@@ -209,7 +232,7 @@
             return sortVal === 'oldest' ? da - db : db - da;
         });
 
-        renderJobsList(filtered);
+        renderJobsList(filtered, allJobs.length);
     }
 
     async function initHomeView() {

@@ -105,14 +105,29 @@
                 th.setAttribute('aria-sort', 'none');
             }
 
+            let indicator = th.querySelector('.sort-indicator');
+            if (!indicator) {
+                indicator = document.createElement('span');
+                indicator.className = 'sort-indicator';
+                indicator.setAttribute('aria-hidden', 'true');
+                const initSort = th.getAttribute('aria-sort');
+                indicator.textContent = initSort === 'ascending' ? '▲' : (initSort === 'descending' ? '▼' : '⇅');
+                th.appendChild(indicator);
+            }
+
             const sortHandler = () => {
                 const currentSort = th.getAttribute('aria-sort');
                 const nextDir = currentSort === 'ascending' ? 'descending' : 'ascending';
 
-                headers.forEach(h => h.setAttribute('aria-sort', 'none'));
+                headers.forEach(h => {
+                    h.setAttribute('aria-sort', 'none');
+                    const ind = h.querySelector('.sort-indicator');
+                    if (ind) ind.textContent = '⇅';
+                });
                 th.setAttribute('aria-sort', nextDir);
+                indicator.textContent = nextDir === 'ascending' ? '▲' : '▼';
 
-                const rows = Array.from(tbody.querySelectorAll('tr'));
+                const rows = Array.from(tbody.querySelectorAll('tr')).filter(r => !r.id || !r.id.toLowerCase().includes('noresults'));
                 const sortKey = th.dataset.sortKey || '';
                 const sortType = th.dataset.sortType || 'string';
 
@@ -125,8 +140,8 @@
                         : (rowB.children[colIdx] ? rowB.children[colIdx].textContent.trim() : '');
 
                     if (sortType === 'number') {
-                        valA = parseFloat(valA) || 0;
-                        valB = parseFloat(valB) || 0;
+                        valA = parseFloat(String(valA).replace(/[^0-9.-]/g, '')) || 0;
+                        valB = parseFloat(String(valB).replace(/[^0-9.-]/g, '')) || 0;
                         return nextDir === 'ascending' ? valA - valB : valB - valA;
                     }
                     return nextDir === 'ascending'

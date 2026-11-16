@@ -4,95 +4,109 @@
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <title>PostYourJobUK — Cloud-Native AI Recruitment &amp; ATS Job Board</title>
-    <link rel="stylesheet" href="/assets/css/styles.css?v=5">
+    <link rel="stylesheet" href="/assets/css/styles.css?v=6">
 </head>
 <body>
     <div id="app-header"></div>
 
     <main id="main-content" class="container section" tabindex="-1">
         <!-- Hero Search Banner -->
-        <section class="card" style="text-align: center; padding: 2.5rem 1.5rem; margin-bottom: 2rem;" aria-labelledby="hero-title">
-            <h1 id="hero-title" style="margin-bottom: 0.65rem;">Find Your Next Career Opportunity</h1>
+        <section class="card" style="text-align: center; padding: 2rem; margin-bottom: 2rem;" aria-labelledby="hero-title">
+            <h1 id="hero-title" style="margin-bottom: 0.75rem;">📋 PostYourJobUK</h1>
             <p class="text-muted" style="max-width: 640px; margin: 0 auto 1.5rem auto;">
-                Browse verified UK opportunities evaluated by our zero-bias, grounded AI matching engine.
+                Find your dream job from top companies
             </p>
-            <form id="hero-search-form" action="/" method="GET" style="display: flex; gap: 0.75rem; max-width: 680px; margin: 0 auto; flex-wrap: wrap;">
-                <label for="hero-search-input" class="sr-only">Search jobs by title, skill, or location</label>
-                <input type="text" id="hero-search-input" name="search" placeholder="Search by job title, technical skill, company, or UK city…" style="flex: 1; min-width: 220px;">
-                <button type="submit" class="btn btn-primary">🔍 Search Jobs</button>
+            <form id="hero-search-form" action="/" method="GET" style="display: flex; gap: 0.5rem; max-width: 600px; margin: 0 auto; flex-wrap: wrap;">
+                <label for="hero-search-input" class="sr-only">Search jobs by title, company, or location</label>
+                <input type="text" id="hero-search-input" name="search" placeholder="Search by title, company, location..." style="flex: 1; min-width: 220px;">
+                <button type="submit" class="btn btn-primary">Search</button>
             </form>
         </section>
 
-        <!-- Industry News Carousel -->
-        <section style="margin-bottom: 2.25rem;" aria-labelledby="news-heading">
-            <div style="display: flex; justify-content: space-between; align-items: center; flex-wrap: wrap; gap: 0.75rem; margin-bottom: 1rem;">
-                <h2 id="news-heading" style="font-size: 1.35rem; margin: 0;">📰 Latest UK Recruitment &amp; HR Tech News</h2>
-                <button type="button" id="refresh-news-btn" class="btn btn-ghost btn-sm">↻ Refresh News</button>
+        <!-- Industry News Section -->
+        <section class="card" style="margin-bottom: 2.5rem; padding: 2rem;" aria-labelledby="news-heading">
+            <div style="display: flex; justify-content: space-between; align-items: center; flex-wrap: wrap; gap: 0.75rem; margin-bottom: 1.25rem; border-bottom: 2px solid var(--primary); padding-bottom: 0.5rem;">
+                <h2 id="news-heading" style="font-size: 1.25rem; margin: 0; display: flex; align-items: center; gap: 0.5rem;">
+                    📰 Industry News &amp; Insights
+                </h2>
+                <button type="button" id="refresh-news-btn" class="btn btn-ghost btn-sm" style="font-size: 0.75rem; padding: 0.25rem 0.75rem;">
+                    🔄 Refresh News
+                </button>
             </div>
             <div id="news-carousel-container" class="news-scroll-container" role="region" aria-label="Recruitment Industry News">
                 <p class="text-muted">Loading latest industry news…</p>
             </div>
         </section>
 
-        <!-- Free ATS Resume Builder Promo Card -->
-        <section class="card" style="margin-bottom: 2.25rem; border-left: 5px solid #8b5cf6; display: flex; justify-content: space-between; align-items: center; flex-wrap: wrap; gap: 1rem;" aria-labelledby="resume-promo-heading">
-            <div>
-                <h2 id="resume-promo-heading" style="font-size: 1.25rem; margin-bottom: 0.25rem;">📄 Need an ATS-Optimised CV?</h2>
-                <p class="text-muted" style="font-size: 0.9rem;">Build and download a clean, AI-readable vector PDF CV in under 3 minutes—100% free and private in your browser.</p>
+        <!-- Free ATS Resume Builder Hook Card -->
+        <section class="card" style="background: linear-gradient(135deg, rgba(139, 92, 246, 0.14), rgba(16, 185, 129, 0.08)); border: 1px solid rgba(139, 92, 246, 0.4); padding: 2rem; margin-bottom: 2.5rem; display: flex; flex-wrap: wrap; align-items: center; justify-content: space-between; gap: 1.5rem;" aria-labelledby="resume-promo-heading">
+            <div style="flex: 1 1 480px;">
+                <div style="display: inline-flex; align-items: center; gap: 0.4rem; background: rgba(16, 185, 129, 0.15); color: #34d399; border: 1px solid rgba(16, 185, 129, 0.35); border-radius: 999px; padding: 0.25rem 0.75rem; font-size: 0.75rem; font-weight: 700; text-transform: uppercase; letter-spacing: 0.05em; margin-bottom: 0.75rem;">
+                    ✨ 100% Free • Private Client-Side Builder • ATS Optimized
+                </div>
+                <h2 id="resume-promo-heading" style="color: #ffffff; font-size: 1.4rem; margin-bottom: 0.5rem;">
+                    📄 Need a CV to Apply? Build Your Own Professional Resume in Minutes
+                </h2>
+                <p style="color: var(--text-muted); font-size: 0.92rem; line-height: 1.6; margin: 0;">
+                    Choose from 6 modern, recruiter-approved CV templates designed for instant compatibility with our evidence-based AI evaluation engine. Fill in your details with live A4 preview and save directly to your device — zero account or cloud storage required.
+                </p>
             </div>
-            <a href="/resume-builder" class="btn btn-primary">Launch Free CV Builder →</a>
+            <div style="flex: 0 0 auto; display: flex; flex-direction: column; align-items: center; gap: 0.5rem;">
+                <a href="/resume-builder" class="btn btn-primary" style="padding: 0.85rem 1.85rem; font-size: 0.95rem; font-weight: 700; box-shadow: 0 8px 25px rgba(139, 92, 246, 0.4);">
+                    🛠️ Build Your Free CV Now →
+                </a>
+                <span style="font-size: 0.75rem; color: var(--text-muted);">Instant PDF Download • 6 Modern Templates</span>
+            </div>
         </section>
 
-        <!-- Filter Bar & Job Listings -->
-        <section aria-labelledby="jobs-heading">
+        <!-- Filter Bar & 3-Column Job Listings Grid -->
+        <section aria-labelledby="jobs-heading" style="margin-bottom: 3rem;">
             <div style="display: flex; justify-content: space-between; align-items: center; flex-wrap: wrap; gap: 0.75rem; margin-bottom: 1rem;">
                 <div>
-                    <h2 id="jobs-heading" style="font-size: 1.4rem; margin: 0;">💼 Active Job Opportunities</h2>
-                    <small id="jobs-count-label" class="text-muted">Loading positions…</small>
+                    <h2 id="jobs-heading" style="font-size: 1.4rem; margin: 0;">Latest Opportunities</h2>
+                    <div id="active-search-banner" style="display: none; margin-top: 0.25rem; font-size: 0.85rem; color: #94a3b8;"></div>
+                </div>
+                <span id="jobs-count-label" style="font-size: 0.85rem; color: #94a3b8; font-weight: 500;">Loading opportunities…</span>
+            </div>
+
+            <div class="opportunities-filter-toolbar">
+                <div class="opportunities-filter-group" style="flex: 1 1 auto;">
+                    <label for="filter-type" class="sr-only">Filter by Work Type</label>
+                    <select id="filter-type" class="opp-filter-select">
+                        <option value="all">💼 All Work Types</option>
+                        <option value="full-time">Full time</option>
+                        <option value="part-time">Part time</option>
+                        <option value="contract">Contract</option>
+                        <option value="internship">Internship</option>
+                        <option value="remote">Remote</option>
+                    </select>
+
+                    <label for="filter-location" class="sr-only">Filter by Location</label>
+                    <select id="filter-location" class="opp-filter-select">
+                        <option value="all">📍 All Locations</option>
+                    </select>
+
+                    <label for="filter-industry" class="sr-only">Filter by Industry</label>
+                    <select id="filter-industry" class="opp-filter-select">
+                        <option value="all">🏷️ All Industries</option>
+                    </select>
+
+                    <label for="filter-sort" class="sr-only">Sort Jobs</label>
+                    <select id="filter-sort" class="opp-filter-select">
+                        <option value="newest">🕒 Newest First</option>
+                        <option value="oldest">🕒 Oldest First</option>
+                        <option value="title_asc">🔤 Title (A - Z)</option>
+                        <option value="company_asc">🏢 Company (A - Z)</option>
+                    </select>
+                </div>
+                <div>
+                    <button type="button" id="filter-reset-btn" class="btn btn-sm btn-ghost" style="font-size: 0.8rem; padding: 0.35rem 0.75rem; color: #94a3b8; border: 1px solid #374151; display: none;">
+                        ✕ Reset Filters
+                    </button>
                 </div>
             </div>
 
-            <div class="card" style="margin-bottom: 1.5rem; padding: 1rem;">
-                <div style="display: grid; grid-template-columns: repeat(auto-fit, minmax(175px, 1fr)); gap: 0.75rem; align-items: end;">
-                    <div>
-                        <label for="filter-type" class="sr-only">Filter by Work Type</label>
-                        <select id="filter-type">
-                            <option value="all">🕒 All Employment Types</option>
-                            <option value="full-time">Full-time</option>
-                            <option value="part-time">Part-time</option>
-                            <option value="contract">Contract</option>
-                            <option value="internship">Internship</option>
-                            <option value="remote">Remote</option>
-                        </select>
-                    </div>
-                    <div>
-                        <label for="filter-location" class="sr-only">Filter by Location</label>
-                        <select id="filter-location">
-                            <option value="all">📍 All Locations</option>
-                        </select>
-                    </div>
-                    <div>
-                        <label for="filter-industry" class="sr-only">Filter by Industry</label>
-                        <select id="filter-industry">
-                            <option value="all">🏢 All Industries</option>
-                        </select>
-                    </div>
-                    <div>
-                        <label for="filter-sort" class="sr-only">Sort Jobs</label>
-                        <select id="filter-sort">
-                            <option value="newest">⚡ Sort: Newest First</option>
-                            <option value="oldest">⏳ Sort: Oldest First</option>
-                            <option value="title_asc">🔤 Sort: Role Title (A–Z)</option>
-                            <option value="company_asc">🏢 Sort: Company (A–Z)</option>
-                        </select>
-                    </div>
-                    <div>
-                        <button type="button" id="filter-reset-btn" class="btn btn-ghost w-100" style="width: 100%;">Reset Filters</button>
-                    </div>
-                </div>
-            </div>
-
-            <div id="jobs-list-container">
+            <div id="jobs-list-container" class="jobs-grid-3">
                 <p class="text-muted">Loading active job listings…</p>
             </div>
         </section>
@@ -100,9 +114,9 @@
 
     <div id="app-footer"></div>
 
-    <script src="/assets/js/api.js?v=5"></script>
-    <script src="/assets/js/a11y.js?v=5"></script>
-    <script src="/assets/js/public.js?v=5"></script>
+    <script src="/assets/js/api.js?v=6"></script>
+    <script src="/assets/js/a11y.js?v=6"></script>
+    <script src="/assets/js/public.js?v=6"></script>
     <script>
         document.addEventListener('DOMContentLoaded', async function () {
             const session = await window.AppApi.initSession();
