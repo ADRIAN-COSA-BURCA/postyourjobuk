@@ -51,6 +51,7 @@ $router->get('/auth/google/callback', [\App\Controllers\AuthController::class, '
 // 4. RECRUITER WORKSPACE, JOB CRUD & ATS PIPELINE ROUTES
 // =========================================================================
 $router->get('/api/dashboard', [\App\Controllers\DashboardController::class, 'index']);
+$router->post('/api/dashboard/profile', [\App\Controllers\DashboardController::class, 'updateProfile']);
 $router->get('/api/dashboard/analytics', [\App\Controllers\DashboardController::class, 'analytics']);
 
 $router->post('/api/jobs/store', [\App\Controllers\JobController::class, 'store']);

@@ -429,7 +429,27 @@
         }
 
         const params = new URLSearchParams(window.location.search);
-        const searchQ = params.get('search') || '';
+        const searchQ = (params.get('search') || '').trim();
+        const searchInput = document.getElementById('hero-search-input');
+        if (searchInput) {
+            searchInput.value = searchQ;
+        }
+        const searchBanner = document.getElementById('active-search-banner');
+        if (searchBanner) {
+            if (searchQ) {
+                searchBanner.style.display = 'flex';
+                searchBanner.style.alignItems = 'center';
+                searchBanner.style.gap = '0.65rem';
+                searchBanner.innerHTML = `
+                    <span>🔍 Showing search results for <strong style="color: #ffffff;">"${escapeHtml(searchQ)}"</strong></span>
+                    <a href="/" class="btn btn-ghost btn-sm" style="padding: 0.2rem 0.6rem; font-size: 0.75rem; color: #f87171; border-color: rgba(248, 113, 113, 0.35);">✕ Clear Search</a>
+                `;
+            } else {
+                searchBanner.style.display = 'none';
+                searchBanner.innerHTML = '';
+            }
+        }
+
         const res = await window.AppApi.get('/api/public/home' + (searchQ ? `?search=${encodeURIComponent(searchQ)}` : ''));
         if (!res.ok || !res.data.success) {
             showToast('Failed to load job listings.', 'error');
@@ -559,8 +579,11 @@
                         <h2 style="font-size: 1.1rem; margin-bottom: 0.75rem;">🏢 Employer &amp; Recruiter Business Card</h2>
                         <p><strong>Organisation:</strong> ${escapeHtml(job.company_name || 'N/A')}</p>
                         <p><strong>Hiring Contact:</strong> ${escapeHtml(job.contact_person || 'Recruitment Team')}</p>
+                        ${job.company_email ? `<p><strong>Contact Email:</strong> <a href="mailto:${escapeHtml(job.company_email)}" style="color: #818cf8;">${escapeHtml(job.company_email)}</a></p>` : ''}
+                        ${job.phone_number ? `<p><strong>Phone Number:</strong> ${escapeHtml(job.phone_number)}</p>` : ''}
                         <p><strong>Industry:</strong> ${escapeHtml(job.industry || 'General')}</p>
                         ${job.website_url ? `<p><strong>Website:</strong> <a href="${escapeHtml(job.website_url)}" target="_blank" rel="noopener">${escapeHtml(job.website_url)}</a></p>` : ''}
+                        ${job.company_address ? `<p><strong>Headquarters:</strong> ${escapeHtml(job.company_address)}</p>` : ''}
                     </article>
                 </div>
 

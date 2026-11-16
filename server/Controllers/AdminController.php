@@ -748,15 +748,42 @@ class AdminController extends BaseController {
             $this->json(['success' => false, 'error' => 'Tenant not found.'], 404);
         }
 
-        $allowed = ['company_name', 'contact_person', 'phone_number', 'website_url', 'company_address', 'industry'];
+        $allowed = ['company_name', 'email', 'contact_person', 'phone_number', 'website_url', 'company_address', 'industry', 'recovery_code'];
         $data    = [];
         $fields  = [];
 
         foreach ($body as $key => $value) {
             if (in_array($key, $allowed, true)) {
-                $data[$key] = trim((string)$value);
+                $val = trim((string)$value);
+                if ($key === 'recovery_code') {
+                    if ($val === '') {
+                        continue;
+                    }
+                    $val = strtoupper($val);
+                }
+                if ($key === 'email') {
+                    if ($val === '' || !filter_var($val, FILTER_VALIDATE_EMAIL)) {
+                        $this->json(['success' => false, 'error' => 'Please provide a valid corporate email address.'], 422);
+                    }
+                    $stmtDup = $this->db->prepare("SELECT tenant_id FROM tenants WHERE email = ? AND tenant_id != ? LIMIT 1");
+                    $stmtDup->execute([$val, $tenantId]);
+                    if ($stmtDup->fetch()) {
+                        $this->json(['success' => false, 'error' => 'That email address is already assigned to another tenant.'], 422);
+                    }
+                }
+                $data[$key] = $val;
                 $fields[]   = "$key = :$key";
             }
+        }
+
+        // Optional admin password override
+        $newPassword = (string)($body['new_password'] ?? $body['password'] ?? '');
+        if ($newPassword !== '') {
+            if (mb_strlen($newPassword) < 8) {
+                $this->json(['success' => false, 'error' => 'New password must be at least 8 characters long.'], 422);
+            }
+            $data['password_hash'] = password_hash($newPassword, PASSWORD_DEFAULT);
+            $fields[]              = "password_hash = :password_hash";
         }
 
         if (empty($fields)) {
@@ -771,14 +798,17 @@ class AdminController extends BaseController {
         $stmt = $this->db->prepare($sql);
         $stmt->execute($data);
 
-        $adminLabel = 'Admin: ' . ($_SESSION['admin_email'] ?? 'Unknown');
+        $auditFields = array_keys($data);
+        $adminLabel  = 'Admin: ' . ($_SESSION['admin_email'] ?? 'Unknown');
         AuditLogger::log('TENANT_EDIT', $adminLabel, 'INFO', 0, 'tenant', $tenantId, [
-            'updated_fields' => array_keys($data)
+            'updated_fields' => $auditFields
         ]);
 
         $this->json([
             'success' => true,
-            'message' => 'Tenant profile updated successfully.'
+            'message' => ($newPassword !== '')
+                ? 'Tenant details, email, and password updated successfully.'
+                : 'Tenant profile updated successfully.'
         ]);
     }
 }

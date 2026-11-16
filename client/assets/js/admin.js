@@ -407,16 +407,37 @@
 
             <div class="grid-2">
                 <section class="card">
-                    <h2 style="font-size: 1.15rem; margin-bottom: 1rem;">Edit Organization Details</h2>
+                    <h2 style="font-size: 1.15rem; margin-bottom: 1rem;">Edit Organization &amp; Account Credentials</h2>
                     <form id="admin-edit-tenant-form">
                         <input type="hidden" name="tenant_id" value="${Number(tenant.tenant_id)}">
-                        <div class="form-group"><label for="et-comp">Company Name</label><input type="text" id="et-comp" name="company_name" value="${escapeHtml(tenant.company_name)}" required></div>
-                        <div class="form-group"><label for="et-contact">Contact Person</label><input type="text" id="et-contact" name="contact_person" value="${escapeHtml(tenant.contact_person || '')}"></div>
-                        <div class="form-group"><label for="et-phone">Phone Number</label><input type="text" id="et-phone" name="phone_number" value="${escapeHtml(tenant.phone_number || '')}"></div>
-                        <div class="form-group"><label for="et-ind">Industry</label><input type="text" id="et-ind" name="industry" value="${escapeHtml(tenant.industry || '')}"></div>
-                        <div class="form-group"><label for="et-web">Website URL</label><input type="url" id="et-web" name="website_url" value="${escapeHtml(tenant.website_url || '')}"></div>
+                        <div class="grid-2" style="gap: 0.75rem; margin-bottom: 0;">
+                            <div class="form-group"><label for="et-comp">Company Name *</label><input type="text" id="et-comp" name="company_name" value="${escapeHtml(tenant.company_name)}" required></div>
+                            <div class="form-group"><label for="et-email">Corporate Login Email *</label><input type="email" id="et-email" name="email" value="${escapeHtml(tenant.email || '')}" required></div>
+                        </div>
+                        <div class="grid-2" style="gap: 0.75rem; margin-bottom: 0;">
+                            <div class="form-group"><label for="et-contact">Contact Person</label><input type="text" id="et-contact" name="contact_person" value="${escapeHtml(tenant.contact_person || '')}"></div>
+                            <div class="form-group"><label for="et-phone">Phone Number</label><input type="text" id="et-phone" name="phone_number" value="${escapeHtml(tenant.phone_number || '')}"></div>
+                        </div>
+                        <div class="grid-2" style="gap: 0.75rem; margin-bottom: 0;">
+                            <div class="form-group"><label for="et-ind">Industry</label><input type="text" id="et-ind" name="industry" value="${escapeHtml(tenant.industry || '')}"></div>
+                            <div class="form-group"><label for="et-web">Website URL</label><input type="url" id="et-web" name="website_url" value="${escapeHtml(tenant.website_url || '')}"></div>
+                        </div>
                         <div class="form-group"><label for="et-addr">Address</label><textarea id="et-addr" name="company_address" rows="2">${escapeHtml(tenant.company_address || '')}</textarea></div>
-                        <button type="submit" class="btn btn-primary btn-sm">Save Tenant Changes</button>
+
+                        <hr style="border: none; border-top: 1px solid rgba(255,255,255,0.1); margin: 1rem 0;">
+                        <p style="font-size: 0.8rem; font-weight: 700; color: #a78bfa; text-transform: uppercase; letter-spacing: 0.05em; margin: 0 0 0.65rem 0;">🔐 Admin Account Reset &amp; Recovery Controls</p>
+                        <div class="grid-2" style="gap: 0.75rem; margin-bottom: 0;">
+                            <div class="form-group">
+                                <label for="et-pass">Reset Password (leave blank to keep current)</label>
+                                <input type="password" id="et-pass" name="new_password" minlength="8" placeholder="New password (min. 8 chars)" autocomplete="new-password">
+                            </div>
+                            <div class="form-group">
+                                <label for="et-rec">Recovery Code (for Forgot Password)</label>
+                                <input type="text" id="et-rec" name="recovery_code" value="${escapeHtml(tenant.recovery_code || '')}" placeholder="e.g., RECOV-2026">
+                            </div>
+                        </div>
+
+                        <button type="submit" class="btn btn-primary btn-sm" style="margin-top: 0.35rem;">💾 Save Tenant &amp; Credential Changes</button>
                     </form>
                 </section>
 
@@ -457,15 +478,20 @@
             const r = await window.AppApi.post('/api/admin/tenants/edit', {
                 tenant_id: id,
                 company_name: f.company_name.value.trim(),
+                email: f.email.value.trim(),
                 contact_person: f.contact_person.value.trim(),
                 phone_number: f.phone_number.value.trim(),
                 industry: f.industry.value.trim(),
                 website_url: f.website_url.value.trim(),
-                company_address: f.company_address.value.trim()
+                company_address: f.company_address.value.trim(),
+                recovery_code: f.recovery_code.value.trim(),
+                new_password: f.new_password.value
             });
             if (r.ok && r.data.success) {
                 showToast(r.data.message, 'success');
                 renderTenantInspect(host);
+            } else {
+                showToast((r.data && r.data.error) || 'Failed to update tenant.', 'error');
             }
         });
     }

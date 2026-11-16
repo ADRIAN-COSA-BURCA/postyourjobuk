@@ -70,7 +70,10 @@
                         <h1 style="margin: 0 0 0.35rem 0; font-size: 1.85rem; color: #ffffff;">Welcome, ${escapeHtml(tenant.company_name || 'Recruiter')}</h1>
                         <p class="text-muted" style="margin: 0; color: #94a3b8;">Your Corporate Profile Dashboard</p>
                     </div>
-                    <a href="/dashboard/analytics" class="btn btn-primary">📊 View Analytics</a>
+                    <div style="display: flex; gap: 0.65rem; flex-wrap: wrap;">
+                        <button type="button" id="open-edit-profile-btn" class="btn btn-ghost" style="border-color: #6366f1; color: #a5b4fc;">⚙️ Update Details</button>
+                        <a href="/dashboard/analytics" class="btn btn-primary">📊 View Analytics</a>
+                    </div>
                 </div>
 
                 <div style="display: grid; grid-template-columns: repeat(auto-fit, minmax(175px, 1fr)); gap: 1rem; background: #1f2937; padding: 1rem; border-radius: 8px; border: 1px solid #374151;">
@@ -102,6 +105,74 @@
                         <p style="margin: 0; font-size: 0.92rem; color: #ffffff;">${escapeHtml(tenant.company_address)}</p>
                     </div>
                 ` : ''}
+            </div>
+
+            <!-- Recruiter Update Corporate Profile & Credentials Modal -->
+            <div id="edit-recruiter-profile-modal" class="modal-backdrop" role="dialog" aria-modal="true" aria-labelledby="edit-profile-modal-title" aria-hidden="true">
+                <div class="modal-dialog" style="max-width: 680px;">
+                    <div style="display: flex; justify-content: space-between; align-items: center; margin-bottom: 0.85rem;">
+                        <div>
+                            <h2 id="edit-profile-modal-title" style="font-size: 1.3rem; margin: 0;">⚙️ Update Corporate Details &amp; Account Credentials</h2>
+                            <p class="text-muted" style="font-size: 0.82rem; margin: 0.2rem 0 0 0;">Changes immediately reflect on your dashboard and across all Employer Business Cards on your job postings.</p>
+                        </div>
+                        <button type="button" class="btn btn-ghost btn-sm" onclick="window.AppA11y.closeModal('edit-recruiter-profile-modal')" aria-label="Close modal">✕</button>
+                    </div>
+                    <form id="recruiter-update-profile-form">
+                        <div class="grid-2" style="gap: 0.75rem; margin-bottom: 0;">
+                            <div class="form-group">
+                                <label for="rp-company">Company Name *</label>
+                                <input type="text" id="rp-company" name="company_name" value="${escapeHtml(tenant.company_name || '')}" required>
+                            </div>
+                            <div class="form-group">
+                                <label for="rp-email">Corporate Login &amp; Contact Email *</label>
+                                <input type="email" id="rp-email" name="email" value="${escapeHtml(tenant.email || '')}" required>
+                            </div>
+                        </div>
+                        <div class="grid-2" style="gap: 0.75rem; margin-bottom: 0;">
+                            <div class="form-group">
+                                <label for="rp-contact">Contact Person</label>
+                                <input type="text" id="rp-contact" name="contact_person" value="${escapeHtml(tenant.contact_person || '')}" placeholder="e.g., Sarah Jenkins (Hiring Manager)">
+                            </div>
+                            <div class="form-group">
+                                <label for="rp-phone">Phone Number</label>
+                                <input type="text" id="rp-phone" name="phone_number" value="${escapeHtml(tenant.phone_number || '')}" placeholder="e.g., +44 20 7946 0921">
+                            </div>
+                        </div>
+                        <div class="grid-2" style="gap: 0.75rem; margin-bottom: 0;">
+                            <div class="form-group">
+                                <label for="rp-industry">Industry Sector</label>
+                                <input type="text" id="rp-industry" name="industry" value="${escapeHtml(tenant.industry || '')}" placeholder="e.g., Technology / Healthcare">
+                            </div>
+                            <div class="form-group">
+                                <label for="rp-website">Website URL</label>
+                                <input type="url" id="rp-website" name="website_url" value="${escapeHtml(tenant.website_url || '')}" placeholder="https://example.co.uk">
+                            </div>
+                        </div>
+                        <div class="form-group">
+                            <label for="rp-address">Headquarters / Company Address</label>
+                            <textarea id="rp-address" name="company_address" rows="2" placeholder="Street, City, Postcode">${escapeHtml(tenant.company_address || '')}</textarea>
+                        </div>
+
+                        <hr style="border: none; border-top: 1px solid rgba(255,255,255,0.1); margin: 1rem 0;">
+                        <p style="font-size: 0.82rem; font-weight: 700; color: #a78bfa; text-transform: uppercase; letter-spacing: 0.05em; margin: 0 0 0.65rem 0;">🔐 Security &amp; Password Recovery Settings</p>
+
+                        <div class="grid-2" style="gap: 0.75rem; margin-bottom: 0;">
+                            <div class="form-group">
+                                <label for="rp-password">New Password (leave blank to keep current)</label>
+                                <input type="password" id="rp-password" name="new_password" minlength="8" placeholder="Min. 8 characters" autocomplete="new-password">
+                            </div>
+                            <div class="form-group">
+                                <label for="rp-recovery">Account Recovery Code (for Forgot Password)</label>
+                                <input type="text" id="rp-recovery" name="recovery_code" value="${escapeHtml(tenant.recovery_code || '')}" placeholder="e.g., RECOV-2026">
+                            </div>
+                        </div>
+
+                        <div style="display: flex; justify-content: flex-end; gap: 0.75rem; margin-top: 0.85rem;">
+                            <button type="button" class="btn btn-ghost" onclick="window.AppA11y.closeModal('edit-recruiter-profile-modal')">Cancel</button>
+                            <button type="submit" id="save-recruiter-profile-btn" class="btn btn-primary">💾 Save Details &amp; Update Jobs</button>
+                        </div>
+                    </form>
+                </div>
             </div>
 
             <!-- 3 Uniform KPI Stat Cards -->
@@ -217,6 +288,49 @@
         `;
 
         window.AppA11y.initSortableTable(document.getElementById('recruiter-jobs-table'));
+
+        // Wire Recruiter Update Details Modal
+        const openProfileBtn = document.getElementById('open-edit-profile-btn');
+        if (openProfileBtn) {
+            openProfileBtn.addEventListener('click', () => {
+                window.AppA11y.openModal('edit-recruiter-profile-modal', openProfileBtn);
+            });
+        }
+
+        const profileForm = document.getElementById('recruiter-update-profile-form');
+        if (profileForm) {
+            profileForm.addEventListener('submit', async (e) => {
+                e.preventDefault();
+                const saveBtn = document.getElementById('save-recruiter-profile-btn');
+                if (saveBtn) {
+                    saveBtn.disabled = true;
+                    saveBtn.textContent = 'Saving…';
+                }
+                const f = e.target;
+                const r = await window.AppApi.post('/api/dashboard/profile', {
+                    company_name: f.company_name.value.trim(),
+                    email: f.email.value.trim(),
+                    contact_person: f.contact_person.value.trim(),
+                    phone_number: f.phone_number.value.trim(),
+                    industry: f.industry.value.trim(),
+                    website_url: f.website_url.value.trim(),
+                    company_address: f.company_address.value.trim(),
+                    recovery_code: f.recovery_code.value.trim(),
+                    new_password: f.new_password.value
+                });
+                if (saveBtn) {
+                    saveBtn.disabled = false;
+                    saveBtn.textContent = '💾 Save Details & Update Jobs';
+                }
+                if (r.ok && r.data.success) {
+                    window.AppA11y.closeModal('edit-recruiter-profile-modal');
+                    showToast(r.data.message, 'success');
+                    renderDashboardHome(host);
+                } else {
+                    showToast((r.data && r.data.error) || 'Could not update profile.', 'error');
+                }
+            });
+        }
 
         // Wire Job Filter & Sort Toolbar
         const searchInput = document.getElementById('jobSearchInput');

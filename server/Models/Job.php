@@ -109,7 +109,8 @@ class Job extends BaseModel {
                 j.*,
                 t.company_name,
                 t.logo_url,
-                t.industry
+                t.industry,
+                (SELECT COUNT(*) FROM applicants WHERE job_id = j.job_id) as applicant_count
             FROM {$this->table} j
             INNER JOIN tenants t ON j.tenant_id = t.tenant_id
             WHERE j.status = 'active'
@@ -117,8 +118,6 @@ class Job extends BaseModel {
             AND t.status = 'active'
             AND (
                 j.title LIKE ?
-                OR j.description LIKE ?
-                OR j.requirements LIKE ?
                 OR j.location LIKE ?
                 OR t.company_name LIKE ?
                 OR t.industry LIKE ?
@@ -129,7 +128,7 @@ class Job extends BaseModel {
         
         $searchTerm = '%' . $trimmed . '%';
         $stmt = $this->db->prepare($sql);
-        $stmt->execute([$searchTerm, $searchTerm, $searchTerm, $searchTerm, $searchTerm, $searchTerm]);
+        $stmt->execute([$searchTerm, $searchTerm, $searchTerm, $searchTerm]);
         return $stmt->fetchAll();
     }
     
