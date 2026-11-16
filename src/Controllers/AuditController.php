@@ -10,9 +10,11 @@ class AuditController extends BaseController {
     public function index() {
         AdminAuth::check();
 
-        // 1. Setup Sorting/Filtering (Reusing Admin logic for uniformity)
-        $sort = $_GET['sort'] ?? 'created_at';
-        $order = ($_GET['order'] ?? 'DESC') === 'ASC' ? 'ASC' : 'DESC';
+        // 1. Setup Sorting/Filtering with strict SQL column allowlist
+        $allowedSorts = ['created_at', 'action_type', 'severity', 'user_label', 'id'];
+        $rawSort = $_GET['sort'] ?? 'created_at';
+        $sort = in_array($rawSort, $allowedSorts, true) ? $rawSort : 'created_at';
+        $order = (strtoupper($_GET['order'] ?? 'DESC') === 'ASC') ? 'ASC' : 'DESC';
         $action = $_GET['action'] ?? 'all';
 
         $db = Database::getInstance();
@@ -20,17 +22,13 @@ class AuditController extends BaseController {
         $where = "1=1";
 
         if ($action !== 'all') {
-    // Correcting the column name to action_type
-    $where .= " AND action_type LIKE :action";
-    $params['action'] = $action . '%'; 
-}
+            $where .= " AND action_type LIKE :action";
+            $params['action'] = $action . '%'; 
+        }
 
         // 2. Fetch Logs
         $sql = "SELECT * FROM system_logs WHERE $where ORDER BY $sort $order LIMIT 100";
         $logs = $db->fetchAll($sql, $params);
-		
-		// DEBUG: Look at the raw data returned from your database
-error_log("DEBUG: Log Data Structure: " . print_r($logs, true));
 
         // 3. Render View
         $this->render('admin/logs', [

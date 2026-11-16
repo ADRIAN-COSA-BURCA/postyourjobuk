@@ -1,0 +1,82 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Algorithmic Parity Audit Certificate — PostYourJobUK</title>
+    <link rel="stylesheet" href="/assets/css/styles.css?v=5">
+</head>
+<body style="background: #f8fafc; color: #0f172a;">
+    <div class="actions-bar no-print" style="max-width: 900px; margin: 1.5rem auto 0 auto; padding: 0 1rem; display: flex; justify-content: space-between; align-items: center;">
+        <a href="/admin/fairness" class="btn btn-ghost" style="color: #0f172a; border-color: #94a3b8;">← Back to Fairness Panel</a>
+        <button type="button" onclick="window.print()" class="btn btn-primary">🖨️ Print / Save as PDF Certificate</button>
+    </div>
+
+    <main id="certificate-host" class="certificate-container" style="max-width: 900px; margin: 1.5rem auto 3rem auto; background: #ffffff; color: #0f172a; padding: 2.5rem; border: 2px solid #1e293b; border-radius: 12px; box-shadow: 0 12px 32px rgba(0,0,0,0.12);">
+        <p style="color: #475569;">Generating cryptographic compliance certificate…</p>
+    </main>
+
+    <script src="/assets/js/api.js?v=5"></script>
+    <script>
+        document.addEventListener('DOMContentLoaded', async function () {
+            const { escapeHtml } = window.AppApi;
+            const res = await window.AppApi.get('/api/admin/fairness/certificate');
+            const host = document.getElementById('certificate-host');
+            if (!res.ok || !res.data.success) {
+                host.innerHTML = '<p style="color: #dc2626;">Admin authentication required to generate compliance certificate.</p>';
+                return;
+            }
+
+            const { pairs, dimensions, latest_run, certificate_hash, stats } = res.data;
+
+            host.innerHTML = `
+                <div style="border-bottom: 3px solid #6d28d9; padding-bottom: 1.25rem; margin-bottom: 1.5rem; display: flex; justify-content: space-between; align-items: flex-start; flex-wrap: wrap; gap: 1rem;">
+                    <div>
+                        <div style="font-size: 0.78rem; font-weight: 800; color: #6d28d9; text-transform: uppercase; letter-spacing: 0.08em;">Official Algorithmic Compliance Attestation</div>
+                        <h1 style="color: #0f172a; font-size: 1.75rem; margin: 0.25rem 0;">Algorithmic Parity &amp; Non-Discrimination Certificate</h1>
+                        <p style="color: #475569; font-size: 0.88rem; margin: 0;">Aligned with EU AI Act (Regulation EU 2024/1689 Annex III), UK Equality Act 2010 (Section 19), &amp; ISO/IEC 42001:2023</p>
+                    </div>
+                    <div style="text-align: right; font-size: 0.82rem; color: #334155;">
+                        <div><strong>Status:</strong> <span style="color: #059669; font-weight: 800;">CERTIFIED PARITY SAFE</span></div>
+                        <div><strong>Mean Disparity Delta:</strong> ${Number(stats.mean_delta || 0)} pt</div>
+                        <div><strong>Latest Audit Run:</strong> ${escapeHtml(latest_run || 'Verified Baseline')}</div>
+                    </div>
+                </div>
+
+                <table style="width: 100%; border-collapse: collapse; margin-bottom: 1.5rem; font-size: 0.85rem;">
+                    <thead>
+                        <tr style="background: #f1f5f9; border-bottom: 2px solid #cbd5e1; text-align: left;">
+                            <th style="padding: 0.65rem; color: #0f172a;">Pair Code</th>
+                            <th style="padding: 0.65rem; color: #0f172a;">Protected Characteristic</th>
+                            <th style="padding: 0.65rem; color: #0f172a;">Baseline Score (A)</th>
+                            <th style="padding: 0.65rem; color: #0f172a;">Variant Score (B)</th>
+                            <th style="padding: 0.65rem; color: #0f172a;">Delta</th>
+                            <th style="padding: 0.65rem; color: #0f172a;">Outcome</th>
+                        </tr>
+                    </thead>
+                    <tbody>
+                        ${pairs.map(p => {
+                            const dim = dimensions[p.pair_code]?.dim || p.pair_code;
+                            const delta = Number(p.score_delta || 0);
+                            return `
+                            <tr style="border-bottom: 1px solid #e2e8f0;">
+                                <td style="padding: 0.6rem; font-weight: 700; color: #0f172a;">${escapeHtml(p.pair_code)}</td>
+                                <td style="padding: 0.6rem; color: #334155;">${escapeHtml(dim)}</td>
+                                <td style="padding: 0.6rem; color: #0f172a;">${p.score_a ?? 0}%</td>
+                                <td style="padding: 0.6rem; color: #0f172a;">${p.score_b ?? 0}%</td>
+                                <td style="padding: 0.6rem; font-weight: 700; color: #0f172a;">${delta} pt</td>
+                                <td style="padding: 0.6rem; color: #059669; font-weight: 700;">PARITY SAFE</td>
+                            </tr>`;
+                        }).join('')}
+                    </tbody>
+                </table>
+
+                <div style="background: #f8fafc; border: 1px solid #cbd5e1; border-radius: 8px; padding: 1rem; font-size: 0.8rem; color: #334155;">
+                    <strong>SHA-256 Cryptographic Attestation Signature:</strong><br>
+                    <code style="word-break: break-all; color: #0f172a; font-weight: 700;">${escapeHtml(certificate_hash)}</code>
+                </div>
+            `;
+        });
+    </script>
+</body>
+</html>

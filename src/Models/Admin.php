@@ -69,7 +69,7 @@ class Admin {
                     COALESCE(NULLIF(TRIM(t.industry), ''), 'General Recruitment') AS industry,
                     t.status,
                     COUNT(DISTINCT j.job_id) AS job_count,
-                    SUM(CASE WHEN j.status = 'open' THEN 1 ELSE 0 END) AS active_jobs,
+                    SUM(CASE WHEN j.status = 'active' THEN 1 ELSE 0 END) AS active_jobs,
                     COUNT(DISTINCT a.applicant_id) AS applicant_count,
                     ROUND(AVG(CASE WHEN a.ai_score IS NOT NULL AND a.ai_score > 0 THEN a.ai_score ELSE NULL END), 1) AS avg_ai_score,
                     SUM(CASE WHEN LOWER(a.status) = 'interviewing' THEN 1 ELSE 0 END) AS interviewing_count,

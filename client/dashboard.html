@@ -1,0 +1,32 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Recruiter Workspace — PostYourJobUK</title>
+    <link rel="stylesheet" href="/assets/css/styles.css?v=5">
+</head>
+<body>
+    <div id="app-header"></div>
+
+    <main id="main-content" class="container section" tabindex="-1">
+        <div id="recruiter-view-host">
+            <p class="text-muted">Loading recruiter workspace…</p>
+        </div>
+    </main>
+
+    <div id="app-footer"></div>
+
+    <script src="/assets/js/api.js?v=5"></script>
+    <script src="/assets/js/a11y.js?v=5"></script>
+    <script src="/assets/js/charts.js?v=5"></script>
+    <script src="/assets/js/recruiter.js?v=5"></script>
+    <script>
+        document.addEventListener('DOMContentLoaded', async function () {
+            const session = await window.AppApi.initSession();
+            window.AppA11y.renderSharedShell(session);
+            window.AppRecruiter.initRecruiterPortal();
+        });
+    </script>
+</body>
+</html>

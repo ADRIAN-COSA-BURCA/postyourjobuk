@@ -1,0 +1,160 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Authentication Portal — PostYourJobUK</title>
+    <link rel="stylesheet" href="/assets/css/styles.css?v=5">
+</head>
+<body>
+    <div id="app-header"></div>
+
+    <main id="main-content" class="login-page-wrapper" tabindex="-1">
+        <div class="login-card-uniform" id="auth-card-host">
+            <!-- Dynamically switches between Recruiter Login, Password Reset, and Super-Admin Login -->
+        </div>
+    </main>
+
+    <div id="app-footer"></div>
+
+    <script src="/assets/js/api.js?v=5"></script>
+    <script src="/assets/js/a11y.js?v=5"></script>
+    <script>
+        document.addEventListener('DOMContentLoaded', async function () {
+            const session = await window.AppApi.initSession();
+            window.AppA11y.renderSharedShell(session);
+
+            const host = document.getElementById('auth-card-host');
+            const path = window.location.pathname.replace(/\/+$/, '');
+
+            function renderAdminLogin() {
+                document.title = 'Super-Admin Login — PostYourJobUK';
+                host.innerHTML = `
+                    <span class="status-badge active" style="margin-bottom: 0.75rem;">🛡️ Platform Governance</span>
+                    <h2>Super-Admin Login</h2>
+                    <p class="text-muted" style="font-size: 0.9rem; margin-bottom: 1.5rem;">Sign in to manage tenants, platform analytics, and fairness audits.</p>
+                    <form id="admin-login-form">
+                        <div class="form-group">
+                            <label for="admin-email">Admin Email Address</label>
+                            <input type="email" id="admin-email" name="email" required autocomplete="username">
+                        </div>
+                        <div class="form-group">
+                            <label for="admin-password">Password</label>
+                            <input type="password" id="admin-password" name="password" required autocomplete="current-password">
+                        </div>
+                        <button type="submit" class="btn btn-primary w-100" style="width: 100%; margin-top: 0.5rem;">Sign In as Admin</button>
+                    </form>
+                    <div style="text-align: center; margin-top: 1.25rem;">
+                        <a href="/login" style="font-size: 0.85rem;">← Switch to Recruiter Login</a>
+                    </div>
+                `;
+                document.getElementById('admin-login-form').addEventListener('submit', async (e) => {
+                    e.preventDefault();
+                    const f = e.target;
+                    const res = await window.AppApi.post('/api/admin/login', {
+                        email: f.email.value.trim(),
+                        password: f.password.value
+                    });
+                    if (res.ok && res.data.success) {
+                        window.location.href = res.data.redirect || '/admin';
+                    } else {
+                        window.AppApi.showToast((res.data && res.data.error) || 'Admin authentication failed.', 'error');
+                    }
+                });
+            }
+
+            function renderResetPassword() {
+                document.title = 'Reset Recruiter Password — PostYourJobUK';
+                host.innerHTML = `
+                    <h2>Reset Password</h2>
+                    <p class="text-muted" style="font-size: 0.9rem; margin-bottom: 1.5rem;">Enter your corporate email and 16-character recovery code.</p>
+                    <form id="reset-pw-form">
+                        <div class="form-group">
+                            <label for="rst-email">Registered Email</label>
+                            <input type="email" id="rst-email" name="email" required>
+                        </div>
+                        <div class="form-group">
+                            <label for="rst-code">Recovery Code</label>
+                            <input type="text" id="rst-code" name="recovery_code" required placeholder="XXXX-XXXX">
+                        </div>
+                        <div class="form-group">
+                            <label for="rst-pass">New Password (min 8 characters)</label>
+                            <input type="password" id="rst-pass" name="new_password" required minlength="8">
+                        </div>
+                        <button type="submit" class="btn btn-primary w-100" style="width: 100%;">Update Password</button>
+                    </form>
+                    <div style="text-align: center; margin-top: 1.25rem;">
+                        <a href="/login" style="font-size: 0.85rem;">← Back to Recruiter Login</a>
+                    </div>
+                `;
+                document.getElementById('reset-pw-form').addEventListener('submit', async (e) => {
+                    e.preventDefault();
+                    const f = e.target;
+                    const res = await window.AppApi.post('/api/auth/reset-password', {
+                        email: f.email.value.trim(),
+                        recovery_code: f.recovery_code.value.trim(),
+                        new_password: f.new_password.value
+                    });
+                    if (res.ok && res.data.success) {
+                        window.AppApi.showToast(res.data.message, 'success');
+                        setTimeout(() => { window.location.href = '/login'; }, 1000);
+                    } else {
+                        window.AppApi.showToast((res.data && res.data.error) || 'Password reset failed.', 'error');
+                    }
+                });
+            }
+
+            function renderRecruiterLogin() {
+                document.title = 'Recruiter Login — PostYourJobUK';
+                host.innerHTML = `
+                    <h2>Recruiter Workspace Login</h2>
+                    <p class="text-muted" style="font-size: 0.9rem; margin-bottom: 1.5rem;">Access your job postings, AI candidate scores, and ATS pipeline.</p>
+                    <form id="recruiter-login-form">
+                        <div class="form-group">
+                            <label for="rec-email">Corporate Email Address</label>
+                            <input type="email" id="rec-email" name="email" required autocomplete="username">
+                        </div>
+                        <div class="form-group">
+                            <label for="rec-password">Password</label>
+                            <input type="password" id="rec-password" name="password" required autocomplete="current-password">
+                        </div>
+                        <button type="submit" class="btn btn-primary w-100" style="width: 100%; margin-top: 0.25rem;">Sign In to Workspace</button>
+                    </form>
+
+                    <div style="display: flex; align-items: center; gap: 0.75rem; margin: 1.25rem 0; color: #94a3b8; font-size: 0.8rem;">
+                        <hr style="flex: 1; border: none; border-top: 1px solid rgba(255,255,255,0.12);">
+                        <span>OR</span>
+                        <hr style="flex: 1; border: none; border-top: 1px solid rgba(255,255,255,0.12);">
+                    </div>
+
+                    <a href="/auth/google" class="btn btn-ghost w-100" style="width: 100%; justify-content: center;">
+                        🌐 Continue with Google Workspace
+                    </a>
+
+                    <div style="display: flex; justify-content: space-between; margin-top: 1.25rem; font-size: 0.84rem;">
+                        <a href="/reset-password">Forgot Password?</a>
+                        <a href="/admin/login">Admin Portal →</a>
+                    </div>
+                `;
+                document.getElementById('recruiter-login-form').addEventListener('submit', async (e) => {
+                    e.preventDefault();
+                    const f = e.target;
+                    const res = await window.AppApi.post('/api/auth/login', {
+                        email: f.email.value.trim(),
+                        password: f.password.value
+                    });
+                    if (res.ok && res.data.success) {
+                        window.location.href = res.data.redirect || '/dashboard';
+                    } else {
+                        window.AppApi.showToast((res.data && res.data.error) || 'Login failed.', 'error');
+                    }
+                });
+            }
+
+            if (path === '/admin/login') renderAdminLogin();
+            else if (path === '/reset-password') renderResetPassword();
+            else renderRecruiterLogin();
+        });
+    </script>
+</body>
+</html>

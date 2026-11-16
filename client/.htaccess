@@ -1,0 +1,26 @@
+<IfModule mod_rewrite.c>
+    RewriteEngine On
+    RewriteBase /
+
+    # 1. Route all REST API, OAuth Callback & Binary Download requests to server/index.php via api.php
+    RewriteRule ^api(/.*)?$ api.php [L,QSA]
+    RewriteRule ^auth/google(/callback)?$ api.php [L,QSA]
+    RewriteRule ^applicant/download$ api.php [L,QSA]
+
+    # 2. Serve existing static assets (.css, .js, .html, images) directly
+    RewriteCond %{REQUEST_FILENAME} -f [OR]
+    RewriteCond %{REQUEST_FILENAME} -d
+    RewriteRule ^ - [L]
+
+    # 3. Clean URL mappings to Presentation Tier HTML5 entry points
+    RewriteRule ^job$ job.html [L,QSA]
+    RewriteRule ^resume-builder(/editor)?$ resume.html [L,QSA]
+    RewriteRule ^(login|admin/login|reset-password)$ login.html [L,QSA]
+    RewriteRule ^(dashboard|dashboard/analytics|jobs/create|jobs/edit|applicants|applicant/view)$ dashboard.html [L,QSA]
+    RewriteRule ^admin/fairness/certificate$ certificate.html [L,QSA]
+    RewriteRule ^(admin|admin/index\.php|admin/analytics|admin/logs|admin/view-tenant|admin/tenant/edit|admin/fairness)$ admin.html [L,QSA]
+    RewriteRule ^(about|contact|vision|terms)$ index.html [L,QSA]
+
+    # 4. Fallback to index.html
+    RewriteRule ^ index.html [L,QSA]
+</IfModule>

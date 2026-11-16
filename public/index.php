@@ -1,4 +1,16 @@
 <?php
+// 0. THREE-TIER API GATEWAY DELEGATION
+// Delegate REST API requests (/api/*) to server/index.php while preserving SSR routes
+$_reqPath = parse_url($_SERVER['REQUEST_URI'] ?? '/', PHP_URL_PATH) ?: '/';
+$_acceptsJson = stripos($_SERVER['HTTP_ACCEPT'] ?? '', 'application/json') !== false
+    || stripos($_SERVER['CONTENT_TYPE'] ?? '', 'application/json') !== false
+    || ($_SERVER['HTTP_X_REQUESTED_WITH'] ?? '') === 'XMLHttpRequest';
+
+if (str_starts_with($_reqPath, '/api/') && ($_reqPath !== '/api/refresh-news' || $_acceptsJson || $_SERVER['REQUEST_METHOD'] === 'POST')) {
+    require_once __DIR__ . '/../server/index.php';
+    exit;
+}
+
 // 1. PRODUCTION-READY ERROR HANDLING
 ini_set('display_errors', 0);
 ini_set('log_errors', 1);

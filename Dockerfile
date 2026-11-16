@@ -19,13 +19,12 @@ RUN curl -sS https://getcomposer.org/installer | php -- --install-dir=/usr/bin -
 # 4. Enable Apache rewrite module
 RUN a2enmod rewrite
 
-# 5. Configure Apache DocumentRoot to point to your 'public' folder
-ENV APACHE_DOCUMENT_ROOT /var/www/html/public
+# 5. Allow .htaccess overrides globally and configure Apache DocumentRoot to point to 'client'
+RUN sed -i '/<Directory \/var\/www\/>/,/<\/Directory>/ s/AllowOverride None/AllowOverride All/' /etc/apache2/apache2.conf
+ENV APACHE_DOCUMENT_ROOT /var/www/html/client
 RUN sed -ri -e 's!/var/www/html!${APACHE_DOCUMENT_ROOT}!g' /etc/apache2/sites-available/*.conf
 RUN sed -ri -e 's!/var/www/!${APACHE_DOCUMENT_ROOT}!g' /etc/apache2/apache2.conf /etc/apache2/conf-available/*.conf
-
-# 6. Allow .htaccess overrides globally
-RUN sed -i '/<Directory \/var\/www\/>/,/<\/Directory>/ s/AllowOverride None/AllowOverride All/' /etc/apache2/apache2.conf
+RUN sed -i 's/AllowOverride None/AllowOverride All/g' /etc/apache2/apache2.conf
 
 # 7. Set working directory to your project root
 WORKDIR /var/www/html
