@@ -1,0 +1,95 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>About the Platform &amp; Cloud Architecture — PostYourJobUK</title>
+    <link rel="stylesheet" href="/assets/css/styles.css?v=10">
+</head>
+<body>
+    <div id="app-header"></div>
+
+    <main id="main-content" class="container section" tabindex="-1">
+        <div style="margin-bottom: 2.25rem;">
+            <span class="badge" style="background: rgba(139, 92, 246, 0.16); color: #c4b5fd; border: 1px solid rgba(139, 92, 246, 0.35); text-transform: uppercase; letter-spacing: 0.08em; font-size: 0.72rem; margin-bottom: 0.75rem; display: inline-block;">
+                About the Platform &amp; Cloud Architecture
+            </span>
+            <h1 style="margin: 0 0 0.85rem 0;">The Engineering Behind PostYourJobUK</h1>
+            <p class="text-muted" style="max-width: 820px; font-size: 1rem; line-height: 1.75; margin: 0 0 1.75rem 0;">
+                <strong>PostYourJobUK</strong> is a cloud-native, multi-tenant AI recruitment Software-as-a-Service (SaaS) and Applicant Tracking System (ATS) engineered to solve two critical industry challenges: prohibitive enterprise ATS licensing costs for UK SMEs and black-box algorithmic bias in automated CV screening.
+            </p>
+            <hr style="border: none; border-top: 1px solid var(--glass-border); margin: 0;">
+        </div>
+
+        <!-- 4 Uniform KPI Stat Cards -->
+        <div class="stats-grid" style="margin-bottom: 2.25rem;">
+            <div class="card"><h3>AI Grounding Gate</h3><p class="stat-value">100%</p></div>
+            <div class="card"><h3>Demographic Disparity</h3><p class="stat-value">0.0 pt</p></div>
+            <div class="card"><h3>Cloud Architecture</h3><p class="stat-value">4-Tier Azure</p></div>
+            <div class="card"><h3>Compliance Standards</h3><p class="stat-value">EU AI Act</p></div>
+        </div>
+
+        <!-- 6 Core Architectural Pillars (2x3 Grid) -->
+        <div class="grid-2" style="gap: 1.5rem; margin-bottom: 2.25rem;">
+            <article class="card" style="border-top: 3px solid #8b5cf6;">
+                <h3 style="font-size: 1.12rem; color: #ffffff; margin-bottom: 0.5rem;">🏢 Multi-Tenant Isolation &amp; Zero-Trust Security</h3>
+                <p class="text-muted" style="font-size: 0.9rem; line-height: 1.65;">
+                    Built on a decoupled Three-Tier architecture (<code>client/</code> Presentation Tier + <code>server/</code> REST API Tier) enforcing strict <code>tenant_id</code> BOLA database scoping, Zero-Trust session fingerprinting (<code>User-Agent</code> + SHA-256 IP hash), and timing-safe CSRF token verification.
+                </p>
+            </article>
+
+            <article class="card" style="border-top: 3px solid #10b981;">
+                <h3 style="font-size: 1.12rem; color: #ffffff; margin-bottom: 0.5rem;">🧠 Two-Stage Decoupled AI Evaluation</h3>
+                <p class="text-muted" style="font-size: 0.9rem; line-height: 1.65;">
+                    Candidate CVs undergo Stage 0 regex PII redaction before factual claim extraction via Google Gemini 2.5 Flash at <code>temperature = 0.0</code>. Every claim is verified character-for-character by a deterministic Python Grounding Gate (<code>difflib</code> anti-plagiarism + timeline overlap merging) and scored via Base-100 subtractive math.
+                </p>
+            </article>
+
+            <article class="card" style="border-top: 3px solid #38bdf8;">
+                <h3 style="font-size: 1.12rem; color: #ffffff; margin-bottom: 0.5rem;">⚡ Event-Driven Serverless Azure Ecosystem</h3>
+                <p class="text-muted" style="font-size: 0.9rem; line-height: 1.65;">
+                    Web ingestion (<code>postyourjobuk-web</code> on Azure App Service) is decoupled from heavy document processing via Azure Blob Storage (<code>hranalyticalstorage</code>), Azure Storage Queues (<code>ai-processing-queue</code>), Python 3.11 Azure Functions (<code>postyourjobuk-ai-func</code>), Azure Key Vault (<code>kv-postyourjobuk</code>), and Azure MySQL Flexible Server.
+                </p>
+            </article>
+
+            <article class="card" style="border-top: 3px solid #f59e0b;">
+                <h3 style="font-size: 1.12rem; color: #ffffff; margin-bottom: 0.5rem;">✉️ Automated ATS Pipeline &amp; Brevo Transactional SMTP</h3>
+                <p class="text-muted" style="font-size: 0.9rem; line-height: 1.65;">
+                    Recruiters transition candidates across <code>Reviewed</code>, <code>Interviewing</code>, <code>Hired</code>, and <code>Rejected</code> stages with 1-click automated HTML emails dispatched via PHPMailer and Brevo SMTP Relay (authenticated with Cloudflare <code>SPF</code>, <code>DKIM</code>, and <code>DMARC</code>) embedding live employer business cards.
+                </p>
+            </article>
+
+            <article class="card" style="border-top: 3px solid #ec4899;">
+                <h3 style="font-size: 1.12rem; color: #ffffff; margin-bottom: 0.5rem;">⚖️ Live Counterfactual Fairness Testbed (Tenant 9999)</h3>
+                <p class="text-muted" style="font-size: 0.9rem; line-height: 1.65;">
+                    Features a dedicated Super-Admin compliance workspace that dispatches 18 synthetic CVs across 9 protected demographic pairs into the live Azure Queue, providing a 4-tab Counterfactual Evidence Inspector and SHA-256 signed PDF Compliance Certificates.
+                </p>
+            </article>
+
+            <article class="card" style="border-top: 3px solid #06b6d4;">
+                <h3 style="font-size: 1.12rem; color: #ffffff; margin-bottom: 0.5rem;">📊 Executive Analytics &amp; Zero-CDN Vector CV Builder</h3>
+                <p class="text-muted" style="font-size: 0.9rem; line-height: 1.65;">
+                    Provides candidates with a 100% private, 6-template client-side Resume Builder that compiles native PDF-1.4 vector text streams for <code>PyPDF2</code>, alongside 12 interactive HTML5 <code>&lt;canvas&gt;</code> charts across the Recruiter and Super-Admin analytics suites.
+                </p>
+            </article>
+        </div>
+
+        <div class="card" style="border-left: 4px solid #8b5cf6; background: rgba(30, 41, 59, 0.75); padding: 1.35rem 1.75rem;">
+            <p style="margin: 0; font-size: 0.95rem; color: #e2e8f0; font-style: italic; line-height: 1.7;">
+                "PostYourJobUK was engineered to prove that automated AI talent acquisition can be simultaneously low-cost for SMEs, cloud-scalable on Microsoft Azure, and 100% mathematically transparent."
+            </p>
+        </div>
+    </main>
+
+    <div id="app-footer"></div>
+
+    <script src="/assets/js/api.js?v=10"></script>
+    <script src="/assets/js/a11y.js?v=10"></script>
+    <script>
+        document.addEventListener('DOMContentLoaded', async function () {
+            const session = await window.AppApi.initSession();
+            window.AppA11y.renderSharedShell(session);
+        });
+    </script>
+</body>
+</html>

@@ -19,7 +19,10 @@
     RewriteRule ^(dashboard|dashboard/analytics|jobs/create|jobs/edit|applicants|applicant/view)$ dashboard.html [L,QSA]
     RewriteRule ^admin/fairness/certificate$ certificate.html [L,QSA]
     RewriteRule ^(admin|admin/index\.php|admin/analytics|admin/logs|admin/view-tenant|admin/tenant/edit|admin/fairness)$ admin.html [L,QSA]
-    RewriteRule ^(about|contact|vision|terms)$ index.html [L,QSA]
+    RewriteRule ^about$ about.html [L,QSA]
+    RewriteRule ^vision$ vision.html [L,QSA]
+    RewriteRule ^terms$ terms.html [L,QSA]
+    RewriteRule ^contact$ contact.html [L,QSA]
 
     # 4. Fallback to index.html
     RewriteRule ^ index.html [L,QSA]
